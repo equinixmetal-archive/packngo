@@ -77,13 +77,14 @@ type Client struct {
 	RateLimit Rate
 
 	// Packet Api Objects
-	Projects   ProjectService
-	Devices    DeviceService
-	Plans      PlanService
-	Facilities FacilityService
-	Users      UserService
-	SshKeys    SshKeyService
-	Emails     EmailService
+	Plans            PlanService
+	Users            UserService
+	Emails           EmailService
+	SshKeys          SshKeyService
+	Devices          DeviceService
+	Projects         ProjectService
+	Facilities       FacilityService
+	OperatingSystems OSService
 }
 
 func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
@@ -158,13 +159,14 @@ func NewClient(consumerToken string, apiKey string) *Client {
 	BaseURL, _ := url.Parse(baseURL)
 
 	c := &Client{client: httpClient, BaseURL: BaseURL, UserAgent: userAgent, ConsumerToken: consumerToken, ApiKey: apiKey}
-	c.Projects = &ProjectServiceOp{client: c}
-	c.Devices = &DeviceServiceOp{client: c}
-	c.SshKeys = &SshKeyServiceOp{client: c}
-	c.Facilities = &FacilityServiceOp{client: c}
 	c.Plans = &PlanServiceOp{client: c}
 	c.Users = &UserServiceOp{client: c}
 	c.Emails = &EmailServiceOp{client: c}
+	c.SshKeys = &SshKeyServiceOp{client: c}
+	c.Devices = &DeviceServiceOp{client: c}
+	c.Projects = &ProjectServiceOp{client: c}
+	c.Facilities = &FacilityServiceOp{client: c}
+	c.OperatingSystems = &OSServiceOp{client: c}
 
 	// THIS IS VERY VERY BAD, WE NEED TO FIX THE CERT ON THE SERVER
 	// RELEVANT ERROR IS:

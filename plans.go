@@ -86,9 +86,8 @@ type PlanServiceOp struct {
 }
 
 func (s *PlanServiceOp) List() ([]Plan, *Response, error) {
-	path := "plans"
+	req, err := s.client.NewRequest("GET", planBasePath, nil)
 
-	req, err := s.client.NewRequest("GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
