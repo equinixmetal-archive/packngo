@@ -11,22 +11,23 @@ type planRoot struct {
 }
 
 type Plan struct {
-	Id        string    `json:"id"`
-	Slug      string    `json:"slug,omitempty"`
-	Name      string    `json:"name,omitempty"`
-	Line      string    `json:"line,omitempty"`
-	Specs     *Specs    `json:"specs,omitempty"`
-	Pricing   *Pricing  `json:"pricing,omitempty"`
+	Id          string   `json:"id"`
+	Slug        string   `json:"slug,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Line        string   `json:"line,omitempty"`
+	Specs       *Specs   `json:"specs,omitempty"`
+	Pricing     *Pricing `json:"pricing,omitempty"`
 }
 func (p Plan) String() string {
 	return Stringify(p)
 }
 
 type Specs struct {
-	Cpus      *Cpus     `json:"cpus,omitempty"`
+	Cpus      []*Cpus   `json:"cpus,omitempty"`
 	Memory    *Memory   `json:"memory,omitempty"`
-	Drives    *Drives   `json:"drives,omitempty"`
-  Nics      *Nics     `json:"nics,omitempty"`
+	Drives    []*Drives `json:"drives,omitempty"`
+  Nics      []*Nics   `json:"nics,omitempty"`
 	Features  *Features `json:"features,omitempty"`
 }
 func (s Specs) String() string {
