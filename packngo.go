@@ -68,7 +68,7 @@ func (r *ErrorResponse) Error() string {
 type Client struct {
 	client *http.Client
 
-  BaseURL *url.URL
+	BaseURL *url.URL
 
 	UserAgent string
 	ConsumerToken string

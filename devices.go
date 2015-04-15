@@ -46,8 +46,7 @@ type DeviceCreateRequest struct {
 	Facility     string   `json:"facility"`
 	OS           string   `json:"operating_system"`
 	BillingCycle string   `json:"billing_cycle"`
-	ProjectId    string   `json:"project"`
-	ServerId     string   `json:"server_id"`
+	ProjectId    string   `json:"project_id"`
 	UserData     string   `json:"user_data"`
 	Tags         []string `json:"tags"`
 }
