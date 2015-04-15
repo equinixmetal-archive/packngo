@@ -110,6 +110,8 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 		return nil, err
 	}
 
+	req.Close = true
+
 	req.Header.Add("X-Auth-Token", c.ApiKey)
 	req.Header.Add("X-Consumer-Token", c.ConsumerToken)
 
