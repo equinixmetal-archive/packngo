@@ -28,7 +28,6 @@ type Device struct {
 	Updated      string    `json:"updated_at,omitempty"`
 	Tags         []string  `json:"tags,omitempty"`
 	BillingCycle string    `json:"billing_cycle,omitempty"`
-	Charges      []*Charge `json:"charges,omitempty"`
 	Network      []*IP     `json:"ip_addresses"`
 	OS           *OS       `json:"operating_system,omitempty"`
 	Plan         *Plan     `json:"plan,omitempty"`
@@ -70,13 +69,6 @@ type IP struct {
 }
 func (n IP) String() string {
 	return Stringify(n)
-}
-
-type Charge struct {
-	Id string `json:"id"`
-}
-func (c Charge) String() string {
-	return Stringify(c)
 }
 
 type DeviceServiceOp struct {
