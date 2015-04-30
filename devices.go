@@ -20,8 +20,7 @@ type DevicesRoot struct {
 
 type Device struct {
 	ID           string    `json:"id"`
-	Name         string    `json:"name,omitempty"`
-  Href         string    `json:"href,omitempty"`
+	Href         string    `json:"href,omitempty"`
 	Hostname     string    `json:"hostname,omitempty"`
 	State        string    `json:"state,omitempty"`
 	Created      string    `json:"created_at,omitempty"`
@@ -40,7 +39,7 @@ func (d Device) String() string {
 }
 
 type DeviceCreateRequest struct {
-	Name         string   `json:"name"`
+	HostName     string   `json:"hostname"`
 	Plan         string   `json:"plan"`
 	Facility     string   `json:"facility"`
 	OS           string   `json:"operating_system"`
