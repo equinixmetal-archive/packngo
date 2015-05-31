@@ -13,6 +13,8 @@ type DeviceService interface {
 	Reboot(string) (*Response, error)
 	PowerOff(string) (*Response, error)
 	PowerOn(string) (*Response, error)
+	Lock(string) (*Response, error)
+	Unlock(string) (*Response, error)
 }
 
 type devicesRoot struct {
@@ -27,6 +29,7 @@ type Device struct {
 	State        string       `json:"state,omitempty"`
 	Created      string       `json:"created_at,omitempty"`
 	Updated      string       `json:"updated_at,omitempty"`
+	Locked       bool         `json:"locked,omitempty"`
 	BillingCycle string       `json:"billing_cycle,omitempty"`
 	Tags         []string     `json:"tags,omitempty"`
 	Network      []*ipAddress `json:"ip_addresses"`
@@ -183,6 +186,41 @@ func (s *DeviceServiceOp) PowerOn(deviceID string) (*Response, error) {
 
 	action := &DeviceActionRequest { Type: "power_on" }
 	req, err := s.client.NewRequest("POST", path, action)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	return resp, err
+}
+
+type lockDeviceType struct {
+	Locked bool `json:"locked"`
+}
+
+// Lock sets a device to "locked"
+func (s *DeviceServiceOp) Lock(deviceID string) (*Response, error) {
+	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
+
+	action := lockDeviceType{ Locked: true }
+	req, err := s.client.NewRequest("PATCH", path, action)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	return resp, err
+
+}
+
+// Unlock sets a device to "locked"
+func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
+	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
+
+	action := lockDeviceType{ Locked: false }
+	req, err := s.client.NewRequest("PATCH", path, action)
 	if err != nil {
 		return nil, err
 	}
