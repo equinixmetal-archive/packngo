@@ -32,7 +32,7 @@ type Device struct {
 	Locked       bool         `json:"locked,omitempty"`
 	BillingCycle string       `json:"billing_cycle,omitempty"`
 	Tags         []string     `json:"tags,omitempty"`
-	Network      []*ipAddress `json:"ip_addresses"`
+	Network      []*IPAddress `json:"ip_addresses"`
 	OS           *OS          `json:"operating_system,omitempty"`
 	Plan         *Plan        `json:"plan,omitempty"`
 	Facility     *Facility    `json:"facility,omitempty"`
@@ -66,14 +66,15 @@ func (d DeviceActionRequest) String() string {
 	return Stringify(d)
 }
 
-type ipAddress struct {
+// IPAddress used to execute actions on devices
+type IPAddress struct {
 	Family  int    `json:"address_family"`
 	Cidr    int    `json:"cidr"`
 	Address string `json:"address"`
 	Gateway string `json:"gateway"`
 	Public  bool   `json:"public"`
 }
-func (n ipAddress) String() string {
+func (n IPAddress) String() string {
 	return Stringify(n)
 }
 
