@@ -4,6 +4,7 @@ import "fmt"
 
 const projectBasePath = "/projects"
 
+// ProjectService interface defines available project methods
 type ProjectService interface {
 	List() ([]Project, *Response, error)
 	Get(string) (*Project, *Response, error)
@@ -11,10 +12,10 @@ type ProjectService interface {
 	Update(*ProjectUpdateRequest) (*Project, *Response, error)
 }
 
-type ProjectsRoot struct {
+type projectsRoot struct {
 	Projects []Project `json:"projects"`
 }
-
+// Project represents a Packet project
 type Project struct {
 	ID      string   `json:"id"`
 	Name    string   `json:"name,omitempty"`
@@ -22,13 +23,14 @@ type Project struct {
 	Updated string   `json:"updated_at,omitempty"`
 	Users   []User   `json:"members,omitempty"`
 	Devices []Device `json:"devices,omitempty"`
-	SshKeys []SshKey `json:"ssh_keys,omitempty"`
-	Url     string   `json:"href,omitempty"`
+	SSHKeys []SSHKey `json:"ssh_keys,omitempty"`
+	URL     string   `json:"href,omitempty"`
 }
 func (p Project) String() string {
 	return Stringify(p)
 }
 
+// ProjectCreateRequest type used to create a Packet project
 type ProjectCreateRequest struct {
 	Name string `json:"name"`
 }
@@ -36,25 +38,28 @@ func (p ProjectCreateRequest) String() string {
 	return Stringify(p)
 }
 
+// ProjectUpdateRequest type used to update a Packet project
 type ProjectUpdateRequest struct {
-	Id   string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 func (p ProjectUpdateRequest) String() string {
 	return Stringify(p)
 }
 
+// ProjectServiceOp implements ProjectService
 type ProjectServiceOp struct {
 	client *Client
 }
 
+// List returns the user's projects
 func (s *ProjectServiceOp) List() ([]Project, *Response, error) {
 	req, err := s.client.NewRequest("GET", projectBasePath, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	root := new(ProjectsRoot)
+	root := new(projectsRoot)
 	resp, err := s.client.Do(req, root)
 	if err != nil {
 		return nil, resp, err
@@ -63,8 +68,9 @@ func (s *ProjectServiceOp) List() ([]Project, *Response, error) {
 	return root.Projects, resp, err
 }
 
-func (s *ProjectServiceOp) Get(projectId string) (*Project, *Response, error) {
-	path := fmt.Sprintf("%s/%s", projectBasePath, projectId)
+// Get returns a project by id
+func (s *ProjectServiceOp) Get(projectID string) (*Project, *Response, error) {
+	path := fmt.Sprintf("%s/%s", projectBasePath, projectID)
 	req, err := s.client.NewRequest("GET", path, nil)
 	if err != nil {
 		return nil, nil, err
@@ -79,6 +85,7 @@ func (s *ProjectServiceOp) Get(projectId string) (*Project, *Response, error) {
 	return project, resp, err
 }
 
+// Create creates a new project
 func (s *ProjectServiceOp) Create(createRequest *ProjectCreateRequest) (*Project, *Response, error) {
 	req, err := s.client.NewRequest("POST", projectBasePath, createRequest)
 	if err != nil {
@@ -94,8 +101,9 @@ func (s *ProjectServiceOp) Create(createRequest *ProjectCreateRequest) (*Project
 	return project, resp, err
 }
 
+// Update updates a project
 func (s *ProjectServiceOp) Update(updateRequest *ProjectUpdateRequest) (*Project, *Response, error) {
-	path := fmt.Sprintf("%s/%s", projectBasePath, updateRequest.Id)
+	path := fmt.Sprintf("%s/%s", projectBasePath, updateRequest.ID)
 	req, err := s.client.NewRequest("PATCH", path, updateRequest)
 	if err != nil {
 		return nil, nil, err
@@ -108,4 +116,18 @@ func (s *ProjectServiceOp) Update(updateRequest *ProjectUpdateRequest) (*Project
 	}
 
 	return project, resp, err
+}
+
+// Delete deletes a project
+func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
+	path := fmt.Sprintf("%s/%s", projectBasePath, projectID)
+
+	req, err := s.client.NewRequest("DELETE", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+
+	return resp, err
 }

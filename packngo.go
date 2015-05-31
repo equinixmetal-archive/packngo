@@ -36,6 +36,7 @@ type ListOptions struct {
 	Includes string
 }
 
+// Response is the http response from api calls
 type Response struct {
 	*http.Response
 	Rate
@@ -55,6 +56,7 @@ func (r *Response) populateRate() {
 	}
 }
 
+// ErrorResponse is the http response used on errrors
 type ErrorResponse struct {
 	Response *http.Response
 	Message string
@@ -64,7 +66,7 @@ func (r *ErrorResponse) Error() string {
 		r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, r.Message)
 }
 
-// the base API Client
+// Client is the base API Client
 type Client struct {
 	client *http.Client
 
@@ -72,7 +74,7 @@ type Client struct {
 
 	UserAgent string
 	ConsumerToken string
-	ApiKey string
+	APIKey string
 
 	RateLimit Rate
 
@@ -80,13 +82,14 @@ type Client struct {
 	Plans            PlanService
 	Users            UserService
 	Emails           EmailService
-	SshKeys          SshKeyService
+	SSHKeys          SSHKeyService
 	Devices          DeviceService
 	Projects         ProjectService
 	Facilities       FacilityService
 	OperatingSystems OSService
 }
 
+// NewRequest inits a new http request with the proper headers
 func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
 	// relative path to append to the endpoint url, no leading slash please
 	rel, err := url.Parse(path)
@@ -112,7 +115,7 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 
 	req.Close = true
 
-	req.Header.Add("X-Auth-Token", c.ApiKey)
+	req.Header.Add("X-Auth-Token", c.APIKey)
 	req.Header.Add("X-Consumer-Token", c.ConsumerToken)
 
 	req.Header.Add("Content-Type", mediaType)
@@ -121,6 +124,7 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 	return req, nil
 }
 
+// Do executes the http request
 func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -133,7 +137,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	response.populateRate()
 	c.RateLimit = response.Rate
 
-	err = CheckResponse(resp)
+	err = checkResponse(resp)
 	// if the response is an error, return the ErrorReponse
 	if err != nil {
 		return &response, err
@@ -154,17 +158,17 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	return &response, err
 }
 
-// initializes and returns a Client, use this to get an API Client to operate on
+// NewClient initializes and returns a Client, use this to get an API Client to operate on
 func NewClient(consumerToken string, apiKey string) *Client {
 	httpClient := http.DefaultClient
 
 	BaseURL, _ := url.Parse(baseURL)
 
-	c := &Client{client: httpClient, BaseURL: BaseURL, UserAgent: userAgent, ConsumerToken: consumerToken, ApiKey: apiKey}
+	c := &Client{client: httpClient, BaseURL: BaseURL, UserAgent: userAgent, ConsumerToken: consumerToken, APIKey: apiKey}
 	c.Plans = &PlanServiceOp{client: c}
 	c.Users = &UserServiceOp{client: c}
 	c.Emails = &EmailServiceOp{client: c}
-	c.SshKeys = &SshKeyServiceOp{client: c}
+	c.SSHKeys = &SSHKeyServiceOp{client: c}
 	c.Devices = &DeviceServiceOp{client: c}
 	c.Projects = &ProjectServiceOp{client: c}
 	c.Facilities = &FacilityServiceOp{client: c}
@@ -182,7 +186,7 @@ func NewClient(consumerToken string, apiKey string) *Client {
 	return c
 }
 
-func CheckResponse(r *http.Response) error {
+func checkResponse(r *http.Response) error {
 	// return if http status code is within 200 range
 	if c := r.StatusCode; c >= 200 && c <= 299 {
 		return nil

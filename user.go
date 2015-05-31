@@ -2,10 +2,12 @@ package packngo
 
 const userBasePath = "/users"
 
+// UserService interface defines available user methods
 type UserService interface {
 	Get(string) (*User, *Response, error)
 }
 
+// User represents a Packet user
 type User struct {
 	ID           string    `json:"id"`
 	FirstName    string    `json:"first_name,omitempty"`
@@ -13,7 +15,7 @@ type User struct {
   FullName     string    `json:"full_name,omitempty"`
   Email        string    `json:"email,omitempty"`
   TwoFactor    string    `json:"two_factor_auth,omitempty"`
-	AvatarUrl    string    `json:"avatar_url,omitempty"`
+	AvatarURL    string    `json:"avatar_url,omitempty"`
 	Facebook     string    `json:"twitter,omitempty"`
 	Twitter      string    `json:"facebook,omitempty"`
 	LinkedIn     string    `json:"linkedin,omitempty"`
@@ -22,16 +24,18 @@ type User struct {
 	TimeZone     string    `json:"timezone,omitempty"`
 	Emails       []Email   `json:"email,omitempty"`
 	PhoneNumber  string    `json:"phone_number,omitempty"`
-	Url          string    `json:"href,omitempty"`
+	URL          string    `json:"href,omitempty"`
 }
 func (u User) String() string {
 	return Stringify(u)
 }
 
+// UserServiceOp implements UserService
 type UserServiceOp struct {
 	client *Client
 }
 
+// Get method gets a user by userID
 func (s *UserServiceOp) Get(userID string) (*User, *Response, error) {
 	req, err := s.client.NewRequest("GET", userBasePath, nil)
 	if err != nil {

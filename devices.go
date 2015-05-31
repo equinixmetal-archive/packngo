@@ -4,8 +4,9 @@ import "fmt"
 
 const deviceBasePath = "/devices"
 
+// DeviceService interface defines available device methods
 type DeviceService interface {
-	List(ProjectId string) ([]Device, *Response, error)
+	List(ProjectID string) ([]Device, *Response, error)
 	Get(string) (*Device, *Response, error)
 	Create(*DeviceCreateRequest) (*Device, *Response, error)
 	Delete(string) (*Response, error)
@@ -14,37 +15,39 @@ type DeviceService interface {
 	PowerOn(string) (*Response, error)
 }
 
-type DevicesRoot struct {
+type devicesRoot struct {
 	Devices []Device `json:"devices"`
 }
 
+// Device represents a Packet device
 type Device struct {
-	ID           string    `json:"id"`
-	Href         string    `json:"href,omitempty"`
-	Hostname     string    `json:"hostname,omitempty"`
-	State        string    `json:"state,omitempty"`
-	Created      string    `json:"created_at,omitempty"`
-	Updated      string    `json:"updated_at,omitempty"`
-	Tags         []string  `json:"tags,omitempty"`
-	BillingCycle string    `json:"billing_cycle,omitempty"`
-	Network      []*IP     `json:"ip_addresses"`
-	OS           *OS       `json:"operating_system,omitempty"`
-	Plan         *Plan     `json:"plan,omitempty"`
-	Facility     *Facility `json:"facility,omitempty"`
-	Project      *Project  `json:"project,omitempty"`
-  ProvisionPer float32   `json:"provisioning_percentage,omitempty"`
+	ID           string       `json:"id"`
+	Href         string       `json:"href,omitempty"`
+	Hostname     string       `json:"hostname,omitempty"`
+	State        string       `json:"state,omitempty"`
+	Created      string       `json:"created_at,omitempty"`
+	Updated      string       `json:"updated_at,omitempty"`
+	BillingCycle string       `json:"billing_cycle,omitempty"`
+	Tags         []string     `json:"tags,omitempty"`
+	Network      []*ipAddress `json:"ip_addresses"`
+	OS           *OS          `json:"operating_system,omitempty"`
+	Plan         *Plan        `json:"plan,omitempty"`
+	Facility     *Facility    `json:"facility,omitempty"`
+	Project      *Project     `json:"project,omitempty"`
+  ProvisionPer float32      `json:"provisioning_percentage,omitempty"`
 }
 func (d Device) String() string {
 	return Stringify(d)
 }
 
+// DeviceCreateRequest type used to create a Packet device
 type DeviceCreateRequest struct {
 	HostName     string   `json:"hostname"`
 	Plan         string   `json:"plan"`
 	Facility     string   `json:"facility"`
 	OS           string   `json:"operating_system"`
 	BillingCycle string   `json:"billing_cycle"`
-	ProjectId    string   `json:"project_id"`
+	ProjectID    string   `json:"project_id"`
 	UserData     string   `json:"user_data"`
 	Tags         []string `json:"tags"`
 }
@@ -52,6 +55,7 @@ func (d DeviceCreateRequest) String() string {
 	return Stringify(d)
 }
 
+// DeviceActionRequest type used to execute actions on devices
 type DeviceActionRequest struct {
 	Type string `json:"type"`
 }
@@ -59,30 +63,32 @@ func (d DeviceActionRequest) String() string {
 	return Stringify(d)
 }
 
-type IP struct {
+type ipAddress struct {
 	Family  int    `json:"address_family"`
 	Cidr    int    `json:"cidr"`
 	Address string `json:"address"`
 	Gateway string `json:"gateway"`
 	Public  bool   `json:"public"`
 }
-func (n IP) String() string {
+func (n ipAddress) String() string {
 	return Stringify(n)
 }
 
+// DeviceServiceOp implements DeviceService
 type DeviceServiceOp struct {
 	client *Client
 }
 
-func (s *DeviceServiceOp) List(projectId string) ([]Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s/devices", projectBasePath, projectId)
+// List returns devices on a project
+func (s *DeviceServiceOp) List(projectID string) ([]Device, *Response, error) {
+	path := fmt.Sprintf("%s/%s/devices", projectBasePath, projectID)
 
 	req, err := s.client.NewRequest("GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	root := new(DevicesRoot)
+	root := new(devicesRoot)
 	resp, err := s.client.Do(req, root)
 	if err != nil {
 		return nil, resp, err
@@ -91,8 +97,9 @@ func (s *DeviceServiceOp) List(projectId string) ([]Device, *Response, error) {
 	return root.Devices, resp, err
 }
 
-func (s *DeviceServiceOp) Get(deviceId string) (*Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceId)
+// Get returns a device by id
+func (s *DeviceServiceOp) Get(deviceID string) (*Device, *Response, error) {
+	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
 
 	req, err := s.client.NewRequest("GET", path, nil)
 	if err != nil {
@@ -108,8 +115,9 @@ func (s *DeviceServiceOp) Get(deviceId string) (*Device, *Response, error) {
 	return device, resp, err
 }
 
+// Create creates a new device
 func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s/devices", projectBasePath, createRequest.ProjectId)
+	path := fmt.Sprintf("%s/%s/devices", projectBasePath, createRequest.ProjectID)
 
 	req, err := s.client.NewRequest("POST", path, createRequest)
 	if err != nil {
@@ -125,6 +133,7 @@ func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *
 	return device, resp, err
 }
 
+// Delete deletes a device
 func (s *DeviceServiceOp) Delete(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
 
@@ -138,6 +147,7 @@ func (s *DeviceServiceOp) Delete(deviceID string) (*Response, error) {
 	return resp, err
 }
 
+// Reboot reboots on a device
 func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
 
@@ -152,6 +162,7 @@ func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
 	return resp, err
 }
 
+// PowerOff powers on a device
 func (s *DeviceServiceOp) PowerOff(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
 
@@ -166,6 +177,7 @@ func (s *DeviceServiceOp) PowerOff(deviceID string) (*Response, error) {
 	return resp, err
 }
 
+// PowerOn powers on a device
 func (s *DeviceServiceOp) PowerOn(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
 

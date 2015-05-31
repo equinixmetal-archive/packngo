@@ -4,19 +4,21 @@ import "fmt"
 
 const sshKeyBasePath = "/ssh-keys"
 
-type SshKeyService interface {
-	List() ([]SshKey, *Response, error)
-	Get(string) (*SshKey, *Response, error)
-	Create(*SshKeyCreateRequest) (*SshKey, *Response, error)
-	Update(*SshKeyUpdateRequest) (*SshKey, *Response, error)
+// SSHKeyService interface defines available device methods
+type SSHKeyService interface {
+	List() ([]SSHKey, *Response, error)
+	Get(string) (*SSHKey, *Response, error)
+	Create(*SSHKeyCreateRequest) (*SSHKey, *Response, error)
+	Update(*SSHKeyUpdateRequest) (*SSHKey, *Response, error)
 	Delete(string) (*Response, error)
 }
 
-type SshKeyRoot struct {
-	SshKeys []SshKey `json:"ssh_keys"`
+type sshKeyRoot struct {
+	SSHKeys []SSHKey `json:"ssh_keys"`
 }
 
-type SshKey struct {
+// SSHKey represents a user's ssh key
+type SSHKey struct {
 	ID          string    `json:"id"`
 	Label       string    `json:"label"`
   Key         string    `json:"key"`
@@ -24,57 +26,62 @@ type SshKey struct {
 	Created     string    `json:"created_at"`
 	Updated     string    `json:"updated_at"`
 	User        User      `json:"user,omitempty"`
-	Url         string    `json:"href,omitempty"`
+	URL         string    `json:"href,omitempty"`
 }
-func (s SshKey) String() string {
+func (s SSHKey) String() string {
 	return Stringify(s)
 }
 
-type SshKeyCreateRequest struct {
+// SSHKeyCreateRequest type used to create an ssh key
+type SSHKeyCreateRequest struct {
 	Label string   `json:"label"`
 	Key   string   `json:"key"`
 }
-func (s SshKeyCreateRequest) String() string {
+func (s SSHKeyCreateRequest) String() string {
 	return Stringify(s)
 }
 
-type SshKeyUpdateRequest struct {
-	Id    string   `json:"id"`
+// SSHKeyUpdateRequest type used to update an ssh key
+type SSHKeyUpdateRequest struct {
+	ID    string   `json:"id"`
 	Label string   `json:"label"`
 	Key   string   `json:"key"`
 }
-func (s SshKeyUpdateRequest) String() string {
+func (s SSHKeyUpdateRequest) String() string {
 	return Stringify(s)
 }
 
-type SshKeyServiceOp struct {
+// SSHKeyServiceOp implements SSHKeyService
+type SSHKeyServiceOp struct {
 	client *Client
 }
 
-func (s *SshKeyServiceOp) List() ([]SshKey, *Response, error) {
+// List returns a user's ssh keys
+func (s *SSHKeyServiceOp) List() ([]SSHKey, *Response, error) {
 	req, err := s.client.NewRequest("GET", sshKeyBasePath, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	root := new(SshKeyRoot)
+	root := new(sshKeyRoot)
 	resp, err := s.client.Do(req, root)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return root.SshKeys, resp, err
+	return root.SSHKeys, resp, err
 }
 
-func (s *SshKeyServiceOp) Get(sshKeyId string) (*SshKey, *Response, error) {
-	path := fmt.Sprintf("%s/%s", sshKeyBasePath, sshKeyId)
+// Get returns an ssh key by id
+func (s *SSHKeyServiceOp) Get(sshKeyID string) (*SSHKey, *Response, error) {
+	path := fmt.Sprintf("%s/%s", sshKeyBasePath, sshKeyID)
 
 	req, err := s.client.NewRequest("GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	sshKey := new(SshKey)
+	sshKey := new(SSHKey)
 	resp, err := s.client.Do(req, sshKey)
 	if err != nil {
 		return nil, resp, err
@@ -83,13 +90,14 @@ func (s *SshKeyServiceOp) Get(sshKeyId string) (*SshKey, *Response, error) {
 	return sshKey, resp, err
 }
 
-func (s *SshKeyServiceOp) Create(createRequest *SshKeyCreateRequest) (*SshKey, *Response, error) {
+// Create creates a new ssh key
+func (s *SSHKeyServiceOp) Create(createRequest *SSHKeyCreateRequest) (*SSHKey, *Response, error) {
 	req, err := s.client.NewRequest("POST", sshKeyBasePath, createRequest)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	sshKey := new(SshKey)
+	sshKey := new(SSHKey)
 	resp, err := s.client.Do(req, sshKey)
 	if err != nil {
 		return nil, resp, err
@@ -98,14 +106,15 @@ func (s *SshKeyServiceOp) Create(createRequest *SshKeyCreateRequest) (*SshKey, *
 	return sshKey, resp, err
 }
 
-func (s *SshKeyServiceOp) Update(updateRequest *SshKeyUpdateRequest) (*SshKey, *Response, error) {
-	path := fmt.Sprintf("%s/%s", sshKeyBasePath, updateRequest.Id)
+// Update updates an ssh key
+func (s *SSHKeyServiceOp) Update(updateRequest *SSHKeyUpdateRequest) (*SSHKey, *Response, error) {
+	path := fmt.Sprintf("%s/%s", sshKeyBasePath, updateRequest.ID)
 	req, err := s.client.NewRequest("PATCH", path, updateRequest)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	sshKey := new(SshKey)
+	sshKey := new(SSHKey)
 	resp, err := s.client.Do(req, sshKey)
 	if err != nil {
 		return nil, resp, err
@@ -114,7 +123,8 @@ func (s *SshKeyServiceOp) Update(updateRequest *SshKeyUpdateRequest) (*SshKey, *
 	return sshKey, resp, err
 }
 
-func (s *SshKeyServiceOp) Delete(sshKeyID string) (*Response, error) {
+// Delete deletes an ssh key
+func (s *SSHKeyServiceOp) Delete(sshKeyID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", sshKeyBasePath, sshKeyID)
 
 	req, err := s.client.NewRequest("DELETE", path, nil)
