@@ -10,6 +10,7 @@ type ProjectService interface {
 	Get(string) (*Project, *Response, error)
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
 	Update(*ProjectUpdateRequest) (*Project, *Response, error)
+	Delete(string) (*Response, error)
 }
 
 type projectsRoot struct {
