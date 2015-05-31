@@ -33,7 +33,8 @@ func (p Project) String() string {
 
 // ProjectCreateRequest type used to create a Packet project
 type ProjectCreateRequest struct {
-	Name string `json:"name"`
+	Name          string `json:"name"`
+	PaymentMethod string `json:"payment_method,omitempty"`
 }
 func (p ProjectCreateRequest) String() string {
 	return Stringify(p)
@@ -41,8 +42,9 @@ func (p ProjectCreateRequest) String() string {
 
 // ProjectUpdateRequest type used to update a Packet project
 type ProjectUpdateRequest struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID            string `json:"id"`
+	Name          string `json:"name,omitempty"`
+	PaymentMethod string `json:"payment_method,omitempty"`
 }
 func (p ProjectUpdateRequest) String() string {
 	return Stringify(p)
