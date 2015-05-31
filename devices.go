@@ -84,7 +84,7 @@ type DeviceServiceOp struct {
 
 // List returns devices on a project
 func (s *DeviceServiceOp) List(projectID string) ([]Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s/devices", projectBasePath, projectID)
+	path := fmt.Sprintf("%s/%s/devices?include=facility", projectBasePath, projectID)
 
 	req, err := s.client.NewRequest("GET", path, nil)
 	if err != nil {
@@ -102,7 +102,7 @@ func (s *DeviceServiceOp) List(projectID string) ([]Device, *Response, error) {
 
 // Get returns a device by id
 func (s *DeviceServiceOp) Get(deviceID string) (*Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
+	path := fmt.Sprintf("%s/%s?include=facility", deviceBasePath, deviceID)
 
 	req, err := s.client.NewRequest("GET", path, nil)
 	if err != nil {
