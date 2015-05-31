@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 	"crypto/tls"
+	"strings"
 )
 
 const (
@@ -59,11 +60,11 @@ func (r *Response) populateRate() {
 // ErrorResponse is the http response used on errrors
 type ErrorResponse struct {
 	Response *http.Response
-	Message string
+	Errors   []string `json:"errors"`
 }
 func (r *ErrorResponse) Error() string {
 	return fmt.Sprintf("%v %v: %d %v",
-		r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, r.Message)
+		r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, strings.Join(r.Errors, ", "))
 }
 
 // Client is the base API Client
@@ -138,7 +139,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	c.RateLimit = response.Rate
 
 	err = checkResponse(resp)
-	// if the response is an error, return the ErrorReponse
+	// if the response is an error, return the ErrorResponse
 	if err != nil {
 		return &response, err
 	}
@@ -189,6 +190,7 @@ func NewClient(consumerToken string, apiKey string) *Client {
 func checkResponse(r *http.Response) error {
 	// return if http status code is within 200 range
 	if c := r.StatusCode; c >= 200 && c <= 299 {
+		// response is good, return
 		return nil
 	}
 
