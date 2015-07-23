@@ -37,8 +37,9 @@ type Device struct {
 	Plan         *Plan        `json:"plan,omitempty"`
 	Facility     *Facility    `json:"facility,omitempty"`
 	Project      *Project     `json:"project,omitempty"`
-  ProvisionPer float32      `json:"provisioning_percentage,omitempty"`
+	ProvisionPer float32      `json:"provisioning_percentage,omitempty"`
 }
+
 func (d Device) String() string {
 	return Stringify(d)
 }
@@ -51,9 +52,10 @@ type DeviceCreateRequest struct {
 	OS           string   `json:"operating_system"`
 	BillingCycle string   `json:"billing_cycle"`
 	ProjectID    string   `json:"project_id"`
-	UserData     string   `json:"user_data"`
+	UserData     string   `json:"userdata"`
 	Tags         []string `json:"tags"`
 }
+
 func (d DeviceCreateRequest) String() string {
 	return Stringify(d)
 }
@@ -62,6 +64,7 @@ func (d DeviceCreateRequest) String() string {
 type DeviceActionRequest struct {
 	Type string `json:"type"`
 }
+
 func (d DeviceActionRequest) String() string {
 	return Stringify(d)
 }
@@ -74,6 +77,7 @@ type IPAddress struct {
 	Gateway string `json:"gateway"`
 	Public  bool   `json:"public"`
 }
+
 func (n IPAddress) String() string {
 	return Stringify(n)
 }
@@ -155,7 +159,7 @@ func (s *DeviceServiceOp) Delete(deviceID string) (*Response, error) {
 func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
 
-	action := &DeviceActionRequest { Type: "reboot" }
+	action := &DeviceActionRequest{Type: "reboot"}
 	req, err := s.client.NewRequest("POST", path, action)
 	if err != nil {
 		return nil, err
@@ -170,7 +174,7 @@ func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
 func (s *DeviceServiceOp) PowerOff(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
 
-	action := &DeviceActionRequest { Type: "power_off" }
+	action := &DeviceActionRequest{Type: "power_off"}
 	req, err := s.client.NewRequest("POST", path, action)
 	if err != nil {
 		return nil, err
@@ -185,7 +189,7 @@ func (s *DeviceServiceOp) PowerOff(deviceID string) (*Response, error) {
 func (s *DeviceServiceOp) PowerOn(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
 
-	action := &DeviceActionRequest { Type: "power_on" }
+	action := &DeviceActionRequest{Type: "power_on"}
 	req, err := s.client.NewRequest("POST", path, action)
 	if err != nil {
 		return nil, err
@@ -204,7 +208,7 @@ type lockDeviceType struct {
 func (s *DeviceServiceOp) Lock(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
 
-	action := lockDeviceType{ Locked: true }
+	action := lockDeviceType{Locked: true}
 	req, err := s.client.NewRequest("PATCH", path, action)
 	if err != nil {
 		return nil, err
@@ -220,7 +224,7 @@ func (s *DeviceServiceOp) Lock(deviceID string) (*Response, error) {
 func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
 
-	action := lockDeviceType{ Locked: false }
+	action := lockDeviceType{Locked: false}
 	req, err := s.client.NewRequest("PATCH", path, action)
 	if err != nil {
 		return nil, err
