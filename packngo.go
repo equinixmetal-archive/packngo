@@ -9,9 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
-	"crypto/tls"
 	"strings"
+	"time"
 )
 
 const (
@@ -42,6 +41,7 @@ type Response struct {
 	*http.Response
 	Rate
 }
+
 func (r *Response) populateRate() {
 	// parse the rate limit headers and populate Response.Rate
 	if limit := r.Header.Get(headerRateLimit); limit != "" {
@@ -62,6 +62,7 @@ type ErrorResponse struct {
 	Response *http.Response
 	Errors   []string `json:"errors"`
 }
+
 func (r *ErrorResponse) Error() string {
 	return fmt.Sprintf("%v %v: %d %v",
 		r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, strings.Join(r.Errors, ", "))
@@ -73,9 +74,9 @@ type Client struct {
 
 	BaseURL *url.URL
 
-	UserAgent string
+	UserAgent     string
 	ConsumerToken string
-	APIKey string
+	APIKey        string
 
 	RateLimit Rate
 
@@ -160,8 +161,16 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 }
 
 // NewClient initializes and returns a Client, use this to get an API Client to operate on
-func NewClient(consumerToken string, apiKey string) *Client {
-	httpClient := http.DefaultClient
+// N.B.: Packet's API certificate requires Go 1.5+ to successfully parse. If you are using
+// an older version of Go, pass in a custom http.Client with a custom TLS configuration
+// that sets "InsecureSkipVerify" to "true"
+func NewClient(consumerToken string, apiKey string, httpClient *http.Client) *Client {
+	if httpClient == nil {
+		// Don't fall back on http.DefaultClient as it's not nice to adjust state
+		// implicitly. If the client wants to use http.DefaultClient, they can
+		// pass it in explicitly.
+		httpClient = &http.Client{}
+	}
 
 	BaseURL, _ := url.Parse(baseURL)
 
@@ -174,15 +183,6 @@ func NewClient(consumerToken string, apiKey string) *Client {
 	c.Projects = &ProjectServiceOp{client: c}
 	c.Facilities = &FacilityServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
-
-	// THIS IS VERY VERY BAD, WE NEED TO FIX THE CERT ON THE SERVER
-	// RELEVANT ERROR IS:
-	// x509: certificate signed by unknown authority (possibly because of "x509: cannot verify signature: algorithm unimplemented" while trying to verify candidate authority certificate "COMODO RSA Certification Authority")
-	cfg := &tls.Config{ InsecureSkipVerify: true }
-	http.DefaultClient.Transport = &http.Transport{
-    TLSClientConfig: cfg,
-	}
-	// END BAD PART
 
 	return c
 }
