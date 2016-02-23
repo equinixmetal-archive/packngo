@@ -94,9 +94,6 @@ func (m BondingMode) String() string {
 	if str, ok := bondingModeStrings[m]; ok {
 		return str
 	}
-	if m < 10 {
-		return string('0' + m)
-	}
 	return fmt.Sprintf("%d", m)
 }
 
