@@ -11,7 +11,7 @@ import (
 
 const BaseURL = "https://metadata.packet.net"
 
-func Get() (*CurrentDevice, error) {
+func GetMetadata() (*CurrentDevice, error) {
 	res, err := http.Get(BaseURL + "/metadata")
 	if err != nil {
 		return nil, err
