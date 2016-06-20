@@ -164,7 +164,10 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 // N.B.: Packet's API certificate requires Go 1.5+ to successfully parse. If you are using
 // an older version of Go, pass in a custom http.Client with a custom TLS configuration
 // that sets "InsecureSkipVerify" to "true"
-func NewClient(consumerToken string, apiKey string, httpClient *http.Client, apiBaseURL string) (*Client, error) {
+func NewClient(consumerToken string, apiKey string, httpClient *http.Client) (*Client, error) {
+	return NewClientWithBaseURL(consumerToken, apiKey, httpClient, baseURL)
+}
+func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.Client, apiBaseURL string) (*Client, error) {
 	if httpClient == nil {
 		// Don't fall back on http.DefaultClient as it's not nice to adjust state
 		// implicitly. If the client wants to use http.DefaultClient, they can
@@ -176,12 +179,12 @@ func NewClient(consumerToken string, apiKey string, httpClient *http.Client, api
 		apiBaseURL = baseURL
 	}
 
-	BaseURL, err := url.Parse(apiBaseURL)
+	u, err := url.Parse(apiBaseURL)
 	if err != nil {
 		return nil, err
 	}
 
-	c := &Client{client: httpClient, BaseURL: BaseURL, UserAgent: userAgent, ConsumerToken: consumerToken, APIKey: apiKey}
+	c := &Client{client: httpClient, BaseURL: u, UserAgent: userAgent, ConsumerToken: consumerToken, APIKey: apiKey}
 	c.Plans = &PlanServiceOp{client: c}
 	c.Users = &UserServiceOp{client: c}
 	c.Emails = &EmailServiceOp{client: c}
