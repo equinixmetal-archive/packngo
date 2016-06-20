@@ -76,6 +76,8 @@ type IPAddress struct {
 	Address string `json:"address"`
 	Gateway string `json:"gateway"`
 	Public  bool   `json:"public"`
+	Network string `json:"network"`
+	Netmask string `json:"netmask"`
 }
 
 func (n IPAddress) String() string {

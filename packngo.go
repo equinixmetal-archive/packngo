@@ -165,6 +165,10 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 // an older version of Go, pass in a custom http.Client with a custom TLS configuration
 // that sets "InsecureSkipVerify" to "true"
 func NewClient(consumerToken string, apiKey string, httpClient *http.Client) *Client {
+	client, _ := NewClientWithBaseURL(consumerToken, apiKey, httpClient, baseURL)
+	return client
+}
+func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.Client, apiBaseURL string) (*Client, error) {
 	if httpClient == nil {
 		// Don't fall back on http.DefaultClient as it's not nice to adjust state
 		// implicitly. If the client wants to use http.DefaultClient, they can
@@ -172,9 +176,12 @@ func NewClient(consumerToken string, apiKey string, httpClient *http.Client) *Cl
 		httpClient = &http.Client{}
 	}
 
-	BaseURL, _ := url.Parse(baseURL)
+	u, err := url.Parse(apiBaseURL)
+	if err != nil {
+		return nil, err
+	}
 
-	c := &Client{client: httpClient, BaseURL: BaseURL, UserAgent: userAgent, ConsumerToken: consumerToken, APIKey: apiKey}
+	c := &Client{client: httpClient, BaseURL: u, UserAgent: userAgent, ConsumerToken: consumerToken, APIKey: apiKey}
 	c.Plans = &PlanServiceOp{client: c}
 	c.Users = &UserServiceOp{client: c}
 	c.Emails = &EmailServiceOp{client: c}
@@ -184,7 +191,7 @@ func NewClient(consumerToken string, apiKey string, httpClient *http.Client) *Cl
 	c.Facilities = &FacilityServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
 
-	return c
+	return c, nil
 }
 
 func checkResponse(r *http.Response) error {
