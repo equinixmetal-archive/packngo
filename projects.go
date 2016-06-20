@@ -11,6 +11,11 @@ type ProjectService interface {
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
 	Update(*ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
+	ListIPAddresses(string) ([]IPAddress, *Response, error)
+}
+
+type ipsRoot struct {
+	IPAddresses []IPAddress `json:"ip_addresses"`
 }
 
 type projectsRoot struct {
@@ -53,6 +58,22 @@ func (p ProjectUpdateRequest) String() string {
 // ProjectServiceOp implements ProjectService
 type ProjectServiceOp struct {
 	client *Client
+}
+
+func (s *ProjectServiceOp) ListIPAddresses(projectID string) ([]IPAddress, *Response, error) {
+	url := fmt.Sprintf("%s/%s/ips", projectBasePath, projectID)
+	req, err := s.client.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	root := new(ipsRoot)
+	resp, err := s.client.Do(req, root)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return root.IPAddresses, resp, err
 }
 
 // List returns the user's projects
