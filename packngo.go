@@ -176,10 +176,6 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 		httpClient = &http.Client{}
 	}
 
-	if apiBaseURL == "" {
-		apiBaseURL = baseURL
-	}
-
 	u, err := url.Parse(apiBaseURL)
 	if err != nil {
 		return nil, err
