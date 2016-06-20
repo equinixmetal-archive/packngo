@@ -164,8 +164,9 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 // N.B.: Packet's API certificate requires Go 1.5+ to successfully parse. If you are using
 // an older version of Go, pass in a custom http.Client with a custom TLS configuration
 // that sets "InsecureSkipVerify" to "true"
-func NewClient(consumerToken string, apiKey string, httpClient *http.Client) (*Client, error) {
-	return NewClientWithBaseURL(consumerToken, apiKey, httpClient, baseURL)
+func NewClient(consumerToken string, apiKey string, httpClient *http.Client) *Client {
+	client, _ := NewClientWithBaseURL(consumerToken, apiKey, httpClient, baseURL)
+	return client
 }
 func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.Client, apiBaseURL string) (*Client, error) {
 	if httpClient == nil {
