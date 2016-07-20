@@ -72,7 +72,7 @@ func (i *IPServiceOp) Unassign(ipAddressID string) (*Response, error) {
 
 // Assign assigns an IP address to a device. The IP address must be in one of the IP ranges assigned to the device’s project.
 func (i *IPServiceOp) Assign(deviceID string, assignRequest *IPAddressAssignRequest) (*IPAddress, *Response, error) {
-	path := fmt.Sprintf("devices/%s%s", deviceID, ipBasePath)
+	path := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, ipBasePath)
 
 	req, err := i.client.NewRequest("POST", path, assignRequest)
 
@@ -130,7 +130,7 @@ type ipReservationRoot struct {
 
 // List provides a list of IP resevations for a single project.
 func (i *IPReservationServiceOp) List(projectID string) ([]IPReservation, *Response, error) {
-	path := fmt.Sprintf("projects/%s%s", projectID, ipBasePath)
+	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, ipBasePath)
 
 	req, err := i.client.NewRequest("GET", path, nil)
 	if err != nil {
@@ -147,7 +147,7 @@ func (i *IPReservationServiceOp) List(projectID string) ([]IPReservation, *Respo
 
 // RequestMore requests more IP space for a project in order to have additional IP addresses to assign to devices
 func (i *IPReservationServiceOp) RequestMore(projectID string, ipReservationReq *IPReservationRequest) (*Response, error) {
-	path := fmt.Sprintf("projects/%s%s", projectID, ipBasePath)
+	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, ipBasePath)
 
 	req, err := i.client.NewRequest("POST", path, &ipReservationReq)
 	if err != nil {
