@@ -89,6 +89,8 @@ type Client struct {
 	Projects         ProjectService
 	Facilities       FacilityService
 	OperatingSystems OSService
+	Ips              IPService
+	IpReservations   IPReservationService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -190,6 +192,8 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Projects = &ProjectServiceOp{client: c}
 	c.Facilities = &FacilityServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
+	c.Ips = &IPServiceOp{client: c}
+	c.IpReservations = &IPReservationServiceOp{client: c}
 
 	return c, nil
 }
