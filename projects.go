@@ -12,10 +12,15 @@ type ProjectService interface {
 	Update(*ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
 	ListIPAddresses(string) ([]IPAddress, *Response, error)
+	ListVolumes(string) ([]Volume, *Response, error)
 }
 
 type ipsRoot struct {
 	IPAddresses []IPAddress `json:"ip_addresses"`
+}
+
+type volumesRoot struct {
+	Volumes []Volume `json:"volumes"`
 }
 
 type projectsRoot struct {
@@ -158,4 +163,21 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 	resp, err := s.client.Do(req, nil)
 
 	return resp, err
+}
+
+// List returns Volumes for a project
+func (s *ProjectServiceOp) ListVolumes(projectID string) ([]Volume, *Response, error) {
+	url := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, volumeBasePath)
+	req, err := s.client.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	root := new(volumesRoot)
+	resp, err := s.client.Do(req, root)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return root.Volumes, resp, err
 }
