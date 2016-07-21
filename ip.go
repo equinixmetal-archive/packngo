@@ -15,6 +15,7 @@ type IPService interface {
 type IPAddress struct {
 	ID            string            `json:"id"`
 	Address       string            `json:"address"`
+	Gateway       string            `json:"gateway"`
 	Network       string            `json:"network"`
 	AddressFamily int               `json:"address_family"`
 	Netmask       string            `json:"netmask"`

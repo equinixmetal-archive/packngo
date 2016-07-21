@@ -33,8 +33,10 @@ type Volume struct {
 
 // SnapshotPolicy used to execute actions on volume
 type SnapshotPolicy struct {
-	ID   string `json:"id"`
-	Href string `json:"href"`
+	ID                string `json:"id"`
+	Href              string `json:"href"`
+	SnapshotFrequency string `json:"snapshot_frequency,omitempty"`
+	snapshot_count    int    `json:"snapshot_count,omitempty"`
 }
 
 // Attachment used to execute actions on volume
