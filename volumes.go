@@ -51,12 +51,13 @@ func (v Volume) String() string {
 
 // VolumeCreateRequest type used to create a Packet volume
 type VolumeCreateRequest struct {
-	Size         int    `json:"size"`
-	BillingCycle string `json:"billing_cycle"`
-	ProjectID    string `json:"project_id"`
-	PlanID       string `json:"plan_id"`
-	FacilityID   string `json:"facility_id"`
-	Description  string `json:"Description,omitempty"`
+	Size           int              `json:"size"`
+	BillingCycle   string           `json:"billing_cycle"`
+	ProjectID      string           `json:"project_id"`
+	PlanID         string           `json:"plan_id"`
+	FacilityID     string           `json:"facility_id"`
+	Description    string           `json:"Description,omitempty"`
+	SnapshotPolicy []SnapshotPolicy `json:"snapshot_policies,omitempty"`
 }
 
 func (v VolumeCreateRequest) String() string {
