@@ -2,18 +2,18 @@ package packngo
 
 import "fmt"
 
-const storageBasePath = "/storage"
+const volumeBasePath = "/storage"
 
-// StoraveService interface defines available Storage methods
-type StorageService interface {
-  Get(string) (*Storage, *Response, error)
-  Update(*StorageUpdateRequest) (*Storage, *Response, error)
+// VolumeService interface defines available Volume methods
+type VolumeService interface {
+  Get(string) (*Volume, *Response, error)
+  Update(*VolumeUpdateRequest) (*Volume, *Response, error)
   Delete(string) (*Response, error)
-  Create(*StorageCreateRequest) (*Storage, *Response, error)
+  Create(*VolumeCreateRequest) (*Volume, *Response, error)
 }
 
-// Storage represents a storage
-type Storage struct {
+// Volume represents a volume
+type Volume struct {
   ID               string           `json:"id"`
   Name             string           `json:"name,omitempty"`
   Description      string           `json:"description,omitempty"`
@@ -22,7 +22,7 @@ type Storage struct {
   Locked           bool             `json:"locked,omitempty"`
   BillingCycle     string           `json:"billing_cycle,omitempty"`
   Created          string           `json:"created_at,omitempty"`
-	Updated          string           `json:"updated_at,omitempty"`
+  Updated          string           `json:"updated_at,omitempty"`
   Href             string           `json:"href,omitempty"`
   SnapshotPolicies []SnapshotPolicy `json:"snapshot_policies,omitempty"`
   Attachments      []Attachment     `json:"attachments,omitempty"`
@@ -31,114 +31,113 @@ type Storage struct {
   Project          *Project         `json:"project,omitempty"`
 }
 
-// SnapshotPolicy used to execute actions on storage
+// SnapshotPolicy used to execute actions on volume
 type SnapshotPolicy struct {
   ID    string    `json:"id"`
   Href  string    `json:"href"`
 }
 
-// Attachment used to execute actions on storage
+// Attachment used to execute actions on volume
 type Attachment struct {
   ID    string    `json:"id"`
   Href  string    `json:"href"`
 }
 
-func (s Storage) String() string {
-	return Stringify(s)
+func (v Volume) String() string {
+	return Stringify(v)
 }
 
-// StorageUpdateRequest type used to update a Packet storage
-type StorageUpdateRequest struct {
+// VolumeCreateRequest type used to create a Packet volume
+type VolumeCreateRequest struct {
+  Size          int      `json:"size"`
+  BillingCycle  string   `json:"billing_cycle"`
+  ProjectID     string   `json:"project_id"`
+  PlanID        string   `json:"plan_id"`
+  FacilityID    string   `json:"facility_id"`
+  Description   string   `json:"Description,omitempty"`
+}
+
+func (v VolumeCreateRequest) String() string {
+	return Stringify(v)
+}
+
+// VolumeUpdateRequest type used to update a Packet volume
+type VolumeUpdateRequest struct {
 	ID            string   `json:"id"`
 	Description   string   `json:"description,omitempty"`
-	Size          int      `json:"size,omitempty"`
-  Locked        bool     `json:"locked",omitempty`
+	Plan          string   `json:"plan,omitempty"`
 }
 
-func (p StorageUpdateRequest) String() string {
-	return Stringify(p)
+func (v VolumeUpdateRequest) String() string {
+	return Stringify(v)
 }
 
-// StorageServiceOp implements StorageService
-type StorageServiceOp struct {
+// VolumeServiceOp implements VolumeService
+type VolumeServiceOp struct {
 	client *Client
 }
 
-// Get returns a storage by id
-func (s *StorageServiceOp) Get(storageID string) (*Storage, *Response, error) {
-	path := fmt.Sprintf("%s/%s", storageBasePath, storageID)
-	req, err := s.client.NewRequest("GET", path, nil)
+// Get returns a volume by id
+func (v *VolumeServiceOp) Get(volumeID string) (*Volume, *Response, error) {
+	path := fmt.Sprintf("%s/%s", volumeBasePath, volumeID)
+	req, err := v.client.NewRequest("GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	storage := new(Storage)
-	resp, err := s.client.Do(req, storage)
+	volume := new(Volume)
+	resp, err := v.client.Do(req, volume)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return storage, resp, err
+	return volume, resp, err
 }
 
-// Update updates a storage
-func (s *StorageServiceOp) Update(updateRequest *StorageUpdateRequest) (*Storage, *Response, error) {
-	path := fmt.Sprintf("%s/%s", storageBasePath, updateRequest.ID)
-	req, err := s.client.NewRequest("PATCH", path, updateRequest)
+// Update updates a volume
+func (v *VolumeServiceOp) Update(updateRequest *VolumeUpdateRequest) (*Volume, *Response, error) {
+	path := fmt.Sprintf("%s/%s", volumeBasePath, updateRequest.ID)
+	req, err := v.client.NewRequest("PATCH", path, updateRequest)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	storage := new(Storage)
-	resp, err := s.client.Do(req, storage)
+	volume := new(Volume)
+	resp, err := v.client.Do(req, volume)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return storage, resp, err
+	return volume, resp, err
 }
 
-// Delete deletes a storage
-func (s *StorageServiceOp) Delete(storageID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", storageBasePath, storageID)
+// Delete deletes a volume
+func (v *VolumeServiceOp) Delete(volumeID string) (*Response, error) {
+	path := fmt.Sprintf("%s/%s", volumeBasePath, volumeID)
 
-	req, err := s.client.NewRequest("DELETE", path, nil)
+	req, err := v.client.NewRequest("DELETE", path, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := s.client.Do(req, nil)
+	resp, err := v.client.Do(req, nil)
 
 	return resp, err
 }
 
-// StorageCreateRequest type used to create a Packet storage
-type StorageCreateRequest struct {
-  Name          string   `json:"name"`
-  Size          int      `json:"size"`
-  BillingCycle  string   `json:"billing_cycle"`
-	ProjectID     string   `json:"project_id"`
-  PlanID        string   `json:"plan_id"`
-  FacilityID    string   `json:"facility_id"`
-}
-
-func (s StorageCreateRequest) String() string {
-	return Stringify(s)
-}
-
-// Create creates a new storage for a project
-func (s *StorageServiceOp) Create(createRequest *StorageCreateRequest) (*Storage, *Response, error) {
-	url := fmt.Sprintf("%s/%s%s", projectBasePath, createRequest.ProjectID, storageBasePath)
-	req, err := s.client.NewRequest("POST", url, createRequest)
+// Create creates a new volume for a project
+func (v *VolumeServiceOp) Create(createRequest *VolumeCreateRequest) (*Volume, *Response, error) {
+	url := fmt.Sprintf("%s/%s%s", projectBasePath, createRequest.ProjectID, volumeBasePath)
+	req, err := v.client.NewRequest("POST", url, createRequest)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	storage := new(Storage)
-	resp, err := s.client.Do(req, storage)
+	volume := new(Volume)
+	resp, err := v.client.Do(req, volume)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return storage, resp, err
+	return volume, resp, err
 }

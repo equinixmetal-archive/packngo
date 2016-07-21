@@ -12,15 +12,15 @@ type ProjectService interface {
 	Update(*ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
 	ListIPAddresses(string) ([]IPAddress, *Response, error)
-	ListStorages(string) ([]Storage, *Response, error)
+	ListVolumes(string) ([]Volume, *Response, error)
 }
 
 type ipsRoot struct {
 	IPAddresses []IPAddress `json:"ip_addresses"`
 }
 
-type storagesRoot struct {
-	Storages []Storage `json:"volumes"`
+type volumesRoot struct {
+	Volumes []Volume `json:"volumes"`
 }
 
 type projectsRoot struct {
@@ -165,19 +165,19 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 	return resp, err
 }
 
-// List returns Storages for a project
-func (s *ProjectServiceOp) ListStorages(projectID string) ([]Storage, *Response, error) {
-	url := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, storageBasePath)
+// List returns Volumes for a project
+func (s *ProjectServiceOp) ListVolumes(projectID string) ([]Volume, *Response, error) {
+	url := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, volumeBasePath)
 	req, err := s.client.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	root := new(storagesRoot)
+	root := new(volumesRoot)
 	resp, err := s.client.Do(req, root)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return root.Storages, resp, err
+	return root.Volumes, resp, err
 }
