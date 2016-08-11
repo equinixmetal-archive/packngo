@@ -56,7 +56,7 @@ type VolumeCreateRequest struct {
 	ProjectID        string            `json:"project_id"`
 	PlanID           string            `json:"plan_id"`
 	FacilityID       string            `json:"facility_id"`
-	Description      string            `json:"Description,omitempty"`
+	Description      string            `json:"description,omitempty"`
 	SnapshotPolicies []*SnapshotPolicy `json:"snapshot_policies,omitempty"`
 }
 
