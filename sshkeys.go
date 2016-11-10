@@ -35,8 +35,9 @@ func (s SSHKey) String() string {
 
 // SSHKeyCreateRequest type used to create an ssh key
 type SSHKeyCreateRequest struct {
-	Label string `json:"label"`
-	Key   string `json:"key"`
+	Label     string `json:"label"`
+	Key       string `json:"key"`
+	ProjectID string `json:"-"`
 }
 
 func (s SSHKeyCreateRequest) String() string {
@@ -95,7 +96,11 @@ func (s *SSHKeyServiceOp) Get(sshKeyID string) (*SSHKey, *Response, error) {
 
 // Create creates a new ssh key
 func (s *SSHKeyServiceOp) Create(createRequest *SSHKeyCreateRequest) (*SSHKey, *Response, error) {
-	req, err := s.client.NewRequest("POST", sshKeyBasePath, createRequest)
+	path := sshKeyBasePath
+	if createRequest.ProjectID != "" {
+		path = "projects/" + createRequest.ProjectID + sshKeyBasePath
+	}
+	req, err := s.client.NewRequest("POST", path, createRequest)
 	if err != nil {
 		return nil, nil, err
 	}
