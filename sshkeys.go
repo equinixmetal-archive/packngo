@@ -98,7 +98,7 @@ func (s *SSHKeyServiceOp) Get(sshKeyID string) (*SSHKey, *Response, error) {
 func (s *SSHKeyServiceOp) Create(createRequest *SSHKeyCreateRequest) (*SSHKey, *Response, error) {
 	path := sshKeyBasePath
 	if createRequest.ProjectID != "" {
-		path = "projects/" + createRequest.ProjectID + sshKeyBasePath
+		path = "/projects/" + createRequest.ProjectID + sshKeyBasePath
 	}
 	req, err := s.client.NewRequest("POST", path, createRequest)
 	if err != nil {
