@@ -25,6 +25,7 @@ type IPAddress struct {
 	Created       string            `json:"created_at,omitempty"`
 	Updated       string            `json:"updated_at,omitempty"`
 	Href          string            `json:"href"`
+	Facility      Facility		`json:"facility,omitempty"`
 }
 
 // IPAddressAssignRequest represents the body if a ip assign request
