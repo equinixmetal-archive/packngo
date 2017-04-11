@@ -8,13 +8,13 @@ pipeline:
     commands:
       - go get -v -u github.com/alecthomas/gometalinter
       - gometalinter --install
-      - go get -v .
+      - go get -v ./...
       - |
         gometalinter --disable=gas ./... || :
       - |
         gometalinter --disable-all --enable=gas ./... || :
       - |
-        gofmt -d | (! grep '.') || ok=false
+        gofmt -d . | (! grep '.') || ok=false
       - if ! $ok; then exit 1; fi
 
   build:
