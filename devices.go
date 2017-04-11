@@ -31,12 +31,14 @@ type Device struct {
 	Updated      string       `json:"updated_at,omitempty"`
 	Locked       bool         `json:"locked,omitempty"`
 	BillingCycle string       `json:"billing_cycle,omitempty"`
+	IQN          string       `json:"iqn,omitempty"`
 	Tags         []string     `json:"tags,omitempty"`
 	Network      []*IPAddress `json:"ip_addresses"`
 	OS           *OS          `json:"operating_system,omitempty"`
 	Plan         *Plan        `json:"plan,omitempty"`
 	Facility     *Facility    `json:"facility,omitempty"`
 	Project      *Project     `json:"project,omitempty"`
+	UserData     string       `json:"userdata,omitempty"`
 	ProvisionPer float32      `json:"provisioning_percentage,omitempty"`
 }
 
