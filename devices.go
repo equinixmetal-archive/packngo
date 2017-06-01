@@ -38,7 +38,6 @@ type Device struct {
 	Facility      *Facility    `json:"facility,omitempty"`
 	Project       *Project     `json:"project,omitempty"`
 	ProvisionPer  float32      `json:"provisioning_percentage,omitempty"`
-	AlwaysPXE     bool         `json:"always_pxe,omitempty"`
 	IPXEScriptUrl string       `json:"ipxe_script_url,omitempty"`
 }
 
