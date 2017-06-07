@@ -55,7 +55,7 @@ type DeviceCreateRequest struct {
 	ProjectID     string   `json:"project_id"`
 	UserData      string   `json:"userdata"`
 	Tags          []string `json:"tags"`
-	IPXEScriptUrl string   `json:"ipxe_script_url"`
+	IPXEScriptUrl string   `json:"ipxe_script_url,omitempty"`
 }
 
 func (d DeviceCreateRequest) String() string {
