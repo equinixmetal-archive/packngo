@@ -39,6 +39,7 @@ type Device struct {
 	Project       *Project     `json:"project,omitempty"`
 	ProvisionPer  float32      `json:"provisioning_percentage,omitempty"`
 	IPXEScriptUrl string       `json:"ipxe_script_url,omitempty"`
+	AlwaysPXE     bool         `json:"always_pxe,omitempty"`
 }
 
 func (d Device) String() string {
@@ -57,6 +58,7 @@ type DeviceCreateRequest struct {
 	Tags                 []string `json:"tags"`
 	IPXEScriptUrl        string   `json:"ipxe_script_url,omitempty"`
 	PublicIPv4SubnetSize int      `json:"public_ipv4_subnet_size"`
+	AlwaysPXE            bool     `json:"always_pxe,omitempty"`
 }
 
 func (d DeviceCreateRequest) String() string {
