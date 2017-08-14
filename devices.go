@@ -57,7 +57,7 @@ type DeviceCreateRequest struct {
 	UserData             string   `json:"userdata"`
 	Tags                 []string `json:"tags"`
 	IPXEScriptUrl        string   `json:"ipxe_script_url,omitempty"`
-	PublicIPv4SubnetSize int      `json:"public_ipv4_subnet_size"`
+	PublicIPv4SubnetSize int      `json:"public_ipv4_subnet_size,omitempty"`
 	AlwaysPXE            bool     `json:"always_pxe,omitempty"`
 }
 
