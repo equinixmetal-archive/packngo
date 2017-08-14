@@ -2,7 +2,10 @@ package packngo
 
 import "fmt"
 
-const volumeBasePath = "/storage"
+const (
+	volumeBasePath      = "/storage"
+	attachmentsBasePath = "/attachments"
+)
 
 // VolumeService interface defines available Volume methods
 type VolumeService interface {
@@ -10,6 +13,10 @@ type VolumeService interface {
 	Update(*VolumeUpdateRequest) (*Volume, *Response, error)
 	Delete(string) (*Response, error)
 	Create(*VolumeCreateRequest) (*Volume, *Response, error)
+	Attach(string, string) (*VolumeAttachment, *Response, error)
+	Detach(string, string) (*Response, error)
+	GetAttachment(string) (*VolumeAttachment, *Response, error)
+	DeleteAttachment(string) (*Response, error)
 }
 
 // Volume represents a volume
@@ -39,12 +46,6 @@ type SnapshotPolicy struct {
 	SnapshotCount     int    `json:"snapshot_count,omitempty"`
 }
 
-// Attachment used to execute actions on volume
-type Attachment struct {
-	ID   string `json:"id"`
-	Href string `json:"href"`
-}
-
 func (v Volume) String() string {
 	return Stringify(v)
 }
@@ -69,6 +70,31 @@ type VolumeUpdateRequest struct {
 	ID          string `json:"id"`
 	Description string `json:"description,omitempty"`
 	Plan        string `json:"plan,omitempty"`
+}
+
+// VolumeAttachRequest type used to attach a Packet volume to a device
+type VolumeAttachRequest struct {
+	DeviceID string `json:"device_id"`
+}
+
+// Link is API resource link
+type Link struct {
+	Href string `json:"href"`
+}
+
+// Attachment is a helper type to parse
+type Attachment struct {
+	Device         `json:"device"`
+	AttachmentID   string `json:"id"`
+	AttachmentHref string `json:"href"`
+}
+
+// VolumeAttachment is a type from Packet API
+type VolumeAttachment struct {
+	Href       string `json:"href"`
+	ID         string `json:"id"`
+	VolumeHref Link   `json:"volume"`
+	DeviceHref Link   `json:"device"`
 }
 
 func (v VolumeUpdateRequest) String() string {
@@ -143,4 +169,79 @@ func (v *VolumeServiceOp) Create(createRequest *VolumeCreateRequest) (*Volume, *
 	}
 
 	return volume, resp, err
+}
+
+// Attach volume to a device
+func (v *VolumeServiceOp) Attach(volumeID, deviceID string) (*VolumeAttachment, *Response, error) {
+	url := fmt.Sprintf("%s/%s%s", volumeBasePath, volumeID, attachmentsBasePath)
+	volAttachRequest := VolumeAttachRequest{DeviceID: deviceID}
+	req, err := v.client.NewRequest("POST", url, volAttachRequest)
+	if err != nil {
+		return nil, nil, err
+	}
+	volumeAttachment := new(VolumeAttachment)
+	resp, err := v.client.Do(req, volumeAttachment)
+	if err != nil {
+		return nil, resp, err
+	}
+	return volumeAttachment, resp, nil
+}
+
+// GetAttachment gets attachment by id
+func (v *VolumeServiceOp) GetAttachment(attachmentID string) (*VolumeAttachment, *Response, error) {
+	path := fmt.Sprintf("%s%s/%s", volumeBasePath, attachmentsBasePath, attachmentID)
+	req, err := v.client.NewRequest("GET", path, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	volumeAttachment := new(VolumeAttachment)
+	resp, err := v.client.Do(req, volumeAttachment)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return volumeAttachment, resp, nil
+}
+
+// DeleteAttachment deletes attachment by id
+func (v *VolumeServiceOp) DeleteAttachment(attachmentID string) (*Response, error) {
+	path := fmt.Sprintf("%s%s/%s", volumeBasePath, attachmentsBasePath, attachmentID)
+	req, err := v.client.NewRequest("DELETE", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := v.client.Do(req, nil)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
+}
+
+// Detach detaches volume from device by Device and Volume IDs
+func (v *VolumeServiceOp) Detach(volumeID, deviceID string) (*Response, error) {
+	vol, _, err := v.Get(volumeID)
+	if err != nil {
+		return nil, err
+	}
+	attachmentToRemoveURL := ""
+	for _, a := range vol.Attachments {
+		if a.ID == deviceID {
+			attachmentToRemoveURL = a.AttachmentHref
+			break
+		}
+	}
+	if attachmentToRemoveURL == "" {
+		return nil, fmt.Errorf("can not detach, volume %s is not attached to device %s",
+			volumeID, deviceID)
+	}
+	req, err := v.client.NewRequest("DELETE", attachmentToRemoveURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := v.client.Do(req, nil)
+
+	return resp, err
 }
