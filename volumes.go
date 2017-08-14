@@ -2,33 +2,43 @@ package packngo
 
 import "fmt"
 
-const volumeBasePath = "/storage"
+const (
+	volumeBasePath      = "/storage"
+	attachmentsBasePath = "/attachments"
+)
 
 // VolumeService interface defines available Volume methods
 type VolumeService interface {
 	Get(string) (*Volume, *Response, error)
 	Update(*VolumeUpdateRequest) (*Volume, *Response, error)
 	Delete(string) (*Response, error)
-	Create(*VolumeCreateRequest) (*Volume, *Response, error)
+	Create(*VolumeCreateRequest, string) (*Volume, *Response, error)
+}
+
+// VolumeAttachmentService defines attachment methdods
+type VolumeAttachmentService interface {
+	Get(string) (*VolumeAttachment, *Response, error)
+	Create(string, string) (*VolumeAttachment, *Response, error)
+	Delete(string) (*Response, error)
 }
 
 // Volume represents a volume
 type Volume struct {
-	ID               string            `json:"id"`
-	Name             string            `json:"name,omitempty"`
-	Description      string            `json:"description,omitempty"`
-	Size             int               `json:"size,omitempty"`
-	State            string            `json:"state,omitempty"`
-	Locked           bool              `json:"locked,omitempty"`
-	BillingCycle     string            `json:"billing_cycle,omitempty"`
-	Created          string            `json:"created_at,omitempty"`
-	Updated          string            `json:"updated_at,omitempty"`
-	Href             string            `json:"href,omitempty"`
-	SnapshotPolicies []*SnapshotPolicy `json:"snapshot_policies,omitempty"`
-	Attachments      []*Attachment     `json:"attachments,omitempty"`
-	Plan             *Plan             `json:"plan,omitempty"`
-	Facility         *Facility         `json:"facility,omitempty"`
-	Project          *Project          `json:"project,omitempty"`
+	ID               string              `json:"id"`
+	Name             string              `json:"name,omitempty"`
+	Description      string              `json:"description,omitempty"`
+	Size             int                 `json:"size,omitempty"`
+	State            string              `json:"state,omitempty"`
+	Locked           bool                `json:"locked,omitempty"`
+	BillingCycle     string              `json:"billing_cycle,omitempty"`
+	Created          string              `json:"created_at,omitempty"`
+	Updated          string              `json:"updated_at,omitempty"`
+	Href             string              `json:"href,omitempty"`
+	SnapshotPolicies []*SnapshotPolicy   `json:"snapshot_policies,omitempty"`
+	Attachments      []*VolumeAttachment `json:"attachments,omitempty"`
+	Plan             *Plan               `json:"plan,omitempty"`
+	Facility         *Facility           `json:"facility,omitempty"`
+	Project          *Project            `json:"project,omitempty"`
 }
 
 // SnapshotPolicy used to execute actions on volume
@@ -37,12 +47,6 @@ type SnapshotPolicy struct {
 	Href              string `json:"href"`
 	SnapshotFrequency string `json:"snapshot_frequency,omitempty"`
 	SnapshotCount     int    `json:"snapshot_count,omitempty"`
-}
-
-// Attachment used to execute actions on volume
-type Attachment struct {
-	ID   string `json:"id"`
-	Href string `json:"href"`
 }
 
 func (v Volume) String() string {
@@ -71,8 +75,21 @@ type VolumeUpdateRequest struct {
 	Plan        string `json:"plan,omitempty"`
 }
 
+// VolumeAttachment is a type from Packet API
+type VolumeAttachment struct {
+	Href   string `json:"href"`
+	ID     string `json:"id"`
+	Volume Volume `json:"volume"`
+	Device Device `json:"device"`
+}
+
 func (v VolumeUpdateRequest) String() string {
 	return Stringify(v)
+}
+
+// VolumeAttachmentServiceOp implements VolumeService
+type VolumeAttachmentServiceOp struct {
+	client *Client
 }
 
 // VolumeServiceOp implements VolumeService
@@ -129,8 +146,8 @@ func (v *VolumeServiceOp) Delete(volumeID string) (*Response, error) {
 }
 
 // Create creates a new volume for a project
-func (v *VolumeServiceOp) Create(createRequest *VolumeCreateRequest) (*Volume, *Response, error) {
-	url := fmt.Sprintf("%s/%s%s", projectBasePath, createRequest.ProjectID, volumeBasePath)
+func (v *VolumeServiceOp) Create(createRequest *VolumeCreateRequest, projectID string) (*Volume, *Response, error) {
+	url := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, volumeBasePath)
 	req, err := v.client.NewRequest("POST", url, createRequest)
 	if err != nil {
 		return nil, nil, err
@@ -143,4 +160,56 @@ func (v *VolumeServiceOp) Create(createRequest *VolumeCreateRequest) (*Volume, *
 	}
 
 	return volume, resp, err
+}
+
+// Attachments
+
+// Create Attachment, i.e. attach volume to a device
+func (v *VolumeAttachmentServiceOp) Create(volumeID, deviceID string) (*VolumeAttachment, *Response, error) {
+	url := fmt.Sprintf("%s/%s%s", volumeBasePath, volumeID, attachmentsBasePath)
+	type volumeAttachRequest struct {
+		DeviceID string `json:"device_id"`
+	}
+	volAttachRequest := volumeAttachRequest{DeviceID: deviceID}
+	req, err := v.client.NewRequest("POST", url, volAttachRequest)
+	if err != nil {
+		return nil, nil, err
+	}
+	volumeAttachment := new(VolumeAttachment)
+	resp, err := v.client.Do(req, volumeAttachment)
+	if err != nil {
+		return nil, resp, err
+	}
+	return volumeAttachment, resp, nil
+}
+
+// Get gets attachment by id
+func (v *VolumeAttachmentServiceOp) Get(attachmentID string) (*VolumeAttachment, *Response, error) {
+	path := fmt.Sprintf("%s%s/%s", volumeBasePath, attachmentsBasePath, attachmentID)
+	req, err := v.client.NewRequest("GET", path, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	volumeAttachment := new(VolumeAttachment)
+	resp, err := v.client.Do(req, volumeAttachment)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return volumeAttachment, resp, nil
+}
+
+// Delete deletes attachment by id
+func (v *VolumeAttachmentServiceOp) Delete(attachmentID string) (*Response, error) {
+	path := fmt.Sprintf("%s%s/%s", volumeBasePath, attachmentsBasePath, attachmentID)
+	req, err := v.client.NewRequest("DELETE", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := v.client.Do(req, nil)
+	if err != nil {
+		return resp, err
+	}
+	return resp, nil
 }
