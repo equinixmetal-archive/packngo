@@ -65,10 +65,10 @@ type AddressInfo struct {
 	Address     net.IP        `json:"address"`
 	NetworkMask net.IP        `json:"netmask"`
 	Gateway     net.IP        `json:"gateway"`
+	NetworkBits int           `json:"cidr"`
 
 	// These are available, but not really needed:
 	//   Network     net.IP `json:"network"`
-	//   NetworkBits int    `json:"cidr"`
 }
 
 type BondingMode int
