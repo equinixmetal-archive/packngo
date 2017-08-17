@@ -129,6 +129,7 @@ type IPReservation struct {
 	Created       string              `json:"created_at,omitempty"`
 	Updated       string              `json:"updated_at,omitempty"`
 	Href          string              `json:"href"`
+	Facility      Facility            `json:"facility,omitempty"`
 }
 
 type ipReservationRoot struct {
