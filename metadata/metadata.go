@@ -28,6 +28,9 @@ func GetMetadata() (*CurrentDevice, error) {
 		*CurrentDevice
 	}
 	if err := json.Unmarshal(b, &result); err != nil {
+		if res.StatusCode >= 400 {
+			return nil, errors.New(res.Status)
+		}
 		return nil, err
 	}
 	if result.Error != "" {
