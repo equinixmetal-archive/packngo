@@ -42,6 +42,11 @@ type Response struct {
 	Rate
 }
 
+// Href is an API link
+type Href struct {
+	Href string `json:"href"`
+}
+
 func (r *Response) populateRate() {
 	// parse the rate limit headers and populate Response.Rate
 	if limit := r.Header.Get(headerRateLimit); limit != "" {
@@ -90,7 +95,6 @@ type Client struct {
 	Facilities       FacilityService
 	OperatingSystems OSService
 	Ips              IPService
-	IpReservations   IPReservationService
 	Volumes          VolumeService
 }
 
@@ -171,6 +175,9 @@ func NewClient(consumerToken string, apiKey string, httpClient *http.Client) *Cl
 	client, _ := NewClientWithBaseURL(consumerToken, apiKey, httpClient, baseURL)
 	return client
 }
+
+// NewClientWithBaseURL returns a Client pointing to nonstandard API URL, e.g.
+// for mocking the remote API
 func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.Client, apiBaseURL string) (*Client, error) {
 	if httpClient == nil {
 		// Don't fall back on http.DefaultClient as it's not nice to adjust state
@@ -194,7 +201,6 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Facilities = &FacilityServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
 	c.Ips = &IPServiceOp{client: c}
-	c.IpReservations = &IPReservationServiceOp{client: c}
 	c.Volumes = &VolumeServiceOp{client: c}
 
 	return c, nil
