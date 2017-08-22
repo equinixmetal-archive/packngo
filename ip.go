@@ -29,7 +29,7 @@ type ipAddressCommon struct {
 	AddressFamily int    `json:"address_family"`
 	Netmask       string `json:"netmask"`
 	Public        bool   `json:"public"`
-	Cidr          int    `json:"cidr"`
+	CIDR          int    `json:"cidr"`
 	Created       string `json:"created_at,omitempty"`
 	Updated       string `json:"updated_at,omitempty"`
 	Href          string `json:"href"`
@@ -52,7 +52,7 @@ type AvailableResponse struct {
 
 // AvailableRequest is a type for listing available addresses from a reserved block.
 type AvailableRequest struct {
-	Cidr int `json:"cidr"`
+	CIDR int `json:"cidr"`
 }
 
 // IPAddressAssignment is created when an IP address from reservation block is assigned to a device.
@@ -153,7 +153,7 @@ func (i *IPServiceOp) GetReservationByCIDR(projectID, cidrString string) (*IPAdd
 		return nil, resp, err
 	}
 	for _, r := range rs {
-		if r.Network == network && r.Cidr == cidr {
+		if r.Network == network && r.CIDR == cidr {
 			return &r, resp, nil
 		}
 	}

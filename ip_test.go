@@ -22,7 +22,7 @@ func TestIPReservation(t *testing.T) {
 		Facility: testFac,
 	}
 
-	af, _, err := c.Ips.RequestReservation(projectID, &req)
+	af, _, err := c.IPs.RequestReservation(projectID, &req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +33,7 @@ func TestIPReservation(t *testing.T) {
 			quantityToMask[quantity], addrMask[1])
 	}
 
-	res, _, err := c.Ips.GetReservationByCIDR(projectID, af.Address)
+	res, _, err := c.IPs.GetReservationByCIDR(projectID, af.Address)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestIPReservation(t *testing.T) {
 			res.Facility.Code)
 	}
 
-	ipList, _, err := c.Ips.ListReservations(projectID)
+	ipList, _, err := c.IPs.ListReservations(projectID)
 	if len(ipList) != 1 {
 		t.Errorf("There should be only one reservation, was: %s", ipList)
 	}
@@ -51,7 +51,7 @@ func TestIPReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sameRes, _, err := c.Ips.GetReservation(res.ID)
+	sameRes, _, err := c.IPs.GetReservation(res.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,18 +60,18 @@ func TestIPReservation(t *testing.T) {
 			res, sameRes)
 	}
 
-	availableAddresses, _, err := c.Ips.GetAvailableAddresses(
-		res.ID, &AvailableRequest{Cidr: 32})
+	availableAddresses, _, err := c.IPs.GetAvailableAddresses(
+		res.ID, &AvailableRequest{CIDR: 32})
 	if len(availableAddresses) != quantity {
 		t.Errorf("New block should have %d available addresses, got %s",
 			quantity, availableAddresses)
 	}
 
-	_, err = c.Ips.RemoveReservation(res.ID)
+	_, err = c.IPs.RemoveReservation(res.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, _, err = c.Ips.GetReservation(res.ID)
+	_, _, err = c.IPs.GetReservation(res.ID)
 	if err == nil {
 		t.Errorf("Reservation %s should be deleted at this point", res)
 	}
