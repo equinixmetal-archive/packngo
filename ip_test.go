@@ -6,9 +6,8 @@ import (
 )
 
 func TestAccIPReservation(t *testing.T) {
-	if !doAcceptanceTests() {
-		return
-	}
+	skipUnlessAcceptanceTestsAllowed(t)
+
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 	quantityToMask := map[int]string{

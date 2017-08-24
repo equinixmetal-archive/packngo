@@ -3,9 +3,7 @@ package packngo
 import "testing"
 
 func TestAccProject(t *testing.T) {
-	if !doAcceptanceTests() {
-		return
-	}
+	skipUnlessAcceptanceTestsAllowed(t)
 
 	c := setup(t)
 	defer projectTeardown(c)

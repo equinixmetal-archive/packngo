@@ -42,8 +42,10 @@ func setupWithProject(t *testing.T) (*Client, string, func()) {
 
 }
 
-func doAcceptanceTests() bool {
-	return os.Getenv(packngoAccTestVar) != ""
+func skipUnlessAcceptanceTestsAllowed(t *testing.T) {
+	if os.Getenv(packngoAccTestVar) == "" {
+		t.Skipf("%s is not set", packngoAccTestVar)
+	}
 }
 
 func setup(t *testing.T) *Client {
