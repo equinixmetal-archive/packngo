@@ -116,6 +116,9 @@ func (i *DeviceIPServiceOp) Assign(deviceID string, assignRequest *AddressStruct
 	path := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, ipBasePath)
 
 	req, err := i.client.NewRequest("POST", path, assignRequest)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	ipa := new(IPAddressAssignment)
 	resp, err := i.client.Do(req, ipa)

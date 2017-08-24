@@ -64,6 +64,9 @@ func TestAccIPReservation(t *testing.T) {
 
 	availableAddresses, _, err := c.ProjectIPs.AvailableAddresses(
 		res.ID, &AvailableRequest{CIDR: 32})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(availableAddresses) != quantity {
 		t.Errorf("New block should have %d available addresses, got %s",
 			quantity, availableAddresses)
