@@ -94,7 +94,8 @@ type Client struct {
 	Projects         ProjectService
 	Facilities       FacilityService
 	OperatingSystems OSService
-	IPs              IPService
+	DeviceIPs        DeviceIPService
+	ProjectIPs       ProjectIPService
 	Volumes          VolumeService
 }
 
@@ -200,7 +201,8 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Projects = &ProjectServiceOp{client: c}
 	c.Facilities = &FacilityServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
-	c.IPs = &IPServiceOp{client: c}
+	c.DeviceIPs = &DeviceIPServiceOp{client: c}
+	c.ProjectIPs = &ProjectIPServiceOp{client: c}
 	c.Volumes = &VolumeServiceOp{client: c}
 
 	return c, nil
