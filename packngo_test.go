@@ -11,11 +11,7 @@ import (
 
 const (
 	packetTokenEnvVar = "PACKET_AUTH_TOKEN"
-	packngoTestVar    = "PACKNGO_TEST_ACTUAL_API"
-	testInfoMsg       = `
-packngo tests create and destroy resources in the Packet Host.
-They will likely cost you some credit. If you really want to run
-the tests, please export %s env var to nonempty string.`
+	packngoAccTestVar = "PACKNGO_TEST_ACTUAL_API"
 	testProjectPrefix = "PACKNGO_TEST_DELME_2d768716_"
 )
 
@@ -46,10 +42,11 @@ func setupWithProject(t *testing.T) (*Client, string, func()) {
 
 }
 
+func doAcceptanceTests() bool {
+	return os.Getenv(packngoAccTestVar) != ""
+}
+
 func setup(t *testing.T) *Client {
-	if os.Getenv(packngoTestVar) == "" {
-		t.Fatalf(testInfoMsg, packngoTestVar)
-	}
 	apiToken := os.Getenv(packetTokenEnvVar)
 	if apiToken == "" {
 		t.Fatalf("If you want to run packngo test, you must export %s.", packetTokenEnvVar)

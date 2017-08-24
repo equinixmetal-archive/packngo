@@ -5,7 +5,10 @@ import (
 	"testing"
 )
 
-func TestIPReservation(t *testing.T) {
+func TestAccIPReservation(t *testing.T) {
+	if !doAcceptanceTests() {
+		return
+	}
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 	quantityToMask := map[int]string{

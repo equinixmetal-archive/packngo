@@ -2,7 +2,11 @@ package packngo
 
 import "testing"
 
-func TestProject(t *testing.T) {
+func TestAccProject(t *testing.T) {
+	if !doAcceptanceTests() {
+		return
+	}
+
 	c := setup(t)
 	defer projectTeardown(c)
 
