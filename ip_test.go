@@ -17,6 +17,14 @@ func TestAccIPReservation(t *testing.T) {
 	testFac := "ewr1"
 	quantity := 2
 
+	ipList, _, err := c.ProjectIPs.List(projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ipList) != 0 {
+		t.Fatalf("There should be no reservations a new project, existing list: %s", ipList)
+	}
+
 	req := IPReservationRequest{
 		Type:     "public_ipv4",
 		Quantity: quantity,
@@ -30,7 +38,7 @@ func TestAccIPReservation(t *testing.T) {
 	}
 	addrMask := strings.Split(af.Address, "/")
 	if addrMask[1] != quantityToMask[quantity] {
-		t.Errorf(
+		t.Fatalf(
 			"CIDR prefix length for requested reservation should be %s, was %s",
 			quantityToMask[quantity], addrMask[1])
 	}
@@ -40,14 +48,14 @@ func TestAccIPReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 	if res.Facility.Code != testFac {
-		t.Errorf(
+		t.Fatalf(
 			"Facility of new reservation should be %s, was %s", testFac,
 			res.Facility.Code)
 	}
 
-	ipList, _, err := c.ProjectIPs.List(projectID)
+	ipList, _, err = c.ProjectIPs.List(projectID)
 	if len(ipList) != 1 {
-		t.Errorf("There should be only one reservation, was: %s", ipList)
+		t.Fatalf("There should be only one reservation, was: %s", ipList)
 	}
 	if err != nil {
 		t.Fatal(err)
@@ -58,7 +66,7 @@ func TestAccIPReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 	if sameRes.ID != res.ID {
-		t.Errorf("re-requested test reservation should be %s, is %s",
+		t.Fatalf("re-requested test reservation should be %s, is %s",
 			res, sameRes)
 	}
 
@@ -68,7 +76,7 @@ func TestAccIPReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(availableAddresses) != quantity {
-		t.Errorf("New block should have %d available addresses, got %s",
+		t.Fatalf("New block should have %d available addresses, got %s",
 			quantity, availableAddresses)
 	}
 
@@ -78,6 +86,6 @@ func TestAccIPReservation(t *testing.T) {
 	}
 	_, _, err = c.ProjectIPs.Get(res.ID)
 	if err == nil {
-		t.Errorf("Reservation %s should be deleted at this point", res)
+		t.Fatalf("Reservation %s should be deleted at this point", res)
 	}
 }
