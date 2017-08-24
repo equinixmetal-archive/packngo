@@ -216,7 +216,7 @@ func (i *ProjectIPServiceOp) GetByCIDR(projectID, cidr string) (*IPAddressReserv
 func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReservationRequest) (*AddressStruct, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, ipBasePath)
 
-	req, err := i.client.NewRequest("POST", path, &ipReservationReq)
+	req, err := i.client.NewRequest("POST", path, ipReservationReq)
 	if err != nil {
 		return nil, nil, err
 	}
