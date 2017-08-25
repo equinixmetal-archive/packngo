@@ -24,24 +24,24 @@ type devicesRoot struct {
 
 // Device represents a Packet device
 type Device struct {
-	ID            string       `json:"id"`
-	Href          string       `json:"href,omitempty"`
-	Hostname      string       `json:"hostname,omitempty"`
-	State         string       `json:"state,omitempty"`
-	Created       string       `json:"created_at,omitempty"`
-	Updated       string       `json:"updated_at,omitempty"`
-	Locked        bool         `json:"locked,omitempty"`
-	BillingCycle  string       `json:"billing_cycle,omitempty"`
-	Tags          []string     `json:"tags,omitempty"`
-	Network       []*IPAddress `json:"ip_addresses"`
-	OS            *OS          `json:"operating_system,omitempty"`
-	Plan          *Plan        `json:"plan,omitempty"`
-	Facility      *Facility    `json:"facility,omitempty"`
-	Project       *Project     `json:"project,omitempty"`
-	ProvisionPer  float32      `json:"provisioning_percentage,omitempty"`
-	UserData      string       `json:"userdata",omitempty`
-	IPXEScriptUrl string       `json:"ipxe_script_url,omitempty"`
-	AlwaysPXE     bool         `json:"always_pxe,omitempty"`
+	ID            string                 `json:"id"`
+	Href          string                 `json:"href,omitempty"`
+	Hostname      string                 `json:"hostname,omitempty"`
+	State         string                 `json:"state,omitempty"`
+	Created       string                 `json:"created_at,omitempty"`
+	Updated       string                 `json:"updated_at,omitempty"`
+	Locked        bool                   `json:"locked,omitempty"`
+	BillingCycle  string                 `json:"billing_cycle,omitempty"`
+	Tags          []string               `json:"tags,omitempty"`
+	Network       []*IPAddressAssignment `json:"ip_addresses"`
+	OS            *OS                    `json:"operating_system,omitempty"`
+	Plan          *Plan                  `json:"plan,omitempty"`
+	Facility      *Facility              `json:"facility,omitempty"`
+	Project       *Project               `json:"project,omitempty"`
+	ProvisionPer  float32                `json:"provisioning_percentage,omitempty"`
+	UserData      string                 `json:"userdata",omitempty`
+	IPXEScriptUrl string                 `json:"ipxe_script_url,omitempty"`
+	AlwaysPXE     bool                   `json:"always_pxe,omitempty"`
 }
 
 func (d Device) String() string {
