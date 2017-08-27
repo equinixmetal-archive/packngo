@@ -44,6 +44,9 @@ type Device struct {
 	IPXEScriptURL       string                 `json:"ipxe_script_url,omitempty"`
 	AlwaysPXE           bool                   `json:"always_pxe,omitempty"`
 	HardwareReservation Href                   `json:"hardware_reservation,omitempty"`
+	SpotInstance        bool                   `json:"spot_instance,omitempty"`
+	SpotPriceMax        float64                `json:"spot_price_max,omitempty"`
+	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
 }
 
 func (d Device) String() string {
@@ -52,18 +55,21 @@ func (d Device) String() string {
 
 // DeviceCreateRequest type used to create a Packet device
 type DeviceCreateRequest struct {
-	Hostname              string   `json:"hostname"`
-	Plan                  string   `json:"plan"`
-	Facility              string   `json:"facility"`
-	OS                    string   `json:"operating_system"`
-	BillingCycle          string   `json:"billing_cycle"`
-	ProjectID             string   `json:"project_id"`
-	UserData              string   `json:"userdata"`
-	Tags                  []string `json:"tags"`
-	IPXEScriptURL         string   `json:"ipxe_script_url,omitempty"`
-	PublicIPv4SubnetSize  int      `json:"public_ipv4_subnet_size,omitempty"`
-	AlwaysPXE             bool     `json:"always_pxe,omitempty"`
-	HardwareReservationID string   `json:"hardware_reservation_id,omitempty"`
+	Hostname              string     `json:"hostname"`
+	Plan                  string     `json:"plan"`
+	Facility              string     `json:"facility"`
+	OS                    string     `json:"operating_system"`
+	BillingCycle          string     `json:"billing_cycle"`
+	ProjectID             string     `json:"project_id"`
+	UserData              string     `json:"userdata"`
+	Tags                  []string   `json:"tags"`
+	IPXEScriptURL         string     `json:"ipxe_script_url,omitempty"`
+	PublicIPv4SubnetSize  int        `json:"public_ipv4_subnet_size,omitempty"`
+	AlwaysPXE             bool       `json:"always_pxe,omitempty"`
+	HardwareReservationID string     `json:"hardware_reservation_id,omitempty"`
+	SpotInstance          bool       `json:"spot_instance,omitempty"`
+	SpotPriceMax          float64    `json:"spot_price_max,omitempty,string"`
+	TerminationTime       *Timestamp `json:"termination_time,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
