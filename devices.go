@@ -52,7 +52,7 @@ func (d Device) String() string {
 
 // DeviceCreateRequest type used to create a Packet device
 type DeviceCreateRequest struct {
-	HostName              string   `json:"hostname"`
+	Hostname              string   `json:"hostname"`
 	Plan                  string   `json:"plan"`
 	Facility              string   `json:"facility"`
 	OS                    string   `json:"operating_system"`
@@ -68,7 +68,7 @@ type DeviceCreateRequest struct {
 
 // DeviceUpdateRequest type used to update a Packet device
 type DeviceUpdateRequest struct {
-	HostName      string   `json:"hostname"`
+	Hostname      string   `json:"hostname"`
 	Description   string   `json:"description"`
 	UserData      string   `json:"userdata"`
 	Locked        bool     `json:"locked"`
