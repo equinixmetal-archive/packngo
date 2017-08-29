@@ -62,7 +62,7 @@ type AvailableRequest struct {
 // IPAddressAssignment is created when an IP address from reservation block is assigned to a device.
 type IPAddressAssignment struct {
 	ipAddressCommon
-	AssignedTo Href `json:"assignments"`
+	AssignedTo Href `json:"assigned_to"`
 }
 
 // IPReservationRequest represents the body of a reservation request.
