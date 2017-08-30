@@ -12,7 +12,7 @@ type SpotMarketServiceOp struct {
 	client *Client
 }
 
-// PriceMap is a map of [facility][type]-> float Price
+// PriceMap is a map of [facility][plan]-> float Price
 type PriceMap map[string]map[string]float64
 
 // Prices gets currnt PriceMap from the API
@@ -40,10 +40,10 @@ func (s *SpotMarketServiceOp) Prices() (PriceMap, *Response, error) {
 	}
 
 	prices := make(PriceMap)
-	for k, v := range root.SMPs {
-		prices[k] = map[string]float64{}
-		for kk, vv := range v {
-			prices[k][kk] = vv.Price
+	for facility, planMap := range root.SMPs {
+		prices[facility] = map[string]float64{}
+		for plan, v := range planMap {
+			prices[facility][plan] = v.Price
 		}
 	}
 	return prices, resp, err
