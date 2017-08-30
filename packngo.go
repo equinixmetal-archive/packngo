@@ -97,6 +97,7 @@ type Client struct {
 	DeviceIPs        DeviceIPService
 	ProjectIPs       ProjectIPService
 	Volumes          VolumeService
+	SpotMarket       SpotMarketService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -204,6 +205,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.DeviceIPs = &DeviceIPServiceOp{client: c}
 	c.ProjectIPs = &ProjectIPServiceOp{client: c}
 	c.Volumes = &VolumeServiceOp{client: c}
+	c.SpotMarket = &SpotMarketServiceOp{client: c}
 
 	return c, nil
 }
