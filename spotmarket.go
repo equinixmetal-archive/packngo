@@ -28,7 +28,7 @@ func (s *SpotMarketServiceOp) Prices() (PriceMap, *Response, error) {
 		SMPs deepPriceMap `json:"spot_market_prices"`
 	}
 
-	req, err := s.client.NewRequest("GET", "/market/spot/prices", nil)
+	req, err := s.client.NewRequest("GET", spotMarketBasePath, nil)
 	if err != nil {
 		return nil, nil, err
 	}
