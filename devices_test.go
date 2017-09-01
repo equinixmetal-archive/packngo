@@ -183,6 +183,15 @@ func TestAccDeviceAssignIP(t *testing.T) {
 
 	}
 
+	func() {
+		for _, ipa := range d.Network {
+			if ipa.Href == assignment.Href {
+				return
+			}
+		}
+		t.Fatalf("assignment %s should be listed in device %s", assignment, d)
+	}()
+
 	if assignment.AssignedTo.Href != d.Href {
 		t.Fatalf("device %s should be listed in assignment %s",
 			d, assignment)
@@ -191,6 +200,30 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	_, err = c.DeviceIPs.Unassign(assignment.ID)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	// reload reservation, now without any assignment
+	reservation, _, err = c.ProjectIPs.Get(reservation.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(reservation.Assignments) != 0 {
+		t.Fatalf("reservation %s shoud be without assignments. Was %v",
+			reservation, reservation.Assignments)
+	}
+
+	// reload device, now without the assigned floating IP
+	d, _, err = c.Devices.Get(d.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, ipa := range d.Network {
+		if ipa.Href == assignment.Href {
+			t.Fatalf("assignment %s shoud be not listed in device %s anymore",
+				assignment, d)
+		}
 	}
 
 	_, err = c.Devices.Delete(d.ID)
