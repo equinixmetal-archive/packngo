@@ -19,7 +19,7 @@ func TestAccSpotMarket(t *testing.T) {
 				t.Errorf("spot market listing for facility %s doesn't contain any plan prices: %v", dc, val)
 			}
 		} else {
-			t.Errorf("facility %s not in spot prices market dict: %v", dc, prices)
+			t.Errorf("facility %s not in spot prices market map: %v", dc, prices)
 		}
 	}
 

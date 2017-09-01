@@ -15,7 +15,7 @@ type SpotMarketServiceOp struct {
 // PriceMap is a map of [facility][plan]-> float Price
 type PriceMap map[string]map[string]float64
 
-// Prices gets currnt PriceMap from the API
+// Prices gets current PriceMap from the API
 func (s *SpotMarketServiceOp) Prices() (PriceMap, *Response, error) {
 
 	type spotPrice struct {
