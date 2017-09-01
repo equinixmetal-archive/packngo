@@ -22,7 +22,7 @@ type User struct {
 	Created     string  `json:"created_at,omitempty"`
 	Updated     string  `json:"updated_at,omitempty"`
 	TimeZone    string  `json:"timezone,omitempty"`
-	Emails      []Email `json:"email,omitempty"`
+	Emails      []Email `json:"emails,omitempty"`
 	PhoneNumber string  `json:"phone_number,omitempty"`
 	URL         string  `json:"href,omitempty"`
 }
