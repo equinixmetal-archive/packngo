@@ -37,6 +37,8 @@ type ipAddressCommon struct {
 	Created       string `json:"created_at,omitempty"`
 	Updated       string `json:"updated_at,omitempty"`
 	Href          string `json:"href"`
+	Management    bool   `json:"management"`
+	Manageable    bool   `json:"manageable"`
 }
 
 // IPAddressReservation is created when user sends IP reservation request for a project (considering it's within quota).

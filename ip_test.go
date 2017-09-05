@@ -47,6 +47,10 @@ func TestAccIPReservation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	if res.Management {
+		t.Fatal("Management flag of new reservation block must be False")
+	}
 	if res.Facility.Code != testFac {
 		t.Fatalf(
 			"Facility of new reservation should be %s, was %s", testFac,

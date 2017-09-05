@@ -160,6 +160,10 @@ func TestAccDeviceAssignIP(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if !assignment.Management {
+		t.Fatal("Management flag for assignment resource must be True")
+	}
+
 	d, _, err = c.Devices.Get(d.ID)
 	if err != nil {
 		t.Fatal(err)
