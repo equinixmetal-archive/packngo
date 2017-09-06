@@ -21,6 +21,13 @@ func waitDeviceActive(id string, c *Client) (*Device, error) {
 	return nil, fmt.Errorf("device %s is still not active after timeout", id)
 }
 
+func deleteDevice(t *testing.T, c *Client, id string) {
+	_, err := c.Devices.Delete(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestAccDeviceBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
@@ -43,6 +50,8 @@ func TestAccDeviceBasic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer deleteDevice(t, c, d.ID)
+
 	dID := d.ID
 
 	d, err = waitDeviceActive(dID, c)
@@ -65,10 +74,10 @@ func TestAccDeviceBasic(t *testing.T) {
 	if newD.Hostname != newHN {
 		t.Fatalf("hostname of test device should be %s, but is %s", newHN, newD.Hostname)
 	}
-
-	_, err = c.Devices.Delete(dID)
-	if err != nil {
-		t.Fatal(err)
+	for _, ipa := range newD.Network {
+		if !ipa.Management {
+			t.Fatalf("management flag for all the IP addresses in a new device should be True: was %s", ipa)
+		}
 	}
 }
 
@@ -97,6 +106,8 @@ func TestAccDevicePXE(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	defer deleteDevice(t, c, d.ID)
+
 	d, err = waitDeviceActive(d.ID, c)
 	if err != nil {
 		t.Fatal(err)
@@ -107,10 +118,6 @@ func TestAccDevicePXE(t *testing.T) {
 	}
 	if d.IPXEScriptURL != pxeURL {
 		t.Fatalf("ipxe_script_url should be %s", pxeURL)
-	}
-	_, err = c.Devices.Delete(d.ID)
-	if err != nil {
-		t.Fatal(err)
 	}
 }
 
@@ -137,6 +144,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer deleteDevice(t, c, d.ID)
 
 	d, err = waitDeviceActive(d.ID, c)
 	if err != nil {
@@ -158,6 +166,10 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	assignment, _, err := c.DeviceIPs.Assign(d.ID, af)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if assignment.Management {
+		t.Error("Management flag for assignment resource must be False")
 	}
 
 	d, _, err = c.Devices.Get(d.ID)
@@ -225,10 +237,4 @@ func TestAccDeviceAssignIP(t *testing.T) {
 				assignment, d)
 		}
 	}
-
-	_, err = c.Devices.Delete(d.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 }
