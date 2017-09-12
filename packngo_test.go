@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -69,6 +70,23 @@ func projectTeardown(c *Client) {
 				panic(fmt.Errorf("while deleting %s: %s", p, err))
 			}
 		}
+	}
+}
+
+func TestAccInvalidCredentials(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	c := NewClient("packngo test", "wrongApiToken", nil)
+	_, r, expectedErr := c.Projects.List()
+	matched, err := regexp.MatchString(".*Invalid.*", expectedErr.Error())
+	if err != nil {
+		t.Fatalf("Err while matching err string from response err %s: %s", expectedErr, err)
+	}
+	if r.StatusCode != 401 {
+		t.Fatalf("Expected 401 as response code, got: %d", r.StatusCode)
+	}
+
+	if !matched {
+		t.Fatalf("Unexpected error string: %s", expectedErr)
 	}
 
 }
