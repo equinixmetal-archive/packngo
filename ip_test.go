@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"path"
 	"strings"
 	"testing"
 )
@@ -46,6 +47,10 @@ func TestAccIPReservation(t *testing.T) {
 	res, _, err := c.ProjectIPs.GetByCIDR(projectID, af.Address)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if path.Base(res.Project.Href) != projectID {
+		t.Fatalf("Wrong project linked in reserved block: %s", res.Project.Href)
 	}
 
 	if res.Management {
