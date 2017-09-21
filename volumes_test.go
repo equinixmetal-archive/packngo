@@ -27,7 +27,6 @@ func TestAccVolume(t *testing.T) {
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 
-	testFac := "ewr1"
 	sp := SnapshotPolicy{
 		SnapshotFrequency: "1day",
 		SnapshotCount:     3,
@@ -37,7 +36,7 @@ func TestAccVolume(t *testing.T) {
 		Size:             10,
 		BillingCycle:     "hourly",
 		PlanID:           "storage_1",
-		FacilityID:       testFac,
+		FacilityID:       testFacility(),
 		SnapshotPolicies: []*SnapshotPolicy{&sp},
 	}
 
@@ -61,7 +60,7 @@ func TestAccVolume(t *testing.T) {
 		t.Fatal("Test volume has wrong snapshot count")
 	}
 
-	if v.Facility.Code != testFac {
+	if v.Facility.Code != testFacility() {
 		t.Fatal("Test volume has wrong facility")
 	}
 }

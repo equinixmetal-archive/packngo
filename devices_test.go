@@ -248,11 +248,9 @@ func TestAccDeviceAttachVolume(t *testing.T) {
 	defer teardown()
 	hn := randString8()
 
-	testFac := "ewr1"
-
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     testFac,
+		Facility:     testFacility(),
 		Plan:         "baremetal_0",
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -274,7 +272,7 @@ func TestAccDeviceAttachVolume(t *testing.T) {
 		Size:         10,
 		BillingCycle: "hourly",
 		PlanID:       "storage_1",
-		FacilityID:   testFac,
+		FacilityID:   testFacility(),
 	}
 
 	v, _, err := c.Volumes.Create(&vcr, projectID)
