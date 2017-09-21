@@ -2,6 +2,7 @@ package packngo
 
 import (
 	"fmt"
+	"path"
 	"testing"
 	"time"
 )
@@ -237,4 +238,87 @@ func TestAccDeviceAssignIP(t *testing.T) {
 				assignment, d)
 		}
 	}
+}
+
+func TestAccDeviceAttachVolume(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+	hn := randString8()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     testFacility(),
+		Plan:         "baremetal_0",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+		OS:           "ubuntu_16_04",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+
+	d, err = waitDeviceActive(d.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vcr := VolumeCreateRequest{
+		Size:         10,
+		BillingCycle: "hourly",
+		PlanID:       "storage_1",
+		FacilityID:   testFacility(),
+	}
+
+	v, _, err := c.Volumes.Create(&vcr, projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Volumes.Delete(v.ID)
+
+	v, err = waitVolumeActive(v.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	a, _, err := c.VolumeAttachments.Create(v.ID, d.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if path.Base(a.Volume.Href) != v.ID {
+		t.Fatalf("wrong volume href in the attachment: %s, should be %s", a.Volume.Href, v.ID)
+	}
+
+	if path.Base(a.Device.Href) != d.ID {
+		t.Fatalf("wrong device href in the attachment: %s, should be %s", a.Device.Href, d.ID)
+	}
+
+	v, _, err = c.Volumes.Get(v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	d, _, err = c.Devices.Get(d.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if v.Attachments[0].Device.ID != d.ID {
+		t.Fatalf("wrong device linked in volume attachment: %s, should be %s", v.Attachments[0].Device.ID, d.ID)
+	}
+	if path.Base(d.Volumes[0].Href) != v.ID {
+		t.Fatalf("wrong volume linked in device.volumes: %s, should be %s", d.Volumes[0].Href, v.ID)
+	}
+
+	_, err = c.VolumeAttachments.Delete(a.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }

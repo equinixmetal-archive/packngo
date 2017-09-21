@@ -14,7 +14,16 @@ const (
 	packetTokenEnvVar = "PACKET_AUTH_TOKEN"
 	packngoAccTestVar = "PACKNGO_TEST_ACTUAL_API"
 	testProjectPrefix = "PACKNGO_TEST_DELME_2d768716_"
+	testFacilityVar   = "PACKNGO_TEST_FACILITY"
 )
+
+func testFacility() string {
+	envFac := os.Getenv(testFacilityVar)
+	if envFac != "" {
+		return envFac
+	}
+	return "ewr1"
+}
 
 func randString8() string {
 	n := 8

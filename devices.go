@@ -34,6 +34,7 @@ type Device struct {
 	BillingCycle        string                 `json:"billing_cycle,omitempty"`
 	Tags                []string               `json:"tags,omitempty"`
 	Network             []*IPAddressAssignment `json:"ip_addresses"`
+	Volumes             []*Volume              `json:"volumes"`
 	OS                  *OS                    `json:"operating_system,omitempty"`
 	Plan                *Plan                  `json:"plan,omitempty"`
 	Facility            *Facility              `json:"facility,omitempty"`
