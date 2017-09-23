@@ -322,3 +322,52 @@ func TestAccDeviceAttachVolume(t *testing.T) {
 	}
 
 }
+
+func TestAccDeviceSpotInstance(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+	hn := randString8()
+
+	testFac := "nrt1"
+	testSPM := 0.04
+	testTerm := &Timestamp{Time: time.Now().Add(time.Hour - (time.Minute * 10))}
+
+	cr := DeviceCreateRequest{
+		Hostname:        hn,
+		Facility:        testFac,
+		Plan:            "baremetal_0",
+		OS:              "coreos_stable",
+		ProjectID:       projectID,
+		BillingCycle:    "hourly",
+		SpotInstance:    true,
+		SpotPriceMax:    testSPM,
+		TerminationTime: testTerm,
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+
+	d, err = waitDeviceActive(d.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !d.SpotInstance {
+		t.Fatal("spot_instance is false, should be true")
+	}
+
+	if d.SpotPriceMax != testSPM {
+		t.Fatalf("spot_price_max is %f, should be %f", d.SpotPriceMax, testSPM)
+	}
+
+	if d.TerminationTime.Time.Equal(testTerm.Time) {
+		t.Fatalf("termination_time is %s, should be %s",
+			d.TerminationTime.Time.Local(), testTerm.Time.Local())
+	}
+}
