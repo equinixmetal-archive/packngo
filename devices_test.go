@@ -366,7 +366,7 @@ func TestAccDeviceSpotInstance(t *testing.T) {
 		t.Fatalf("spot_price_max is %f, should be %f", d.SpotPriceMax, testSPM)
 	}
 
-	if d.TerminationTime.Time.Equal(testTerm.Time) {
+	if !d.TerminationTime.Time.Truncate(time.Minute).Equal(testTerm.Time.Truncate(time.Minute)) {
 		t.Fatalf("termination_time is %s, should be %s",
 			d.TerminationTime.Time.Local(), testTerm.Time.Local())
 	}
