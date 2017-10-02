@@ -2,8 +2,6 @@ package packngo
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 )
 
 const ipBasePath = "/ips"
@@ -18,9 +16,8 @@ type DeviceIPService interface {
 // ProjectIPService handles reservation of IP address blocks for a project.
 type ProjectIPService interface {
 	Get(reservationID string) (*IPAddressReservation, *Response, error)
-	GetByCIDR(projectID, cidr string) (*IPAddressReservation, *Response, error)
 	List(projectID string) ([]IPAddressReservation, *Response, error)
-	Request(projectID string, ipReservationReq *IPReservationRequest) (*AddressStruct, *Response, error)
+	Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error)
 	Remove(ipReservationID string) (*Response, error)
 	AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error)
 }
@@ -193,33 +190,8 @@ func (i *ProjectIPServiceOp) List(projectID string) ([]IPAddressReservation, *Re
 	return reservations.Reservations, resp, nil
 }
 
-// GetByCIDR returns reservation by CIDR IPv4 net/mask expression, e.g "147.229.20.148/30".
-// This is useful upon submitting a reservation request, which returns CIDR of allocated block in exactly this format.
-func (i *ProjectIPServiceOp) GetByCIDR(projectID, cidr string) (*IPAddressReservation, *Response, error) {
-	cidrSlice := strings.Split(cidr, "/")
-	if len(cidrSlice) != 2 {
-		return nil, nil, fmt.Errorf("invalid CIDR expression: %s", cidr)
-	}
-	network := cidrSlice[0]
-	subnet, err := strconv.Atoi(cidrSlice[1])
-	if err != nil {
-		return nil, nil, err
-	}
-	rs, resp, err := i.List(projectID)
-	if err != nil {
-		return nil, resp, err
-	}
-	for i, r := range rs {
-		if r.Network == network && r.CIDR == subnet {
-			return &rs[i], resp, nil
-		}
-	}
-	return nil, resp, fmt.Errorf("couldn't find reservation for CIDR %s", cidr)
-
-}
-
 // Request requests more IP space for a project in order to have additional IP addresses to assign to devices.
-func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReservationRequest) (*AddressStruct, *Response, error) {
+func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, ipBasePath)
 
 	req, err := i.client.NewRequest("POST", path, ipReservationReq)
@@ -227,12 +199,12 @@ func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReser
 		return nil, nil, err
 	}
 
-	ip := new(AddressStruct)
-	resp, err := i.client.Do(req, ip)
+	ipr := new(IPAddressReservation)
+	resp, err := i.client.Do(req, ipr)
 	if err != nil {
 		return nil, resp, err
 	}
-	return ip, resp, err
+	return ipr, resp, err
 }
 
 // Remove removes an IP reservation from the project.
