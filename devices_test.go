@@ -163,12 +163,14 @@ func TestAccDeviceAssignIP(t *testing.T) {
 		Facility: testFac,
 	}
 
-	af, _, err := c.ProjectIPs.Request(projectID, &req)
+	reservation, _, err := c.ProjectIPs.Request(projectID, &req)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assignment, _, err := c.DeviceIPs.Assign(d.ID, af)
+	af := AddressStruct{Address: fmt.Sprintf("%s/%d", reservation.Address, reservation.CIDR)}
+
+	assignment, _, err := c.DeviceIPs.Assign(d.ID, &af)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,10 +184,10 @@ func TestAccDeviceAssignIP(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// If the quantity in the IPReservationRequest is >1, this test won't work.
+	// If the Quantity in the IPReservationRequest is >1, this test won't work.
 	// The assignment CIDR would then have to be extracted from the reserved
 	// block.
-	reservation, _, err := c.ProjectIPs.GetByCIDR(projectID, af.Address)
+	reservation, _, err = c.ProjectIPs.Get(reservation.ID)
 	if err != nil {
 		t.Fatal(err)
 	}

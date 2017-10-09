@@ -2,7 +2,6 @@ package packngo
 
 import (
 	"path"
-	"strings"
 	"testing"
 )
 
@@ -11,8 +10,8 @@ func TestAccIPReservation(t *testing.T) {
 
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
-	quantityToMask := map[int]string{
-		1: "32", 2: "31", 4: "30", 8: "29", 16: "28",
+	quantityToMask := map[int]int{
+		1: 32, 2: 31, 4: 30, 8: 29, 16: 28,
 	}
 
 	testFac := "ewr1"
@@ -33,20 +32,15 @@ func TestAccIPReservation(t *testing.T) {
 		Facility: testFac,
 	}
 
-	af, _, err := c.ProjectIPs.Request(projectID, &req)
+	res, _, err := c.ProjectIPs.Request(projectID, &req)
 	if err != nil {
 		t.Fatal(err)
-	}
-	addrMask := strings.Split(af.Address, "/")
-	if addrMask[1] != quantityToMask[quantity] {
-		t.Fatalf(
-			"CIDR prefix length for requested reservation should be %s, was %s",
-			quantityToMask[quantity], addrMask[1])
 	}
 
-	res, _, err := c.ProjectIPs.GetByCIDR(projectID, af.Address)
-	if err != nil {
-		t.Fatal(err)
+	if res.CIDR != quantityToMask[quantity] {
+		t.Fatalf(
+			"CIDR prefix length for requested reservation should be %d, was %d",
+			quantityToMask[quantity], res.CIDR)
 	}
 
 	if path.Base(res.Project.Href) != projectID {
