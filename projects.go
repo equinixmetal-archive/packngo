@@ -144,7 +144,7 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 	return resp, err
 }
 
-// List returns Volumes for a project
+// ListVolumes returns Volumes for a project
 func (s *ProjectServiceOp) ListVolumes(projectID string) ([]Volume, *Response, error) {
 	url := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, volumeBasePath)
 	req, err := s.client.NewRequest("GET", url, nil)
