@@ -32,6 +32,7 @@ type Device struct {
 	Updated             string                 `json:"updated_at,omitempty"`
 	Locked              bool                   `json:"locked,omitempty"`
 	BillingCycle        string                 `json:"billing_cycle,omitempty"`
+	Storage             map[string]interface{} `json:"storage,omitempty"`
 	Tags                []string               `json:"tags,omitempty"`
 	Network             []*IPAddressAssignment `json:"ip_addresses"`
 	Volumes             []*Volume              `json:"volumes"`
@@ -75,6 +76,7 @@ type DeviceCreateRequest struct {
 	BillingCycle          string     `json:"billing_cycle"`
 	ProjectID             string     `json:"project_id"`
 	UserData              string     `json:"userdata"`
+	Storage               string     `json:"storage,omitempty"`
 	Tags                  []string   `json:"tags"`
 	IPXEScriptURL         string     `json:"ipxe_script_url,omitempty"`
 	PublicIPv4SubnetSize  int        `json:"public_ipv4_subnet_size,omitempty"`
