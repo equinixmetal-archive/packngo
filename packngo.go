@@ -171,6 +171,15 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	return &response, err
 }
 
+// DoRequest is a convenience method, it calls NewRequest follwed by Do
+func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response, error) {
+	req, err := c.NewRequest(method, path, body)
+	if err != nil {
+		return nil, err
+	}
+	return c.Do(req, v)
+}
+
 // NewClient initializes and returns a Client, use this to get an API Client to operate on
 // N.B.: Packet's API certificate requires Go 1.5+ to successfully parse. If you are using
 // an older version of Go, pass in a custom http.Client with a custom TLS configuration
