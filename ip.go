@@ -81,13 +81,7 @@ type AddressStruct struct {
 func deleteFromIP(client *Client, resourceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", ipBasePath, resourceID)
 
-	req, err := client.NewRequest("DELETE", path, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := client.Do(req, nil)
-	return resp, err
+	return client.DoRequest("DELETE", path, nil, nil)
 }
 
 func (i IPAddressReservation) String() string {
@@ -114,14 +108,9 @@ func (i *DeviceIPServiceOp) Unassign(assignmentID string) (*Response, error) {
 // The IP address must be in one of the IP ranges assigned to the device’s project.
 func (i *DeviceIPServiceOp) Assign(deviceID string, assignRequest *AddressStruct) (*IPAddressAssignment, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, ipBasePath)
-
-	req, err := i.client.NewRequest("POST", path, assignRequest)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	ipa := new(IPAddressAssignment)
-	resp, err := i.client.Do(req, ipa)
+
+	resp, err := i.client.DoRequest("POST", path, assignRequest, ipa)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -132,14 +121,9 @@ func (i *DeviceIPServiceOp) Assign(deviceID string, assignRequest *AddressStruct
 // Get returns assignment by ID.
 func (i *DeviceIPServiceOp) Get(assignmentID string) (*IPAddressAssignment, *Response, error) {
 	path := fmt.Sprintf("%s/%s", ipBasePath, assignmentID)
-
-	req, err := i.client.NewRequest("GET", path, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	ipa := new(IPAddressAssignment)
-	resp, err := i.client.Do(req, ipa)
+
+	resp, err := i.client.DoRequest("GET", path, nil, ipa)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -155,14 +139,9 @@ type ProjectIPServiceOp struct {
 // Get returns reservation by ID.
 func (i *ProjectIPServiceOp) Get(reservationID string) (*IPAddressReservation, *Response, error) {
 	path := fmt.Sprintf("%s/%s", ipBasePath, reservationID)
-
-	req, err := i.client.NewRequest("GET", path, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	ipr := new(IPAddressReservation)
-	resp, err := i.client.Do(req, ipr)
+
+	resp, err := i.client.DoRequest("GET", path, nil, ipr)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -173,17 +152,11 @@ func (i *ProjectIPServiceOp) Get(reservationID string) (*IPAddressReservation, *
 // List provides a list of IP resevations for a single project.
 func (i *ProjectIPServiceOp) List(projectID string) ([]IPAddressReservation, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, ipBasePath)
-
-	req, err := i.client.NewRequest("GET", path, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-	type ipReservationRoot struct {
+	reservations := new(struct {
 		Reservations []IPAddressReservation `json:"ip_addresses"`
-	}
+	})
 
-	reservations := new(ipReservationRoot)
-	resp, err := i.client.Do(req, reservations)
+	resp, err := i.client.DoRequest("GET", path, nil, reservations)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -193,14 +166,9 @@ func (i *ProjectIPServiceOp) List(projectID string) ([]IPAddressReservation, *Re
 // Request requests more IP space for a project in order to have additional IP addresses to assign to devices.
 func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, ipBasePath)
-
-	req, err := i.client.NewRequest("POST", path, ipReservationReq)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	ipr := new(IPAddressReservation)
-	resp, err := i.client.Do(req, ipr)
+
+	resp, err := i.client.DoRequest("POST", path, ipReservationReq, ipr)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -215,14 +183,9 @@ func (i *ProjectIPServiceOp) Remove(ipReservationID string) (*Response, error) {
 // AvailableAddresses lists addresses available from a reserved block
 func (i *ProjectIPServiceOp) AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error) {
 	path := fmt.Sprintf("%s/%s/available", ipBasePath, ipReservationID)
-
-	req, err := i.client.NewRequest("GET", path, r)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	ar := new(AvailableResponse)
-	resp, err := i.client.Do(req, ar)
+
+	resp, err := i.client.DoRequest("GET", path, r, ar)
 	if err != nil {
 		return nil, resp, err
 	}

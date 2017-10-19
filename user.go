@@ -38,13 +38,9 @@ type UserServiceOp struct {
 
 // Get method gets a user by userID
 func (s *UserServiceOp) Get(userID string) (*User, *Response, error) {
-	req, err := s.client.NewRequest("GET", userBasePath, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	user := new(User)
-	resp, err := s.client.Do(req, user)
+
+	resp, err := s.client.DoRequest("GET", userBasePath, nil, user)
 	if err != nil {
 		return nil, resp, err
 	}

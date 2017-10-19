@@ -62,13 +62,9 @@ type SSHKeyServiceOp struct {
 
 // List returns a user's ssh keys
 func (s *SSHKeyServiceOp) List() ([]SSHKey, *Response, error) {
-	req, err := s.client.NewRequest("GET", sshKeyBasePath, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	root := new(sshKeyRoot)
-	resp, err := s.client.Do(req, root)
+
+	resp, err := s.client.DoRequest("GET", sshKeyBasePath, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -79,14 +75,9 @@ func (s *SSHKeyServiceOp) List() ([]SSHKey, *Response, error) {
 // Get returns an ssh key by id
 func (s *SSHKeyServiceOp) Get(sshKeyID string) (*SSHKey, *Response, error) {
 	path := fmt.Sprintf("%s/%s", sshKeyBasePath, sshKeyID)
-
-	req, err := s.client.NewRequest("GET", path, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	sshKey := new(SSHKey)
-	resp, err := s.client.Do(req, sshKey)
+
+	resp, err := s.client.DoRequest("GET", path, nil, sshKey)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -100,13 +91,9 @@ func (s *SSHKeyServiceOp) Create(createRequest *SSHKeyCreateRequest) (*SSHKey, *
 	if createRequest.ProjectID != "" {
 		path = "/projects/" + createRequest.ProjectID + sshKeyBasePath
 	}
-	req, err := s.client.NewRequest("POST", path, createRequest)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	sshKey := new(SSHKey)
-	resp, err := s.client.Do(req, sshKey)
+
+	resp, err := s.client.DoRequest("POST", path, createRequest, sshKeyBasePath)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -117,13 +104,9 @@ func (s *SSHKeyServiceOp) Create(createRequest *SSHKeyCreateRequest) (*SSHKey, *
 // Update updates an ssh key
 func (s *SSHKeyServiceOp) Update(updateRequest *SSHKeyUpdateRequest) (*SSHKey, *Response, error) {
 	path := fmt.Sprintf("%s/%s", sshKeyBasePath, updateRequest.ID)
-	req, err := s.client.NewRequest("PATCH", path, updateRequest)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	sshKey := new(SSHKey)
-	resp, err := s.client.Do(req, sshKey)
+
+	resp, err := s.client.DoRequest("PATCH", path, updateRequest, sshKey)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -135,12 +118,5 @@ func (s *SSHKeyServiceOp) Update(updateRequest *SSHKeyUpdateRequest) (*SSHKey, *
 func (s *SSHKeyServiceOp) Delete(sshKeyID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", sshKeyBasePath, sshKeyID)
 
-	req, err := s.client.NewRequest("DELETE", path, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := s.client.Do(req, nil)
-
-	return resp, err
+	return s.client.DoRequest("DELETE", path, nil, nil)
 }

@@ -17,24 +17,13 @@ type PriceMap map[string]map[string]float64
 
 // Prices gets current PriceMap from the API
 func (s *SpotMarketServiceOp) Prices() (PriceMap, *Response, error) {
+	root := new(struct {
+		SMPs map[string]map[string]struct {
+			Price float64 `json:"price"`
+		} `json:"spot_market_prices"`
+	})
 
-	type spotPrice struct {
-		Price float64 `json:"price"`
-	}
-
-	type deepPriceMap map[string]map[string]spotPrice
-
-	type marketRoot struct {
-		SMPs deepPriceMap `json:"spot_market_prices"`
-	}
-
-	req, err := s.client.NewRequest("GET", spotMarketBasePath, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	root := new(marketRoot)
-	resp, err := s.client.Do(req, root)
+	resp, err := s.client.DoRequest("GET", spotMarketBasePath, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}

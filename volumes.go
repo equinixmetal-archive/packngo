@@ -100,13 +100,9 @@ type VolumeServiceOp struct {
 // Get returns a volume by id
 func (v *VolumeServiceOp) Get(volumeID string) (*Volume, *Response, error) {
 	path := fmt.Sprintf("%s/%s?include=facility,snapshot_policies,attachments.device", volumeBasePath, volumeID)
-	req, err := v.client.NewRequest("GET", path, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	volume := new(Volume)
-	resp, err := v.client.Do(req, volume)
+
+	resp, err := v.client.DoRequest("GET", path, nil, volume)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -117,13 +113,9 @@ func (v *VolumeServiceOp) Get(volumeID string) (*Volume, *Response, error) {
 // Update updates a volume
 func (v *VolumeServiceOp) Update(updateRequest *VolumeUpdateRequest) (*Volume, *Response, error) {
 	path := fmt.Sprintf("%s/%s", volumeBasePath, updateRequest.ID)
-	req, err := v.client.NewRequest("PATCH", path, updateRequest)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	volume := new(Volume)
-	resp, err := v.client.Do(req, volume)
+
+	resp, err := v.client.DoRequest("PATCH", path, updateRequest, volume)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -135,26 +127,15 @@ func (v *VolumeServiceOp) Update(updateRequest *VolumeUpdateRequest) (*Volume, *
 func (v *VolumeServiceOp) Delete(volumeID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", volumeBasePath, volumeID)
 
-	req, err := v.client.NewRequest("DELETE", path, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := v.client.Do(req, nil)
-
-	return resp, err
+	return v.client.DoRequest("DELETE", path, nil, nil)
 }
 
 // Create creates a new volume for a project
 func (v *VolumeServiceOp) Create(createRequest *VolumeCreateRequest, projectID string) (*Volume, *Response, error) {
 	url := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, volumeBasePath)
-	req, err := v.client.NewRequest("POST", url, createRequest)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	volume := new(Volume)
-	resp, err := v.client.Do(req, volume)
+
+	resp, err := v.client.DoRequest("POST", url, createRequest, volume)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -167,16 +148,12 @@ func (v *VolumeServiceOp) Create(createRequest *VolumeCreateRequest, projectID s
 // Create Attachment, i.e. attach volume to a device
 func (v *VolumeAttachmentServiceOp) Create(volumeID, deviceID string) (*VolumeAttachment, *Response, error) {
 	url := fmt.Sprintf("%s/%s%s", volumeBasePath, volumeID, attachmentsBasePath)
-	type volumeAttachRequest struct {
-		DeviceID string `json:"device_id"`
-	}
-	volAttachRequest := volumeAttachRequest{DeviceID: deviceID}
-	req, err := v.client.NewRequest("POST", url, volAttachRequest)
-	if err != nil {
-		return nil, nil, err
+	volAttachParam := map[string]string{
+		"device_id": deviceID,
 	}
 	volumeAttachment := new(VolumeAttachment)
-	resp, err := v.client.Do(req, volumeAttachment)
+
+	resp, err := v.client.DoRequest("POST", url, volAttachParam, volumeAttachment)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -186,13 +163,9 @@ func (v *VolumeAttachmentServiceOp) Create(volumeID, deviceID string) (*VolumeAt
 // Get gets attachment by id
 func (v *VolumeAttachmentServiceOp) Get(attachmentID string) (*VolumeAttachment, *Response, error) {
 	path := fmt.Sprintf("%s%s/%s", volumeBasePath, attachmentsBasePath, attachmentID)
-	req, err := v.client.NewRequest("GET", path, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	volumeAttachment := new(VolumeAttachment)
-	resp, err := v.client.Do(req, volumeAttachment)
+
+	resp, err := v.client.DoRequest("GET", path, nil, volumeAttachment)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -203,13 +176,6 @@ func (v *VolumeAttachmentServiceOp) Get(attachmentID string) (*VolumeAttachment,
 // Delete deletes attachment by id
 func (v *VolumeAttachmentServiceOp) Delete(attachmentID string) (*Response, error) {
 	path := fmt.Sprintf("%s%s/%s", volumeBasePath, attachmentsBasePath, attachmentID)
-	req, err := v.client.NewRequest("DELETE", path, nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := v.client.Do(req, nil)
-	if err != nil {
-		return resp, err
-	}
-	return resp, nil
+
+	return v.client.DoRequest("DELETE", path, nil, nil)
 }
