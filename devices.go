@@ -118,7 +118,8 @@ type DeviceServiceOp struct {
 
 // List returns devices on a project
 func (s *DeviceServiceOp) List(projectID string) ([]Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s/devices?include=facility", projectBasePath, projectID)
+	// Default per_page value is 10 so misses devices if you have more than 10 in a project
+	path := fmt.Sprintf("%s/%s/devices?include=facility&per_page=1000", projectBasePath, projectID)
 	root := new(devicesRoot)
 
 	resp, err := s.client.DoRequest("GET", path, nil, root)
