@@ -93,7 +93,7 @@ func (s *SSHKeyServiceOp) Create(createRequest *SSHKeyCreateRequest) (*SSHKey, *
 	}
 	sshKey := new(SSHKey)
 
-	resp, err := s.client.DoRequest("POST", path, createRequest, sshKeyBasePath)
+	resp, err := s.client.DoRequest("POST", path, createRequest, sshKey)
 	if err != nil {
 		return nil, resp, err
 	}
