@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -18,6 +21,7 @@ const (
 	baseURL        = "https://api.packet.net/"
 	userAgent      = "packngo/" + libraryVersion
 	mediaType      = "application/json"
+	debugEnvVar    = "PACKNGO_DEBUG"
 
 	headerRateLimit     = "X-RateLimit-Limit"
 	headerRateRemaining = "X-RateLimit-Remaining"
@@ -77,6 +81,7 @@ func (r *ErrorResponse) Error() string {
 // Client is the base API Client
 type Client struct {
 	client *http.Client
+	Debug  bool
 
 	BaseURL *url.URL
 
@@ -148,6 +153,10 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 
 	response := Response{Response: resp}
 	response.populateRate()
+	if c.Debug {
+		o, _ := httputil.DumpResponse(response.Response, true)
+		log.Printf("%s\n", string(o))
+	}
 	c.RateLimit = response.Rate
 
 	err = checkResponse(resp)
@@ -174,6 +183,10 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 // DoRequest is a convenience method, it calls NewRequest follwed by Do
 func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response, error) {
 	req, err := c.NewRequest(method, path, body)
+	if c.Debug {
+		o, _ := httputil.DumpRequestOut(req, true)
+		log.Printf("%s\n", string(o))
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -205,6 +218,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	}
 
 	c := &Client{client: httpClient, BaseURL: u, UserAgent: userAgent, ConsumerToken: consumerToken, APIKey: apiKey}
+	c.Debug = os.Getenv(debugEnvVar) != ""
 	c.Plans = &PlanServiceOp{client: c}
 	c.Users = &UserServiceOp{client: c}
 	c.Emails = &EmailServiceOp{client: c}

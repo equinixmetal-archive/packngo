@@ -14,7 +14,7 @@ func TestAccIPReservation(t *testing.T) {
 		1: 32, 2: 31, 4: 30, 8: 29, 16: 28,
 	}
 
-	testFac := "ewr1"
+	testFac := testFacility()
 	quantity := 2
 
 	ipList, _, err := c.ProjectIPs.List(projectID)

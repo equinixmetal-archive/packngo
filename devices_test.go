@@ -40,7 +40,7 @@ func TestAccDeviceBasic(t *testing.T) {
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     "ewr1",
+		Facility:     testFacility(),
 		Plan:         "baremetal_0",
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
@@ -67,7 +67,6 @@ func TestAccDeviceBasic(t *testing.T) {
 	if len(d.RootPassword) == 0 {
 		t.Fatal("root_password is empty or non-existent")
 	}
-
 	newHN := randString8()
 	ur := DeviceUpdateRequest{Hostname: newHN}
 
@@ -97,7 +96,7 @@ func TestAccDevicePXE(t *testing.T) {
 
 	cr := DeviceCreateRequest{
 		Hostname:      "pxe-" + hn,
-		Facility:      "ewr1",
+		Facility:      testFacility(),
 		Plan:          "baremetal_0",
 		ProjectID:     projectID,
 		BillingCycle:  "hourly",
@@ -134,7 +133,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	defer teardown()
 	hn := randString8()
 
-	testFac := "ewr1"
+	testFac := testFacility()
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,

@@ -12,6 +12,7 @@ import (
 
 const (
 	packetTokenEnvVar = "PACKET_AUTH_TOKEN"
+	packetURLEnvVar   = "PACKET_API_URL"
 	packngoAccTestVar = "PACKNGO_TEST_ACTUAL_API"
 	testProjectPrefix = "PACKNGO_TEST_DELME_2d768716_"
 	testFacilityVar   = "PACKNGO_TEST_FACILITY"
@@ -63,7 +64,14 @@ func setup(t *testing.T) *Client {
 	if apiToken == "" {
 		t.Fatalf("If you want to run packngo test, you must export %s.", packetTokenEnvVar)
 	}
-	c := NewClient("packngo test", apiToken, nil)
+	apiURL := os.Getenv(packetURLEnvVar)
+	if apiURL == "" {
+		apiURL = baseURL
+	}
+	c, err := NewClientWithBaseURL("packngo test", apiToken, nil, apiURL)
+	if err != nil {
+		t.Fatal(err)
+	}
 	return c
 }
 
