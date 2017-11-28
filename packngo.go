@@ -81,6 +81,7 @@ func (r *ErrorResponse) Error() string {
 // Client is the base API Client
 type Client struct {
 	client *http.Client
+	Debug  bool
 
 	BaseURL *url.URL
 
@@ -152,7 +153,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 
 	response := Response{Response: resp}
 	response.populateRate()
-	if os.Getenv(debugEnvVar) != "" {
+	if c.Debug {
 		o, _ := httputil.DumpResponse(response.Response, true)
 		log.Printf("%s\n", string(o))
 	}
@@ -182,7 +183,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 // DoRequest is a convenience method, it calls NewRequest follwed by Do
 func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response, error) {
 	req, err := c.NewRequest(method, path, body)
-	if os.Getenv(debugEnvVar) != "" {
+	if c.Debug {
 		o, _ := httputil.DumpRequestOut(req, true)
 		log.Printf("%s\n", string(o))
 	}
@@ -217,6 +218,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	}
 
 	c := &Client{client: httpClient, BaseURL: u, UserAgent: userAgent, ConsumerToken: consumerToken, APIKey: apiKey}
+	c.Debug = os.Getenv(debugEnvVar) != ""
 	c.Plans = &PlanServiceOp{client: c}
 	c.Users = &UserServiceOp{client: c}
 	c.Emails = &EmailServiceOp{client: c}
