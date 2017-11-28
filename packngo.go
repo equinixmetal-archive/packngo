@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -18,6 +21,7 @@ const (
 	baseURL        = "https://api.packet.net/"
 	userAgent      = "packngo/" + libraryVersion
 	mediaType      = "application/json"
+	debugEnvVar    = "PACKNGO_DEBUG"
 
 	headerRateLimit     = "X-RateLimit-Limit"
 	headerRateRemaining = "X-RateLimit-Remaining"
@@ -148,6 +152,10 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 
 	response := Response{Response: resp}
 	response.populateRate()
+	if os.Getenv(debugEnvVar) != "" {
+		o, _ := httputil.DumpResponse(response.Response, true)
+		log.Printf("%s\n", string(o))
+	}
 	c.RateLimit = response.Rate
 
 	err = checkResponse(resp)
@@ -174,6 +182,10 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 // DoRequest is a convenience method, it calls NewRequest follwed by Do
 func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response, error) {
 	req, err := c.NewRequest(method, path, body)
+	if os.Getenv(debugEnvVar) != "" {
+		o, _ := httputil.DumpRequestOut(req, true)
+		log.Printf("%s\n", string(o))
+	}
 	if err != nil {
 		return nil, err
 	}
