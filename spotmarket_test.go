@@ -12,7 +12,7 @@ func TestAccSpotMarket(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dcs := []string{"dfw1", "ewr1", "nrt1", "ord1", "sea1", "sjc1", "ams1", "atl1", "iad1", "lax1"}
+	dcs := []string{testFacility()}
 	for _, dc := range dcs {
 		if val, ok := prices[dc]; ok {
 			if len(val) == 0 {
