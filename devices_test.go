@@ -29,7 +29,7 @@ func deleteDevice(t *testing.T, c *Client, id string) {
 	}
 }
 
-func TestAccDeviceBasic(t *testing.T) {
+func TestAccDeviceUpdate(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 
@@ -79,6 +79,51 @@ func TestAccDeviceBasic(t *testing.T) {
 		t.Fatalf("hostname of test device should be %s, but is %s", newHN, newD.Hostname)
 	}
 	for _, ipa := range newD.Network {
+		if !ipa.Management {
+			t.Fatalf("management flag for all the IP addresses in a new device should be True: was %s", ipa)
+		}
+	}
+}
+
+func TestAccDeviceBasic(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     testFacility(),
+		Plan:         "baremetal_0",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+
+	if len(d.ProvisionEvents) != 10 {
+		t.Fatal("10 provision events expected, but %d found", len(d.ProvisionEvents))
+	}
+
+	dID := d.ID
+
+	d, err = waitDeviceActive(dID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(d.RootPassword) == 0 {
+		t.Fatal("root_password is empty or non-existent")
+	}
+	for _, ipa := range d.Network {
 		if !ipa.Management {
 			t.Fatalf("management flag for all the IP addresses in a new device should be True: was %s", ipa)
 		}
