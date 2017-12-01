@@ -336,13 +336,12 @@ func TestAccDeviceSpotInstance(t *testing.T) {
 	defer teardown()
 	hn := randString8()
 
-	testFac := "nrt1"
 	testSPM := 0.04
 	testTerm := &Timestamp{Time: time.Now().Add(time.Hour - (time.Minute * 10))}
 
 	cr := DeviceCreateRequest{
 		Hostname:        hn,
-		Facility:        testFac,
+		Facility:        testFacility(),
 		Plan:            "baremetal_0",
 		OS:              "coreos_stable",
 		ProjectID:       projectID,
