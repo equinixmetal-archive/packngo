@@ -1,8 +1,8 @@
 package packngo
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestVirtualNetworkAttachToPort(t *testing.T) {
