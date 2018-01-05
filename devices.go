@@ -1,6 +1,9 @@
 package packngo
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const deviceBasePath = "/devices"
 
@@ -8,6 +11,7 @@ const deviceBasePath = "/devices"
 type DeviceService interface {
 	List(ProjectID string) ([]Device, *Response, error)
 	Get(string) (*Device, *Response, error)
+	GetWith(string, []string) (*Device, *Response, error)
 	Create(*DeviceCreateRequest) (*Device, *Response, error)
 	Update(string, *DeviceUpdateRequest) (*Device, *Response, error)
 	Delete(string) (*Response, error)
@@ -43,6 +47,7 @@ type Device struct {
 	ProvisionEvents     []*ProvisionEvent      `json:"provisioning_events,omitempty"`
 	ProvisionPer        float32                `json:"provisioning_percentage,omitempty"`
 	UserData            string                 `json:"userdata,omitempty"`
+	NetworkPorts        []Port                 `json:"network_ports"`
 	RootPassword        string                 `json:"root_password,omitempty"`
 	IPXEScriptURL       string                 `json:"ipxe_script_url,omitempty"`
 	AlwaysPXE           bool                   `json:"always_pxe,omitempty"`
@@ -132,6 +137,20 @@ func (s *DeviceServiceOp) List(projectID string) ([]Device, *Response, error) {
 // Get returns a device by id
 func (s *DeviceServiceOp) Get(deviceID string) (*Device, *Response, error) {
 	path := fmt.Sprintf("%s/%s?include=facility", deviceBasePath, deviceID)
+	device := new(Device)
+
+	resp, err := s.client.DoRequest("GET", path, nil, device)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return device, resp, err
+}
+
+// GetWith returns a device by id with full information of the provided resources
+// via 'includes' rather than href links
+func (s *DeviceServiceOp) GetWith(deviceID string, includes []string) (*Device, *Response, error) {
+	path := fmt.Sprintf("%s/%s?include=%s", deviceBasePath, deviceID, strings.Join(includes, ","))
 	device := new(Device)
 
 	resp, err := s.client.DoRequest("GET", path, nil, device)
