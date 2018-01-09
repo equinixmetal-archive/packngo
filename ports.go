@@ -136,7 +136,8 @@ func (i *DevicePortServiceOp) Disbond(input *PortDisbondInput) (*PortDisbondOutp
 		return nil, nil, err
 	}
 
-	return output, resp, nil}
+	return output, resp, nil
+}
 
 func (i *DevicePortServiceOp) GetBondedPort(deviceId string) (*Port, bool, error) {
 	device, _, err := i.client.Devices.Get(deviceId)
