@@ -2,7 +2,6 @@ package packngo
 
 import (
 	"fmt"
-	"strings"
 )
 
 const portBasePath = "/ports"
