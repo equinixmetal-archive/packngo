@@ -92,20 +92,21 @@ type Client struct {
 	RateLimit Rate
 
 	// Packet Api Objects
-	Plans             PlanService
-	Users             UserService
-	Emails            EmailService
-	SSHKeys           SSHKeyService
-	Devices           DeviceService
-	Projects          ProjectService
-	Facilities        FacilityService
-	OperatingSystems  OSService
-	DeviceIPs         DeviceIPService
-	DevicePorts       DevicePortService
-	ProjectIPs        ProjectIPService
-	Volumes           VolumeService
-	VolumeAttachments VolumeAttachmentService
-	SpotMarket        SpotMarketService
+	Plans                  PlanService
+	Users                  UserService
+	Emails                 EmailService
+	SSHKeys                SSHKeyService
+	Devices                DeviceService
+	Projects               ProjectService
+	Facilities             FacilityService
+	OperatingSystems       OSService
+	DeviceIPs              DeviceIPService
+	DevicePorts            DevicePortService
+	ProjectIPs             ProjectIPService
+	ProjectVirtualNetworks ProjectVirtualNetworkService
+	Volumes                VolumeService
+	VolumeAttachments      VolumeAttachmentService
+	SpotMarket             SpotMarketService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -231,6 +232,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.OperatingSystems = &OSServiceOp{client: c}
 	c.DeviceIPs = &DeviceIPServiceOp{client: c}
 	c.DevicePorts = &DevicePortServiceOp{client: c}
+	c.ProjectVirtualNetworks = &ProjectVirtualNetworkServiceOp{client: c}
 	c.ProjectIPs = &ProjectIPServiceOp{client: c}
 	c.Volumes = &VolumeServiceOp{client: c}
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}

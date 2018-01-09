@@ -2,9 +2,19 @@ package packngo
 
 import (
 	"fmt"
+	"strings"
 )
 
 const portBasePath = "/ports"
+
+// DevicePortService handles operations on a port which belongs to a particular device
+type DevicePortService interface {
+	Assign(*PortAssignInput) (*PortAssignOutput, *Response, bool, error)
+	Unassign(*PortUnassignInput) (*PortUnassignOutput, *Response, bool, error)
+	Bond(*PortBondInput) (*PortBondOutput, *Response, error)
+	Disbond(*PortDisbondInput) (*PortDisbondOutput, *Response, error)
+	GetBondedPort(string) (*Port, bool, error)
+}
 
 type Port struct {
 	ID                      string           `json:"id"`
@@ -13,13 +23,8 @@ type Port struct {
 	AttachedVirtualNetworks []VirtualNetwork `json:"virtual_networks"`
 }
 
-type VirtualNetwork struct {
-	ID           string `json:"id,omitempty"`
-	Description  string `json:"description,omitempty"`
-	Vxlan        int    `json:"vxlan,omitempty"`
-	FacilityCode string `json:"facility_code,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
-	Href         string `json:"href"`
+type DevicePortServiceOp struct {
+	client *Client
 }
 
 type PortAssignInput struct {
@@ -31,28 +36,6 @@ type PortAssignInput struct {
 type PortAssignOutput struct {
 	PortId          string           `json:"id"`
 	VirtualNetworks []VirtualNetwork `json:"virtual_networks"`
-}
-
-type PortUnassignInput struct {
-	DeviceId         string
-	PortId           string
-	VirtualNetworkId int `json:"vnid"`
-}
-
-type PortUnassignOutput struct {
-	PortId          string           `json:"id"`
-	VirtualNetworks []VirtualNetwork `json:"virtual_networks"`
-}
-
-type DevicePortServiceOp struct {
-	client *Client
-}
-
-// DevicePortService handles operations on a port which belongs to a particular device
-type DevicePortService interface {
-	Assign(*PortAssignInput) (*PortAssignOutput, *Response, bool, error)
-	Unassign(*PortUnassignInput) (*PortUnassignOutput, *Response, bool, error)
-	GetBondedPort(string) (*Port, bool, error)
 }
 
 // Assign associates virtual networks to a port
@@ -81,6 +64,95 @@ func (i *DevicePortServiceOp) Assign(input *PortAssignInput) (*PortAssignOutput,
 	return nil, nil, false, err
 }
 
+type PortUnassignInput struct {
+	DeviceId         string
+	PortId           string
+	VirtualNetworkId int `json:"vnid"`
+}
+
+type PortUnassignOutput struct {
+	PortId          string           `json:"id"`
+	VirtualNetworks []VirtualNetwork `json:"virtual_networks"`
+}
+
+func (i *DevicePortServiceOp) Unassign(input *PortUnassignInput) (*PortUnassignOutput, *Response, bool, error) {
+	path := fmt.Sprintf("%s/%s/unassign", portBasePath, input.PortId)
+	unassignOutput := new(PortUnassignOutput)
+
+	resp, err := i.client.DoRequest("POST", path, input, unassignOutput)
+	if err != nil {
+		return nil, resp, false, err
+	}
+
+	return unassignOutput, resp, true, err
+}
+
+type PortBondInput struct {
+	PortId     string
+	BulkEnable bool
+}
+
+type PortBondOutput struct {
+	Port Port
+}
+
+func (i *DevicePortServiceOp) Bond(input *PortBondInput) (*PortBondOutput, *Response, error) {
+	var path string
+	if input.BulkEnable {
+		path = fmt.Sprintf("%s/%s/bond?bulk_enable=true", portBasePath, input.PortId)
+	} else {
+		path = fmt.Sprintf("%s/%s/bond", portBasePath, input.PortId)
+	}
+	output := new(PortBondOutput)
+
+	resp, err := i.client.DoRequest("POST", path, input, output)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return output, resp, nil
+}
+
+type PortDisbondInput struct {
+	PortId      string
+	BulkDisable bool
+}
+
+type PortDisbondOutput struct {
+	Port Port
+}
+
+func (i *DevicePortServiceOp) Disbond(input *PortDisbondInput) (*PortDisbondOutput, *Response, error) {
+	var path string
+	if input.BulkDisable {
+		path = fmt.Sprintf("%s/%s/bond?bulk_disable=true", portBasePath, input.PortId)
+	} else {
+		path = fmt.Sprintf("%s/%s/bond", portBasePath, input.PortId)
+	}
+	output := new(PortDisbondOutput)
+
+	resp, err := i.client.DoRequest("POST", path, input, output)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return output, resp, nil}
+
+func (i *DevicePortServiceOp) GetBondedPort(deviceId string) (*Port, bool, error) {
+	device, _, err := i.client.Devices.Get(deviceId)
+	if len(device.NetworkPorts) == 0 {
+		return nil, false, err
+	}
+	for index := range device.NetworkPorts {
+
+		if port := device.NetworkPorts[index]; port.Type == "NetworkBondPort" {
+			return &port, true, nil
+		}
+	}
+	return nil, false, err
+}
+
+// Private helper methods
 func (i *DevicePortServiceOp) assignVirtualNetwork(input *PortAssignInput) (*PortAssignOutput, *Response, bool, error) {
 	path := fmt.Sprintf("%s/%s/assign", portBasePath, input.PortId)
 	assignOutput := new(PortAssignOutput)
@@ -112,30 +184,4 @@ func (p *Port) hasVirtualNetwork(vnid int) bool {
 		}
 	}
 	return false
-}
-
-func (i *DevicePortServiceOp) Unassign(input *PortUnassignInput) (*PortUnassignOutput, *Response, bool, error) {
-	path := fmt.Sprintf("%s/%s/unassign", portBasePath, input.PortId)
-	unassignOutput := new(PortUnassignOutput)
-
-	resp, err := i.client.DoRequest("POST", path, input, unassignOutput)
-	if err != nil {
-		return nil, resp, false, err
-	}
-
-	return unassignOutput, resp, true, err
-}
-
-func (i *DevicePortServiceOp) GetBondedPort(deviceId string) (*Port, bool, error) {
-	device, _, err := i.client.Devices.Get(deviceId)
-	if len(device.NetworkPorts) == 0 {
-		return nil, false, err
-	}
-	for index := range device.NetworkPorts {
-
-		if port := device.NetworkPorts[index]; port.Type == "NetworkBondPort" {
-			return &port, true, nil
-		}
-	}
-	return nil, false, err
 }
