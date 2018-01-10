@@ -160,7 +160,7 @@ func (i *DevicePortServiceOp) convertToLayerTwo(input *PortAssignRequest) (*Port
 
 func (p *Port) hasVirtualNetwork(vnid int) bool {
 	for i := range p.AttachedVirtualNetworks {
-		if p.AttachedVirtualNetworks[i].Vxlan == vnid {
+		if p.AttachedVirtualNetworks[i].VXLAN == vnid {
 			return true
 		}
 	}
