@@ -11,7 +11,7 @@ const deviceBasePath = "/devices"
 type DeviceService interface {
 	List(ProjectID string) ([]Device, *Response, error)
 	Get(string) (*Device, *Response, error)
-	GetWith(string, []string) (*Device, *Response, error)
+	GetAndInclude(string, []string) (*Device, *Response, error)
 	Create(*DeviceCreateRequest) (*Device, *Response, error)
 	Update(string, *DeviceUpdateRequest) (*Device, *Response, error)
 	Delete(string) (*Response, error)
@@ -136,12 +136,12 @@ func (s *DeviceServiceOp) List(projectID string) ([]Device, *Response, error) {
 
 // Get returns a device by id
 func (s *DeviceServiceOp) Get(deviceID string) (*Device, *Response, error) {
-	return s.GetWith(deviceID, []string{"facility"})
+	return s.GetAndInclude(deviceID, []string{"facility"})
 }
 
-// GetWith returns a device by id with full information of the provided resources
+// GetAndInclude returns a device by id with full information of the provided resources
 // via 'includes' rather than href links
-func (s *DeviceServiceOp) GetWith(deviceID string, includes []string) (*Device, *Response, error) {
+func (s *DeviceServiceOp) GetAndInclude(deviceID string, includes []string) (*Device, *Response, error) {
 	path := fmt.Sprintf("%s/%s?include=%s", deviceBasePath, deviceID, strings.Join(includes, ","))
 	device := new(Device)
 
