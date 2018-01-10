@@ -9,15 +9,15 @@ const virtualNetworkBasePath = "/virtual-networks"
 
 // DevicePortService handles operations on a port which belongs to a particular device
 type ProjectVirtualNetworkService interface {
-	List(*VirtualNetworkListInput) (*VirtualNetworkListOutput, *Response, error)
-	Create(*VirtualNetworkCreateInput) (*VirtualNetworkCreateOutput, *Response, error)
-	Delete(*VirtualNetworkDeleteInput) (*VirtualNetworkDeleteOutput, *Response, error)
+	List(*VirtualNetworkListRequest) (*VirtualNetworkListResponse, *Response, error)
+	Create(*VirtualNetworkCreateRequest) (*VirtualNetworkCreateResponse, *Response, error)
+	Delete(*VirtualNetworkDeleteRequest) (*VirtualNetworkDeleteResponse, *Response, error)
 }
 
 type VirtualNetwork struct {
 	ID           string `json:"id"`
 	Description  string `json:"description,omitempty"`
-	Vxlan        int    `json:"vxlan,omitempty"`
+	VXLAN        int    `json:"vxlan,omitempty"`
 	FacilityCode string `json:"facility_code,omitempty"`
 	CreatedAt    string `json:"created_at,omitempty"`
 	Href         string `json:"href"`
@@ -27,25 +27,21 @@ type ProjectVirtualNetworkServiceOp struct {
 	client *Client
 }
 
-type VirtualNetworkListInput struct {
-	ProjectId string
+type VirtualNetworkListRequest struct {
+	ProjectID string
 	Includes  []string
 }
 
-type VirtualNetworkListOutput struct {
+type VirtualNetworkListResponse struct {
 	VirtualNetworks []VirtualNetwork `json:"virtual_networks"`
 }
 
-func (i *ProjectVirtualNetworkServiceOp) List(input *VirtualNetworkListInput) (*VirtualNetworkListOutput, *Response, error) {
-	var path string
+func (i *ProjectVirtualNetworkServiceOp) List(input *VirtualNetworkListRequest) (*VirtualNetworkListResponse, *Response, error) {
+	path := fmt.Sprintf("%s/%s%s", projectBasePath, input.ProjectID, virtualNetworkBasePath)
 	if input.Includes != nil {
-		path = fmt.Sprintf("%s/%s%s?include=%s",
-			projectBasePath, input.ProjectId, virtualNetworkBasePath, strings.Join(input.Includes, ","))
-	} else {
-		path = fmt.Sprintf("%s/%s%s",
-			projectBasePath, input.ProjectId, virtualNetworkBasePath)
+		path += fmt.Sprintf("?include=%s", strings.Join(input.Includes, ","))
 	}
-	output := new(VirtualNetworkListOutput)
+	output := new(VirtualNetworkListResponse)
 
 	resp, err := i.client.DoRequest("GET", path, input, output)
 	if err != nil {
@@ -55,24 +51,24 @@ func (i *ProjectVirtualNetworkServiceOp) List(input *VirtualNetworkListInput) (*
 	return output, resp, nil
 }
 
-type VirtualNetworkCreateInput struct {
-	ProjectId   string `json:"project_id"`
+type VirtualNetworkCreateRequest struct {
+	ProjectID   string `json:"project_id"`
 	Description string `json:"description"`
 	Facility    string `json:"facility"`
-	Vxlan       int    `json:"vxlan"`
-	Vlan        int    `json:"vlan"`
+	VXLAN       int    `json:"vxlan"`
+	VLAN        int    `json:"vlan"`
 }
 
-type VirtualNetworkCreateOutput struct {
+type VirtualNetworkCreateResponse struct {
 	VirtualNetwork VirtualNetwork `json:"virtual_networks"`
 }
 
-func (i *ProjectVirtualNetworkServiceOp) Create(input *VirtualNetworkCreateInput) (*VirtualNetworkCreateOutput, *Response, error) {
+func (i *ProjectVirtualNetworkServiceOp) Create(input *VirtualNetworkCreateRequest) (*VirtualNetworkCreateResponse, *Response, error) {
 	// TODO: May need to add timestamp to output from 'post' request
 	// for the 'created_at' attribute of VirtualNetwork struct since
 	// API response doesn't include it
-	path := fmt.Sprintf("%s/%s%s", projectBasePath, input.ProjectId, virtualNetworkBasePath)
-	output := new(VirtualNetworkCreateOutput)
+	path := fmt.Sprintf("%s/%s%s", projectBasePath, input.ProjectID, virtualNetworkBasePath)
+	output := new(VirtualNetworkCreateResponse)
 
 	resp, err := i.client.DoRequest("POST", path, input, output)
 	if err != nil {
@@ -82,17 +78,17 @@ func (i *ProjectVirtualNetworkServiceOp) Create(input *VirtualNetworkCreateInput
 	return output, resp, nil
 }
 
-type VirtualNetworkDeleteInput struct {
-	VirtualNetworkId string
+type VirtualNetworkDeleteRequest struct {
+	VirtualNetworkID string
 }
 
-type VirtualNetworkDeleteOutput struct {
+type VirtualNetworkDeleteResponse struct {
 	VirtualNetwork VirtualNetwork `json:"virtual_networks"`
 }
 
-func (i *ProjectVirtualNetworkServiceOp) Delete(input *VirtualNetworkDeleteInput) (*VirtualNetworkDeleteOutput, *Response, error) {
-	path := fmt.Sprintf("%s/%s", virtualNetworkBasePath, input.VirtualNetworkId)
-	output := new(VirtualNetworkDeleteOutput)
+func (i *ProjectVirtualNetworkServiceOp) Delete(input *VirtualNetworkDeleteRequest) (*VirtualNetworkDeleteResponse, *Response, error) {
+	path := fmt.Sprintf("%s/%s", virtualNetworkBasePath, input.VirtualNetworkID)
+	output := new(VirtualNetworkDeleteResponse)
 
 	resp, err := i.client.DoRequest("DELETE", path, input, output)
 	if err != nil {

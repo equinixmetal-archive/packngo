@@ -47,7 +47,6 @@ type Device struct {
 	ProvisionEvents     []*ProvisionEvent      `json:"provisioning_events,omitempty"`
 	ProvisionPer        float32                `json:"provisioning_percentage,omitempty"`
 	UserData            string                 `json:"userdata,omitempty"`
-	NetworkPorts        []Port                 `json:"network_ports"`
 	RootPassword        string                 `json:"root_password,omitempty"`
 	IPXEScriptURL       string                 `json:"ipxe_script_url,omitempty"`
 	AlwaysPXE           bool                   `json:"always_pxe,omitempty"`
@@ -55,6 +54,7 @@ type Device struct {
 	SpotInstance        bool                   `json:"spot_instance,omitempty"`
 	SpotPriceMax        float64                `json:"spot_price_max,omitempty"`
 	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
+	NetworkPorts        []Port                 `json:"network_ports"`
 }
 
 type ProvisionEvent struct {
@@ -136,15 +136,7 @@ func (s *DeviceServiceOp) List(projectID string) ([]Device, *Response, error) {
 
 // Get returns a device by id
 func (s *DeviceServiceOp) Get(deviceID string) (*Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s?include=facility", deviceBasePath, deviceID)
-	device := new(Device)
-
-	resp, err := s.client.DoRequest("GET", path, nil, device)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return device, resp, err
+	return s.GetWith(deviceID, []string{"facility"})
 }
 
 // GetWith returns a device by id with full information of the provided resources
