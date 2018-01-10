@@ -2,16 +2,15 @@ package packngo
 
 import (
 	"fmt"
-	"strings"
 )
 
 const virtualNetworkBasePath = "/virtual-networks"
 
 // DevicePortService handles operations on a port which belongs to a particular device
 type ProjectVirtualNetworkService interface {
-	List(*VirtualNetworkListRequest) (*VirtualNetworkListResponse, *Response, error)
+	List(projectID string) (*VirtualNetworkListResponse, *Response, error)
 	Create(*VirtualNetworkCreateRequest) (*VirtualNetworkCreateResponse, *Response, error)
-	Delete(*VirtualNetworkDeleteRequest) (*VirtualNetworkDeleteResponse, *Response, error)
+	Delete(virtualNetworkID string) (*VirtualNetwork, *Response, error)
 }
 
 type VirtualNetwork struct {
@@ -27,23 +26,15 @@ type ProjectVirtualNetworkServiceOp struct {
 	client *Client
 }
 
-type VirtualNetworkListRequest struct {
-	ProjectID string
-	Includes  []string
-}
-
 type VirtualNetworkListResponse struct {
 	VirtualNetworks []VirtualNetwork `json:"virtual_networks"`
 }
 
-func (i *ProjectVirtualNetworkServiceOp) List(input *VirtualNetworkListRequest) (*VirtualNetworkListResponse, *Response, error) {
-	path := fmt.Sprintf("%s/%s%s", projectBasePath, input.ProjectID, virtualNetworkBasePath)
-	if input.Includes != nil {
-		path += fmt.Sprintf("?include=%s", strings.Join(input.Includes, ","))
-	}
+func (i *ProjectVirtualNetworkServiceOp) List(projectID string) (*VirtualNetworkListResponse, *Response, error) {
+	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, virtualNetworkBasePath)
 	output := new(VirtualNetworkListResponse)
 
-	resp, err := i.client.DoRequest("GET", path, input, output)
+	resp, err := i.client.DoRequest("GET", path, nil, output)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -78,19 +69,11 @@ func (i *ProjectVirtualNetworkServiceOp) Create(input *VirtualNetworkCreateReque
 	return output, resp, nil
 }
 
-type VirtualNetworkDeleteRequest struct {
-	VirtualNetworkID string
-}
+func (i *ProjectVirtualNetworkServiceOp) Delete(virtualNetworkID string) (*VirtualNetwork, *Response, error) {
+	path := fmt.Sprintf("%s/%s", virtualNetworkBasePath, virtualNetworkID)
+	output := new(VirtualNetwork)
 
-type VirtualNetworkDeleteResponse struct {
-	VirtualNetwork VirtualNetwork `json:"virtual_networks"`
-}
-
-func (i *ProjectVirtualNetworkServiceOp) Delete(input *VirtualNetworkDeleteRequest) (*VirtualNetworkDeleteResponse, *Response, error) {
-	path := fmt.Sprintf("%s/%s", virtualNetworkBasePath, input.VirtualNetworkID)
-	output := new(VirtualNetworkDeleteResponse)
-
-	resp, err := i.client.DoRequest("DELETE", path, input, output)
+	resp, err := i.client.DoRequest("DELETE", path, nil, output)
 	if err != nil {
 		return nil, nil, err
 	}

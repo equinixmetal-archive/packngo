@@ -10,8 +10,8 @@ const portBasePath = "/ports"
 type DevicePortService interface {
 	Assign(*PortAssignRequest) (*PortAssignResponse, *Response, bool, error)
 	Unassign(*PortUnassignRequest) (*PortUnassignResponse, *Response, bool, error)
-	Bond(*PortBondRequest) (*Port, *Response, error)
-	Disbond(*PortDisbondRequest) (*Port, *Response, error)
+	Bond(portID string, bulkEnable bool) (*Port, *Response, error)
+	Disbond(portID string, bulkDisable bool) (*Port, *Response, error)
 	GetBondedPort(string) (*Port, bool, error)
 }
 
@@ -44,15 +44,14 @@ func (i *DevicePortServiceOp) Assign(input *PortAssignRequest) (*PortAssignRespo
 	device, _, err := i.client.Devices.GetAndInclude(input.DeviceID, []string{"virtual_networks"})
 
 	for _, port := range device.NetworkPorts {
-		if port.ID != input.PortID || port.hasVirtualNetwork(input.VirtualNetworkID) {
-			continue
-		}
-		if len(port.AttachedVirtualNetworks) == 0 {
-			// convert to layer-2 (and attach vlan)
-			return i.convertToLayerTwo(input)
-		} else {
-			// not the first VLAN, so attach without converting
-			return i.assignVirtualNetwork(input)
+		if port.ID == input.PortID && !port.hasVirtualNetwork(input.VirtualNetworkID) {
+			if len(port.AttachedVirtualNetworks) == 0 {
+				// convert to layer-2 (and attach VLAN)
+				return i.convertToLayerTwo(input)
+			} else {
+				// not the first VLAN, so attach without converting
+				return i.assignVirtualNetwork(input)
+			}
 		}
 	}
 
@@ -87,14 +86,14 @@ type PortBondRequest struct {
 	BulkEnable bool
 }
 
-func (i *DevicePortServiceOp) Bond(input *PortBondRequest) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/bond", portBasePath, input.PortID)
-	if input.BulkEnable {
+func (i *DevicePortServiceOp) Bond(portID string, bulkEnable bool) (*Port, *Response, error) {
+	path := fmt.Sprintf("%s/%s/bond", portBasePath, portID)
+	if bulkEnable {
 		path += "?bulk_enable=true"
 	}
 	output := new(Port)
 
-	resp, err := i.client.DoRequest("POST", path, input, output)
+	resp, err := i.client.DoRequest("POST", path, nil, output)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -107,14 +106,14 @@ type PortDisbondRequest struct {
 	BulkDisable bool
 }
 
-func (i *DevicePortServiceOp) Disbond(input *PortDisbondRequest) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/bond", portBasePath, input.PortID)
-	if input.BulkDisable {
+func (i *DevicePortServiceOp) Disbond(portID string, bulkDisable bool) (*Port, *Response, error) {
+	path := fmt.Sprintf("%s/%s/bond", portBasePath, portID)
+	if bulkDisable {
 		path += "?bulk_disable=true"
 	}
 	output := new(Port)
 
-	resp, err := i.client.DoRequest("POST", path, input, output)
+	resp, err := i.client.DoRequest("POST", path, nil, output)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -159,8 +158,8 @@ func (i *DevicePortServiceOp) convertToLayerTwo(input *PortAssignRequest) (*Port
 }
 
 func (p *Port) hasVirtualNetwork(vnid int) bool {
-	for i := range p.AttachedVirtualNetworks {
-		if p.AttachedVirtualNetworks[i].VXLAN == vnid {
+	for _, network := range p.AttachedVirtualNetworks {
+		if network.VXLAN == vnid {
 			return true
 		}
 	}
