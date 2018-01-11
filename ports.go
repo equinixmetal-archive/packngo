@@ -41,7 +41,7 @@ type PortAssignResponse struct {
 func (i *DevicePortServiceOp) Assign(input *PortAssignRequest) (*PortAssignResponse, *Response, bool, error) {
 	// First get the device information in order to determine if this is the first VLAN assigned to this port.
 	// Requires a conversion to layer-2
-	device, _, err := i.client.Devices.GetAndInclude(input.DeviceID, []string{"virtual_networks"})
+	device, _, err := i.client.Devices.GetExtra(input.DeviceID, []string{"virtual_networks"}, nil)
 
 	for _, port := range device.NetworkPorts {
 		if port.ID == input.PortID && !port.hasVirtualNetwork(input.VirtualNetworkID) {
