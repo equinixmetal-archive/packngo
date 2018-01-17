@@ -1,21 +1,69 @@
 package packngo
 
 import (
-	"fmt"
+	"log"
 	"testing"
 )
 
-func TestVirtualNetworks(t *testing.T) {
+func TestAccVirtualNetworks(t *testing.T) {
+
 	skipUnlessAcceptanceTestsAllowed(t)
-	fmt.Println("Not yet implemented")
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	l, _, err := c.ProjectVirtualNetworks.List(projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(l.VirtualNetworks) != 0 {
+		t.Fatal("Newly created project should not have any vlans")
+
+	}
+	l, _, err = c.ProjectVirtualNetworks.List(projectID)
+
+	testDesc := "test_desc_" + randString8()
+
+	cr := VirtualNetworkCreateRequest{
+		ProjectID:   projectID,
+		Description: testDesc,
+		Facility:    testFacility(),
+	}
+
+	vlan, resp, err := c.ProjectVirtualNetworks.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	log.Println(resp)
+	log.Println(vlan)
+
+	if vlan.Description != testDesc {
+		t.Fatal("Wrong description string in created VLAN")
+	}
+
+	l, _, err = c.ProjectVirtualNetworks.List(projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(l.VirtualNetworks) != 1 {
+		t.Fatal("Newly created project should not have any vlans")
+	}
+
+	_, err = c.ProjectVirtualNetworks.Delete(l.VirtualNetworks[0].ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	l, _, err = c.ProjectVirtualNetworks.List(projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(l.VirtualNetworks) != 0 {
+		t.Fatal("The test project should not have any VLANs now")
+	}
+
 	// TODO: Test several bad inputs to ensure rejection without adverse affects
-	// List virtual networks using bad project ID
-	// Ensure there are zero for the fake project
 	// Create virtual network with bad POST body parameters
 	// Ensure create failed
-	// Ensure zero virtual networks still
-	// Create virtual network
-	// List virtual networks and ensure length is one
-	// Delete virtual network
-	// Ensure zero virtual networks attached to project
 }
