@@ -47,7 +47,7 @@ func TestAccVirtualNetworks(t *testing.T) {
 	}
 
 	if len(l.VirtualNetworks) != 1 {
-		t.Fatal("Newly created project should not have any vlans")
+		t.Fatal("At this point, there should be exactly 1 VLAN in the project")
 	}
 
 	_, err = c.ProjectVirtualNetworks.Delete(l.VirtualNetworks[0].ID)
