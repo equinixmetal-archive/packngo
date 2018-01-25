@@ -123,13 +123,3 @@ func (i *DevicePortServiceOp) ConvertToLayerTwo(portID string) (*Port, *Response
 
 	return port, resp, err
 }
-
-func (p *Port) hasVirtualNetwork(vnid string) bool {
-	for _, network := range p.AttachedVirtualNetworks {
-		if network.ID == vnid {
-			return true
-		}
-	}
-
-	return false
-}

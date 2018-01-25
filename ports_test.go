@@ -192,6 +192,12 @@ func testL2WithConvert(t *testing.T, plan string) {
 
 	eth1, _, err = c.DevicePorts.Disbond(eth1.ID, false)
 
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	eth1, _, err = c.DevicePorts.Disbond(eth1.ID, false)
+
 	if len(eth1.AttachedVirtualNetworks) != 0 {
 		t.Fatal("No vlans should be attached to a eth1 in the begining of this test")
 	}
@@ -226,6 +232,10 @@ func testL2WithConvert(t *testing.T, plan string) {
 	}
 
 	eth1, _, err = c.DevicePorts.Bond(eth1.ID, false)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if len(p.AttachedVirtualNetworks) != 0 {
 		t.Fatal("No vlans should be attached to the port at this time")

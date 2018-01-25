@@ -1,7 +1,6 @@
 package packngo
 
 import (
-	"log"
 	"testing"
 )
 
@@ -20,6 +19,9 @@ func TestAccVirtualNetworks(t *testing.T) {
 
 	}
 	l, _, err = c.ProjectVirtualNetworks.List(projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	testDesc := "test_desc_" + randString8()
 
@@ -33,9 +35,6 @@ func TestAccVirtualNetworks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	log.Println(resp)
-	log.Println(vlan)
 
 	if vlan.Description != testDesc {
 		t.Fatal("Wrong description string in created VLAN")
