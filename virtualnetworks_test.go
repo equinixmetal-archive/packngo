@@ -31,7 +31,7 @@ func TestAccVirtualNetworks(t *testing.T) {
 		Facility:    testFacility(),
 	}
 
-	vlan, resp, err := c.ProjectVirtualNetworks.Create(&cr)
+	vlan, _, err := c.ProjectVirtualNetworks.Create(&cr)
 	if err != nil {
 		t.Fatal(err)
 	}
