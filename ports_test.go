@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"log"
 	"path"
 	"testing"
 )
@@ -20,9 +21,11 @@ func TestAccPort1E(t *testing.T) {
 
 	hn := randString8()
 
+	fac := testFacility()
+
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     testFacility(),
+		Facility:     fac,
 		Plan:         "baremetal_1e",
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
@@ -65,7 +68,7 @@ func TestAccPort1E(t *testing.T) {
 
 	vncr := VirtualNetworkCreateRequest{
 		ProjectID: projectID,
-		Facility:  testFacility(),
+		Facility:  fac,
 	}
 
 	vlan, _, err := c.ProjectVirtualNetworks.Create(&vncr)
@@ -95,11 +98,137 @@ func TestAccPort1E(t *testing.T) {
 	if len(p.AttachedVirtualNetworks) != 0 {
 		t.Fatal("No vlans should be attached to the port at this time")
 	}
+}
 
-	// TODO: Figure out how to mock test this.
-	// attempt to assign virtual network to a non-bonded port                     (assert failure)
-	// assign virtual network to bonded port                                      (assert success)
-	// attempt to assign same virtual network to previous port                    (assert failure)
-	// unassign virtual network from bonded port                                  (assert success)
-	// attempt to unassign the same virtual network from the previous bonded port (assert failure)
+func TestAccPort2A(t *testing.T) {
+	// run possible as:
+	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 20m -run=TestAccPort2A
+	testL2WithConvert(t, "baremetal_2a")
+}
+
+func TestAccPort2(t *testing.T) {
+	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccPort2
+	testL2WithConvert(t, "baremetal_2")
+}
+
+func TestAccPort3(t *testing.T) {
+	testL2WithConvert(t, "baremetal_3")
+}
+
+func TestAccPortS(t *testing.T) {
+	testL2WithConvert(t, "baremetal_s")
+}
+
+func testL2WithConvert(t *testing.T, plan string) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	log.Println("Testing L2 with convert for plan", plan)
+
+	// MARK_2
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+
+	fac := testFacility()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     fac,
+		Plan:         plan,
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+	dID := d.ID
+
+	// If you need to test this, run a ${plan} device in your project in a
+	// facility,
+	// and then comment code from MARK_2 to here and uncomment following.
+	// Fill the values from youri testing device, project and facility.
+
+	/*
+
+		c := setup(t)
+
+		dID := "21ed6a8a-5066-403c-8d34-817f53c1853a"
+		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
+		fac := "nrt1"
+
+		d := &Device{}
+		err := fmt.Errorf("hi")
+	*/
+
+	d, err = waitDeviceActive(dID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bond0, err := c.DevicePorts.GetBondedPort(d.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bond0, _, err = c.DevicePorts.ConvertToLayerTwo(bond0.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// would be cool to test if the device is indeed in L2 networking mode
+	// at this point but I don't know a way to tell from the API
+
+	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	eth1, _, err = c.DevicePorts.Disbond(eth1.ID, false)
+
+	if len(eth1.AttachedVirtualNetworks) != 0 {
+		t.Fatal("No vlans should be attached to a eth1 in the begining of this test")
+	}
+
+	vncr := VirtualNetworkCreateRequest{
+		ProjectID: projectID,
+		Facility:  fac,
+	}
+
+	vlan, _, err := c.ProjectVirtualNetworks.Create(&vncr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.ProjectVirtualNetworks.Delete(vlan.ID)
+
+	p, _, err := c.DevicePorts.Assign(eth1.ID, vlan.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(p.AttachedVirtualNetworks) != 1 {
+		t.Fatal("Exactly one vlan should be attached to a eth1 at this point")
+	}
+
+	if path.Base(p.AttachedVirtualNetworks[0].Href) != vlan.ID {
+		t.Fatal("mismatch in the UUID of the assigned VLAN")
+	}
+
+	p, _, err = c.DevicePorts.Unassign(eth1.ID, vlan.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	eth1, _, err = c.DevicePorts.Bond(eth1.ID, false)
+
+	if len(p.AttachedVirtualNetworks) != 0 {
+		t.Fatal("No vlans should be attached to the port at this time")
+	}
+
 }
