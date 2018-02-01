@@ -105,6 +105,7 @@ type Client struct {
 	Volumes           VolumeService
 	VolumeAttachments VolumeAttachmentService
 	SpotMarket        SpotMarketService
+	Organizations     OrganizationService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -220,6 +221,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c := &Client{client: httpClient, BaseURL: u, UserAgent: userAgent, ConsumerToken: consumerToken, APIKey: apiKey}
 	c.debug = os.Getenv(debugEnvVar) != ""
 	c.Plans = &PlanServiceOp{client: c}
+	c.Organizations = &OrganizationServiceOp{client: c}
 	c.Users = &UserServiceOp{client: c}
 	c.Emails = &EmailServiceOp{client: c}
 	c.SSHKeys = &SSHKeyServiceOp{client: c}
