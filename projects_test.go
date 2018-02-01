@@ -56,7 +56,7 @@ func TestCreateOrgProject(t *testing.T) {
 	rs := testProjectPrefix + randString8()
 
 	orgPath := "/organizations/" + u.DefaultOrganizationID
-	pcr := ProjectCreateRequest{Name: rs, Organization: Organization{URL: orgPath}}
+	pcr := ProjectCreateRequest{Name: rs}
 	p, _, err := c.Projects.Create(&pcr)
 	if err != nil {
 		t.Fatal(err)
