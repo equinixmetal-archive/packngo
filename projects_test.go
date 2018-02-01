@@ -1,6 +1,8 @@
 package packngo
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestAccProject(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
@@ -38,4 +40,28 @@ func TestAccProject(t *testing.T) {
 		t.Fatal(err)
 	}
 
+}
+
+func TestCreateOrgProject(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+
+	c := setup(t)
+	defer projectTeardown(c)
+
+	u, _, err := c.Users.Current()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rs := testProjectPrefix + randString8()
+
+	orgPath := "/organizations/" + u.DefaultOrganizationID
+	pcr := ProjectCreateRequest{Name: rs, Organization: Organization{URL: orgPath}}
+	p, _, err := c.Projects.Create(&pcr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.Organization.URL != orgPath {
+		t.Fatalf("Expected new project to be part of org %s, not %v", orgPath, p.Organization)
+	}
 }
