@@ -41,9 +41,8 @@ func (p Project) String() string {
 
 // ProjectCreateRequest type used to create a Packet project
 type ProjectCreateRequest struct {
-	Name          string       `json:"name"`
-	PaymentMethod string       `json:"payment_method,omitempty"`
-	Organization  Organization `json:"organization,omitempty"`
+	Name            string `json:"name"`
+	PaymentMethodID string `json:"payment_method_id,omitempty"`
 }
 
 func (p ProjectCreateRequest) String() string {

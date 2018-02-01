@@ -12,6 +12,7 @@ type OrganizationService interface {
 	Create(*OrganizationCreateRequest) (*Organization, *Response, error)
 	Update(*OrganizationUpdateRequest) (*Organization, *Response, error)
 	Delete(string) (*Response, error)
+	ListPaymentMethods(string) ([]PaymentMethod, *Response, error)
 }
 
 type organizationsRoot struct {
@@ -131,4 +132,17 @@ func (s *OrganizationServiceOp) Delete(organizationID string) (*Response, error)
 	path := fmt.Sprintf("%s/%s", organizationBasePath, organizationID)
 
 	return s.client.DoRequest("DELETE", path, nil, nil)
+}
+
+// ListPaymentMethods returns PaymentMethods for an organization
+func (s *OrganizationServiceOp) ListPaymentMethods(organizationID string) ([]PaymentMethod, *Response, error) {
+	url := fmt.Sprintf("%s/%s%s", organizationBasePath, organizationID, paymentMethodBasePath)
+	root := new(paymentMethodsRoot)
+
+	resp, err := s.client.DoRequest("GET", url, nil, root)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return root.PaymentMethods, resp, err
 }
