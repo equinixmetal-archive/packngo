@@ -76,8 +76,11 @@ func TestAccPort1E(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer c.ProjectVirtualNetworks.Delete(vlan.ID)
+	par := PortAssignRequest{
+		PortID:           eth1.ID,
+		VirtualNetworkID: vlan.ID}
 
-	p, _, err := c.DevicePorts.Assign(eth1.ID, vlan.ID)
+	p, _, err := c.DevicePorts.Assign(&par)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +93,7 @@ func TestAccPort1E(t *testing.T) {
 		t.Fatal("mismatch in the UUID of the assigned VLAN")
 	}
 
-	p, _, err = c.DevicePorts.Unassign(eth1.ID, vlan.ID)
+	p, _, err = c.DevicePorts.Unassign(&par)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,20 +187,8 @@ func testL2WithConvert(t *testing.T, plan string) {
 	// would be cool to test if the device is indeed in L2 networking mode
 	// at this point but I don't know a way to tell from the API
 
-	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	eth1, _, err = c.DevicePorts.Disbond(eth1.ID, false)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(eth1.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to a eth1 in the begining of this test")
+	if len(bond0.AttachedVirtualNetworks) != 0 {
+		t.Fatal("No vlans should be attached to a bond0 in the begining of this test")
 	}
 
 	vncr := VirtualNetworkCreateRequest{
@@ -211,25 +202,29 @@ func testL2WithConvert(t *testing.T, plan string) {
 	}
 	defer c.ProjectVirtualNetworks.Delete(vlan.ID)
 
-	p, _, err := c.DevicePorts.Assign(eth1.ID, vlan.ID)
+	par := PortAssignRequest{
+		PortID:           bond0.ID,
+		VirtualNetworkID: vlan.ID}
+	p, _, err := c.DevicePorts.Assign(&par)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if len(p.AttachedVirtualNetworks) != 1 {
-		t.Fatal("Exactly one vlan should be attached to a eth1 at this point")
+		t.Fatal("Exactly one vlan should be attached to a bond0 at this point")
 	}
 
 	if path.Base(p.AttachedVirtualNetworks[0].Href) != vlan.ID {
 		t.Fatal("mismatch in the UUID of the assigned VLAN")
 	}
 
-	p, _, err = c.DevicePorts.Unassign(eth1.ID, vlan.ID)
+	p, _, err = c.DevicePorts.Unassign(&par)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	eth1, _, err = c.DevicePorts.Bond(eth1.ID, false)
+	bond0, _, err = c.DevicePorts.Bond(&BondRequest{
+		PortID: bond0.ID, BulkEnable: false})
 
 	if err != nil {
 		t.Fatal(err)

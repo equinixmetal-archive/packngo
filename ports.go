@@ -8,10 +8,10 @@ const portBasePath = "/ports"
 
 // DevicePortService handles operations on a port which belongs to a particular device
 type DevicePortService interface {
-	Assign(string, string) (*Port, *Response, error)
-	Unassign(string, string) (*Port, *Response, error)
-	Bond(string, bool) (*Port, *Response, error)
-	Disbond(string, bool) (*Port, *Response, error)
+	Assign(*PortAssignRequest) (*Port, *Response, error)
+	Unassign(*PortAssignRequest) (*Port, *Response, error)
+	Bond(*BondRequest) (*Port, *Response, error)
+	Disbond(*DisbondRequest) (*Port, *Response, error)
 	ConvertToLayerTwo(string) (*Port, *Response, error)
 	GetBondedPort(string) (*Port, error)
 	GetPortByName(string, string) (*Port, error)
@@ -28,7 +28,7 @@ type DevicePortServiceOp struct {
 	client *Client
 }
 
-type PortRequest struct {
+type PortAssignRequest struct {
 	PortID           string `json:"id"`
 	VirtualNetworkID string `json:"vnid"`
 }
@@ -71,34 +71,24 @@ func (i *DevicePortServiceOp) GetPortByName(deviceID, name string) (*Port, error
 	return nil, fmt.Errorf("Port %s not found in device %s", name, deviceID)
 }
 
-func (i *DevicePortServiceOp) Assign(portID, vlanID string) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/assign", portBasePath, portID)
-	return i.assignmentAction(portID, vlanID, path)
+func (i *DevicePortServiceOp) Assign(par *PortAssignRequest) (*Port, *Response, error) {
+	path := fmt.Sprintf("%s/%s/assign", portBasePath, par.PortID)
+	return i.portAction(path, par)
 }
 
-func (i *DevicePortServiceOp) Unassign(portID, vlanID string) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/unassign", portBasePath, portID)
-	return i.assignmentAction(portID, vlanID, path)
+func (i *DevicePortServiceOp) Unassign(par *PortAssignRequest) (*Port, *Response, error) {
+	path := fmt.Sprintf("%s/%s/unassign", portBasePath, par.PortID)
+	return i.portAction(path, par)
 }
 
-func (i *DevicePortServiceOp) assignmentAction(portID, vlanID, path string) (*Port, *Response, error) {
-	req := PortRequest{
-		PortID:           portID,
-		VirtualNetworkID: vlanID,
-	}
-	return i.portAction(path, &req)
+func (i *DevicePortServiceOp) Bond(br *BondRequest) (*Port, *Response, error) {
+	path := fmt.Sprintf("%s/%s/bond", portBasePath, br.PortID)
+	return i.portAction(path, br)
 }
 
-func (i *DevicePortServiceOp) Bond(portID string, bulkEnable bool) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/bond", portBasePath, portID)
-	req := BondRequest{PortID: portID, BulkEnable: bulkEnable}
-	return i.portAction(path, &req)
-}
-
-func (i *DevicePortServiceOp) Disbond(portID string, bulkDisable bool) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/disbond", portBasePath, portID)
-	req := DisbondRequest{PortID: portID, BulkDisable: bulkDisable}
-	return i.portAction(path, &req)
+func (i *DevicePortServiceOp) Disbond(dr *DisbondRequest) (*Port, *Response, error) {
+	path := fmt.Sprintf("%s/%s/disbond", portBasePath, dr.PortID)
+	return i.portAction(path, dr)
 }
 
 func (i *DevicePortServiceOp) portAction(path string, req interface{}) (*Port, *Response, error) {
