@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"fmt"
 	"log"
 	"path"
 	"testing"
@@ -16,44 +17,56 @@ func TestAccPort1E(t *testing.T) {
 
 	// MARK_1
 
-	c, projectID, teardown := setupWithProject(t)
-	defer teardown()
+	/*
 
-	hn := randString8()
+		c, projectID, teardown := setupWithProject(t)
+		defer teardown()
 
-	fac := testFacility()
+		hn := randString8()
 
-	cr := DeviceCreateRequest{
-		Hostname:     hn,
-		Facility:     fac,
-		Plan:         "baremetal_1e",
-		OS:           "ubuntu_16_04",
-		ProjectID:    projectID,
-		BillingCycle: "hourly",
-	}
+		fac := testFacility()
 
-	d, _, err := c.Devices.Create(&cr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteDevice(t, c, d.ID)
-	dID := d.ID
+		cr := DeviceCreateRequest{
+			Hostname:     hn,
+			Facility:     fac,
+			Plan:         "baremetal_1e",
+			OS:           "ubuntu_16_04",
+			ProjectID:    projectID,
+			BillingCycle: "hourly",
+		}
+
+		d, _, err := c.Devices.Create(&cr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer deleteDevice(t, c, d.ID)
+		dID := d.ID
+	*/
 
 	// If you need to test this, run a 1e device in your project in a faciltiy
 	// and then comment code from MARK_1 to here and uncomment following.
 	// Fill the values from your device, project and facility.
 
-	/*
-		c := setup(t)
+	c := setup(t)
 
-		dID := "b904ec58-4da7-438f-b4d2-e1d0c2f2eeeb"
-		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-		fac := "atl1"
-	*/
+	dID := "414f52d3-022a-420d-a521-915fdcc66801"
+	projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
+	fac := "atl1"
+	d := &Device{}
+	err := fmt.Errorf("hi")
 
 	d, err = waitDeviceActive(dID, c)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	nType, err := c.DevicePorts.DeviceNetworkType(d.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if nType != NetworkHybrid {
+		t.Fatal("New 1E device should be in Hybrid Network Type")
 	}
 
 	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
@@ -106,26 +119,26 @@ func TestAccPort1E(t *testing.T) {
 func TestAccPort2A(t *testing.T) {
 	// run possible as:
 	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 20m -run=TestAccPort2A
-	testL2WithConvert(t, "baremetal_2a")
+	testL2L3Convert(t, "baremetal_2a")
 }
 
 func TestAccPort2(t *testing.T) {
 	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccPort2
-	testL2WithConvert(t, "baremetal_2")
+	testL2L3Convert(t, "baremetal_2")
 }
 
 func TestAccPort3(t *testing.T) {
-	testL2WithConvert(t, "baremetal_3")
+	testL2L3Convert(t, "baremetal_3")
 }
 
 func TestAccPortS(t *testing.T) {
-	testL2WithConvert(t, "baremetal_s")
+	testL2L3Convert(t, "baremetal_s")
 }
 
-func testL2WithConvert(t *testing.T, plan string) {
+func testL2L3Convert(t *testing.T, plan string) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
-	log.Println("Testing L2 with convert for plan", plan)
+	log.Println("Testing type", plan, "convert to L2 and back to L3")
 
 	// MARK_2
 
@@ -161,7 +174,7 @@ func testL2WithConvert(t *testing.T, plan string) {
 
 		c := setup(t)
 
-		dID := "21ed6a8a-5066-403c-8d34-817f53c1853a"
+		dID := "873fecd1-85a0-4998-ae61-13cfb4f199a8"
 		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
 		fac := "nrt1"
 
@@ -174,16 +187,46 @@ func testL2WithConvert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	bond0, err := c.DevicePorts.GetBondedPort(d.ID)
+	nType, err := c.DevicePorts.DeviceNetworkType(d.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	bond0, _, err = c.DevicePorts.ConvertToLayerTwo(bond0.ID)
+	if nType != NetworkL3 {
+		t.Fatalf("New %s device should be in network type L3", plan)
+	}
+
+	d, err = c.DevicePorts.DeviceToLayerTwo(d.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	nType, err = c.DevicePorts.DeviceNetworkType(d.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if nType != NetworkL2Bonded {
+		t.Fatalf("the device shoud be in network type L2 Bonded", plan)
+	}
+
+	bond0, err := c.DevicePorts.GetBondPort(d.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	/*
+
+		bond0, err := c.DevicePorts.GetBondPort(d.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		bond0, _, err = c.DevicePorts.ConvertToLayerTwo(bond0.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+	*/
 	// would be cool to test if the device is indeed in L2 networking mode
 	// at this point but I don't know a way to tell from the API
 
@@ -223,15 +266,32 @@ func testL2WithConvert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	bond0, _, err = c.DevicePorts.Bond(&BondRequest{
-		PortID: bond0.ID, BulkEnable: false})
+	/*
 
+		bond0, _, err = c.DevicePorts.Bond(&BondRequest{
+			PortID: bond0.ID, BulkEnable: false})
+
+		if err != nil {
+			t.Fatal(err)
+		}
+	*/
+
+	if len(p.AttachedVirtualNetworks) != 0 {
+		t.Fatal("No vlans should be attached to the port at this time")
+	}
+
+	d, err = c.DevicePorts.DeviceToLayerThree(d.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(p.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to the port at this time")
+	nType, err = c.DevicePorts.DeviceNetworkType(d.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if nType != NetworkL3 {
+		t.Fatalf("the %s device should be back in network type L3", plan)
 	}
 
 }
