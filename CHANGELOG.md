@@ -20,6 +20,7 @@ minimize them and move towards a 1.0 release.
 - Support for ProvisionEvents
 - DoRequest sugar to Client
 - Add ListProject function to the SSHKeys interface
+- Operations for switching between Network Modes, aka "L2 support"
 
 ### Fixed
 - User.Emails json tag is fixed to match api response
