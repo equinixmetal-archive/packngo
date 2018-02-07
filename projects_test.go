@@ -42,7 +42,7 @@ func TestAccProject(t *testing.T) {
 
 }
 
-func TestCreateOrgProject(t *testing.T) {
+func TestAccCreateOrgProject(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
 	c := setup(t)

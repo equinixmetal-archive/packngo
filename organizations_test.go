@@ -11,7 +11,7 @@ func TestAccOrg(t *testing.T) {
 	rs := testProjectPrefix + randString8()
 	ocr := OrganizationCreateRequest{
 		Name:        rs,
-		Description: "Managed by Terraform.",
+		Description: "Managed by Packngo.",
 		Website:     "http://example.com",
 		Twitter:     "foo",
 	}
@@ -26,7 +26,7 @@ func TestAccOrg(t *testing.T) {
 	pur := OrganizationUpdateRequest{
 		ID:          p.ID,
 		Name:        rs,
-		Description: "Managed by Terraform.",
+		Description: "Managed by Packngo.",
 		Website:     "http://quux.example.com",
 		Twitter:     "bar",
 	}
@@ -50,7 +50,7 @@ func TestAccOrg(t *testing.T) {
 	}
 
 }
-func TestOrgListPaymentMethods(t *testing.T) {
+func TestAccOrgListPaymentMethods(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
 	// setup
@@ -60,7 +60,7 @@ func TestOrgListPaymentMethods(t *testing.T) {
 	rs := testProjectPrefix + randString8()
 	ocr := OrganizationCreateRequest{
 		Name:        rs,
-		Description: "Managed by Terraform.",
+		Description: "Managed by Packngo.",
 		Website:     "http://example.com",
 		Twitter:     "foo",
 	}
@@ -70,9 +70,14 @@ func TestOrgListPaymentMethods(t *testing.T) {
 	}
 
 	// tests
-	_, _, err = c.Organizations.ListPaymentMethods(org.ID)
+	pms, _, err := c.Organizations.ListPaymentMethods(org.ID)
+
 	if err != nil {
 		t.Fatal("error: ", err)
+	}
+
+	if len(pms) != 0 {
+		t.Fatal("the new test org should have no payment methods")
 	}
 
 	// teardown
