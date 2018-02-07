@@ -90,6 +90,21 @@ func projectTeardown(c *Client) {
 	}
 }
 
+func organizationTeardown(c *Client) {
+	ps, _, err := c.Organizations.List()
+	if err != nil {
+		panic(fmt.Errorf("while teardown: %s", err))
+	}
+	for _, p := range ps {
+		if strings.HasPrefix(p.Name, testProjectPrefix) {
+			_, err := c.Organizations.Delete(p.ID)
+			if err != nil {
+				panic(fmt.Errorf("while deleting %s: %s", p, err))
+			}
+		}
+	}
+}
+
 func TestAccInvalidCredentials(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	c := NewClient("packngo test", "wrongApiToken", nil)
