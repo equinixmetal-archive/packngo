@@ -8,6 +8,15 @@ Committing
 
 Before committing, it's a good idea to run `gofmt -w *.go`. ([gofmt](https://golang.org/cmd/gofmt/))
 
+
+Usage
+-----
+
+This lib is used by the official [terraform-provider-packet](https://github.com/terraform-providers/terraform-provider-packet).
+
+If you want to use it in your Go code, you can learn a lot from the `*_test.go` sources. Almost all out tests touch the Packet API, so you can see how auth, querying and POSTing works. For example [devices_test.go](devices_test.go).
+
+
 Acceptance Tests
 ----------------
 
