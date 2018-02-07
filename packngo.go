@@ -66,7 +66,7 @@ func (r *Response) populateRate() {
 	}
 }
 
-// ErrorResponse is the http response used on errrors
+// ErrorResponse is the http response used on errors
 type ErrorResponse struct {
 	Response    *http.Response
 	Errors      []string `json:"errors"`
@@ -92,19 +92,21 @@ type Client struct {
 	RateLimit Rate
 
 	// Packet Api Objects
-	Plans             PlanService
-	Users             UserService
-	Emails            EmailService
-	SSHKeys           SSHKeyService
-	Devices           DeviceService
-	Projects          ProjectService
-	Facilities        FacilityService
-	OperatingSystems  OSService
-	DeviceIPs         DeviceIPService
-	ProjectIPs        ProjectIPService
-	Volumes           VolumeService
-	VolumeAttachments VolumeAttachmentService
-	SpotMarket        SpotMarketService
+	Plans                  PlanService
+	Users                  UserService
+	Emails                 EmailService
+	SSHKeys                SSHKeyService
+	Devices                DeviceService
+	Projects               ProjectService
+	Facilities             FacilityService
+	OperatingSystems       OSService
+	DeviceIPs              DeviceIPService
+	DevicePorts            DevicePortService
+	ProjectIPs             ProjectIPService
+	ProjectVirtualNetworks ProjectVirtualNetworkService
+	Volumes                VolumeService
+	VolumeAttachments      VolumeAttachmentService
+	SpotMarket             SpotMarketService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -180,7 +182,8 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	return &response, err
 }
 
-// DoRequest is a convenience method, it calls NewRequest follwed by Do
+// DoRequest is a convenience method, it calls NewRequest followed by Do
+// v is the interface to unmarshal the response JSON into
 func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response, error) {
 	req, err := c.NewRequest(method, path, body)
 	if c.debug {
@@ -228,6 +231,8 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Facilities = &FacilityServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
 	c.DeviceIPs = &DeviceIPServiceOp{client: c}
+	c.DevicePorts = &DevicePortServiceOp{client: c}
+	c.ProjectVirtualNetworks = &ProjectVirtualNetworkServiceOp{client: c}
 	c.ProjectIPs = &ProjectIPServiceOp{client: c}
 	c.Volumes = &VolumeServiceOp{client: c}
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}

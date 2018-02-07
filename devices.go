@@ -1,6 +1,9 @@
 package packngo
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const deviceBasePath = "/devices"
 
@@ -8,6 +11,7 @@ const deviceBasePath = "/devices"
 type DeviceService interface {
 	List(ProjectID string) ([]Device, *Response, error)
 	Get(string) (*Device, *Response, error)
+	GetExtra(deviceID string, includes, excludes []string) (*Device, *Response, error)
 	Create(*DeviceCreateRequest) (*Device, *Response, error)
 	Update(string, *DeviceUpdateRequest) (*Device, *Response, error)
 	Delete(string) (*Response, error)
@@ -50,6 +54,7 @@ type Device struct {
 	SpotInstance        bool                   `json:"spot_instance,omitempty"`
 	SpotPriceMax        float64                `json:"spot_price_max,omitempty"`
 	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
+	NetworkPorts        []Port                 `json:"network_ports,omitempty"`
 }
 
 type ProvisionEvent struct {
@@ -131,7 +136,18 @@ func (s *DeviceServiceOp) List(projectID string) ([]Device, *Response, error) {
 
 // Get returns a device by id
 func (s *DeviceServiceOp) Get(deviceID string) (*Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s?include=facility", deviceBasePath, deviceID)
+	return s.GetExtra(deviceID, []string{"facility"}, nil)
+}
+
+// GetExtra returns a device by id. Specifying either includes/excludes provides more or less desired
+// detailed information about resources which would otherwise be represented with an href link
+func (s *DeviceServiceOp) GetExtra(deviceID string, includes, excludes []string) (*Device, *Response, error) {
+	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
+	if includes != nil {
+		path += fmt.Sprintf("?include=%s", strings.Join(includes, ","))
+	} else if excludes != nil {
+		path += fmt.Sprintf("?exclude=%s", strings.Join(excludes, ","))
+	}
 	device := new(Device)
 
 	resp, err := s.client.DoRequest("GET", path, nil, device)
