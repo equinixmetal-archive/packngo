@@ -117,8 +117,20 @@ func TestAccPort1E(t *testing.T) {
 }
 
 func TestAccPortL2HybridL3ConvertType2A(t *testing.T) {
+	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 30m -run=TestAccPortL2HybridL3ConvertType2A
 	testL2HybridL3Convert(t, "baremetal_2a")
+}
 
+func TestAccPortL2HybridL3ConvertType2(t *testing.T) {
+	testL2HybridL3Convert(t, "baremetal_2")
+}
+
+func TestAccPortL2HybridL3ConvertType3(t *testing.T) {
+	testL2HybridL3Convert(t, "baremetal_3")
+}
+
+func TestAccPortL2HybridL3ConvertTypeS(t *testing.T) {
+	testL2HybridL3Convert(t, "baremetal_s")
 }
 
 func testL2HybridL3Convert(t *testing.T, plan string) {
