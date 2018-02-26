@@ -50,8 +50,8 @@ func (s SSHKeyCreateRequest) String() string {
 // SSHKeyUpdateRequest type used to update an ssh key
 type SSHKeyUpdateRequest struct {
 	ID    string `json:"id"`
-	Label string `json:"label"`
-	Key   string `json:"key"`
+	Label string `json:"label,omitempty"`
+	Key   string `json:"key,omitempty"`
 }
 
 func (s SSHKeyUpdateRequest) String() string {
@@ -116,7 +116,11 @@ func (s *SSHKeyServiceOp) Create(createRequest *SSHKeyCreateRequest) (*SSHKey, *
 
 // Update updates an ssh key
 func (s *SSHKeyServiceOp) Update(updateRequest *SSHKeyUpdateRequest) (*SSHKey, *Response, error) {
+	if updateRequest.Label == "" && updateRequest.Key == "" {
+		return nil, nil, fmt.Errorf("You must set either Label or Key string for SSH Key update")
+	}
 	path := fmt.Sprintf("%s/%s", sshKeyBasePath, updateRequest.ID)
+
 	sshKey := new(SSHKey)
 
 	resp, err := s.client.DoRequest("PATCH", path, updateRequest, sshKey)

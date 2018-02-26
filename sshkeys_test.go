@@ -37,7 +37,7 @@ func createKey(t *testing.T, c *Client, p string) *SSHKey {
 	return key
 }
 
-func TestSSHKeyList(t *testing.T) {
+func TestAccSSHKeyList(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 	c, _, teardown := setupWithProject(t)
@@ -58,7 +58,7 @@ func TestSSHKeyList(t *testing.T) {
 	t.Error("failed to find created key in list of keys retrieved")
 }
 
-func TestSSHKeyProjectList(t *testing.T) {
+func TestAccSSHKeyProjectList(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 	c, projectID, teardown := setupWithProject(t)
@@ -84,7 +84,7 @@ func TestSSHKeyProjectList(t *testing.T) {
 	t.Error("failed to find created project key in list of project keys retrieved")
 }
 
-func TestSSHKeyGet(t *testing.T) {
+func TestAccSSHKeyGet(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 	c, projectID, teardown := setupWithProject(t)
@@ -105,7 +105,7 @@ func TestSSHKeyGet(t *testing.T) {
 	}
 }
 
-func TestSSHKeyCreate(t *testing.T) {
+func TestAccSSHKeyCreate(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 	c, projectID, teardown := setupWithProject(t)
@@ -130,7 +130,73 @@ func TestSSHKeyCreate(t *testing.T) {
 	}
 }
 
-func TestSSHKeyUpdate(t *testing.T) {
+func TestWrongSSHKeyUpdate(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+	key := createKey(t, c, projectID)
+	req := SSHKeyUpdateRequest{
+		ID: key.ID,
+	}
+	_, _, err := c.SSHKeys.Update(&req)
+	if err == nil {
+		t.Fatalf("SSHKey update by request without label or key string should be invalid")
+	}
+}
+
+func TestAccSSHKeyStringUpdate(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+	key := createKey(t, c, projectID)
+
+	newKey := makePubKey(t)
+	req := SSHKeyUpdateRequest{
+		ID:  key.ID,
+		Key: newKey,
+	}
+	got, _, err := c.SSHKeys.Update(&req)
+	if err != nil {
+		t.Fatalf("failed to update key: %v", err)
+	}
+
+	if reflect.DeepEqual(key, got) {
+		t.Fatalf("expected keys to differ, got: %v", key)
+	}
+
+	if got.Key != newKey {
+		t.Fatalf("expected updated key string, want: %s, got: %s", newKey, got.Key)
+	}
+}
+
+func TestAccSSHKeyLabelUpdate(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+	key := createKey(t, c, projectID)
+
+	req := SSHKeyUpdateRequest{
+		ID:    key.ID,
+		Label: key.Label + "-updated",
+	}
+	got, _, err := c.SSHKeys.Update(&req)
+	if err != nil {
+		t.Fatalf("failed to update key: %v", err)
+	}
+
+	if reflect.DeepEqual(key, got) {
+		t.Fatalf("expected keys to differ, got: %v", key)
+	}
+
+	if got.Label != key.Label+"-updated" {
+		t.Fatalf("expected updated label, want: %s-updated, got: %s", key.Label, got.Label)
+	}
+}
+
+func TestAccSSHKeyUpdate(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 	c, projectID, teardown := setupWithProject(t)
@@ -160,7 +226,7 @@ func TestSSHKeyUpdate(t *testing.T) {
 	}
 }
 
-func TestSSHKeyDelete(t *testing.T) {
+func TestAccSSHKeyDelete(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 	c, projectID, teardown := setupWithProject(t)
