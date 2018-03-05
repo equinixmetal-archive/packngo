@@ -24,15 +24,16 @@ type projectsRoot struct {
 
 // Project represents a Packet project
 type Project struct {
-	ID           string       `json:"id"`
-	Name         string       `json:"name,omitempty"`
-	Organization Organization `json:"organization,omitempty"`
-	Created      string       `json:"created_at,omitempty"`
-	Updated      string       `json:"updated_at,omitempty"`
-	Users        []User       `json:"members,omitempty"`
-	Devices      []Device     `json:"devices,omitempty"`
-	SSHKeys      []SSHKey     `json:"ssh_keys,omitempty"`
-	URL          string       `json:"href,omitempty"`
+	ID            string        `json:"id"`
+	Name          string        `json:"name,omitempty"`
+	Organization  Organization  `json:"organization,omitempty"`
+	Created       string        `json:"created_at,omitempty"`
+	Updated       string        `json:"updated_at,omitempty"`
+	Users         []User        `json:"members,omitempty"`
+	Devices       []Device      `json:"devices,omitempty"`
+	SSHKeys       []SSHKey      `json:"ssh_keys,omitempty"`
+	URL           string        `json:"href,omitempty"`
+	PaymentMethod PaymentMethod `json:"payment_method,omitempty"`
 }
 
 func (p Project) String() string {

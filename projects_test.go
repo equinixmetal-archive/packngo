@@ -35,6 +35,10 @@ func TestAccProject(t *testing.T) {
 	if gotProject.Name != rs {
 		t.Fatalf("Expected the name of the GOT project to be %s, not %s", rs, gotProject.Name)
 	}
+
+	if gotProject.PaymentMethod.URL == "" {
+		t.Fatalf("Empty payment_method: %v", gotProject)
+	}
 	_, err = c.Projects.Delete(p.ID)
 	if err != nil {
 		t.Fatal(err)
