@@ -52,9 +52,9 @@ func (p ProjectCreateRequest) String() string {
 
 // ProjectUpdateRequest type used to update a Packet project
 type ProjectUpdateRequest struct {
-	ID            string `json:"id"`
-	Name          string `json:"name,omitempty"`
-	PaymentMethod string `json:"payment_method,omitempty"`
+	ID              string `json:"id"`
+	Name            string `json:"name,omitempty"`
+	PaymentMethodID string `json:"payment_method_id,omitempty"`
 }
 
 func (p ProjectUpdateRequest) String() string {
