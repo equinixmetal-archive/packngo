@@ -24,6 +24,7 @@ type DeviceService interface {
 
 type devicesRoot struct {
 	Devices []Device `json:"devices"`
+	Meta    meta     `json:"meta"`
 }
 
 // Device represents a Packet device
@@ -55,6 +56,17 @@ type Device struct {
 	SpotPriceMax        float64                `json:"spot_price_max,omitempty"`
 	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
 	NetworkPorts        []Port                 `json:"network_ports,omitempty"`
+}
+
+type meta struct {
+	Self           *Href `json:"self"`
+	First          *Href `json:"first"`
+	Last           *Href `json:"last"`
+	Previous       *Href `json:"previous,omitempty"`
+	Next           *Href `json:"next,omitempty"`
+	Total          int   `json:"total"`
+	CurrentPageNum int   `json:"current_page"`
+	LastPageNum    int   `json:"last_page"`
 }
 
 type ProvisionEvent struct {
@@ -122,16 +134,27 @@ type DeviceServiceOp struct {
 }
 
 // List returns devices on a project
-func (s *DeviceServiceOp) List(projectID string) ([]Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s/devices?include=facility", projectBasePath, projectID)
-	root := new(devicesRoot)
+func (s *DeviceServiceOp) List(projectID string) (devices []Device, resp *Response, err error) {
+	params := "include=facility&per_page=100"
+	path := fmt.Sprintf("%s/%s/devices?%s", projectBasePath, projectID, params)
 
-	resp, err := s.client.DoRequest("GET", path, nil, root)
-	if err != nil {
-		return nil, resp, err
+	for {
+		subset := new(devicesRoot)
+
+		resp, err = s.client.DoRequest("GET", path, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		devices = append(devices, subset.Devices...)
+
+		if subset.Meta.Next != nil {
+			path = fmt.Sprintf("%s&%s", subset.Meta.Next.Href, params)
+			continue
+		}
+
+		return
 	}
-
-	return root.Devices, resp, err
 }
 
 // Get returns a device by id
