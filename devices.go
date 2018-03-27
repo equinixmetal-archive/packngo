@@ -141,7 +141,10 @@ func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices 
 		devices = append(devices, subset.Devices...)
 
 		if subset.Meta.Next != nil {
-			path = fmt.Sprintf("%s&%s", subset.Meta.Next.Href, params)
+			path = subset.Meta.Next.Href
+			if params != "" {
+				path = fmt.Sprintf("%s&%s", path, params)
+			}
 			continue
 		}
 

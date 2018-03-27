@@ -68,6 +68,9 @@ func (s *SSHKeyServiceOp) list(url string, listOpt *ListOptions) (sshKeys []SSHK
 	var params string
 	if listOpt != nil {
 		params = listOpt.createURL()
+		if params != "" {
+			url = fmt.Sprintf("%s?%s", url, params)
+		}
 	}
 
 	for {
@@ -81,7 +84,10 @@ func (s *SSHKeyServiceOp) list(url string, listOpt *ListOptions) (sshKeys []SSHK
 		sshKeys = append(sshKeys, subset.SSHKeys...)
 
 		if subset.Meta.Next != nil {
-			url = fmt.Sprintf("%s&%s", subset.Meta.Next.Href, params)
+			url = subset.Meta.Next.Href
+			if params != "" {
+				url = fmt.Sprintf("%s&%s", url, params)
+			}
 			continue
 		}
 
