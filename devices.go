@@ -9,7 +9,7 @@ const deviceBasePath = "/devices"
 
 // DeviceService interface defines available device methods
 type DeviceService interface {
-	List(ProjectID string) ([]Device, *Response, error)
+	List(ProjectID string, listOpt *ListOptions) ([]Device, *Response, error)
 	Get(string) (*Device, *Response, error)
 	GetExtra(deviceID string, includes, excludes []string) (*Device, *Response, error)
 	Create(*DeviceCreateRequest) (*Device, *Response, error)
@@ -134,8 +134,11 @@ type DeviceServiceOp struct {
 }
 
 // List returns devices on a project
-func (s *DeviceServiceOp) List(projectID string) (devices []Device, resp *Response, err error) {
-	params := "include=facility&per_page=100"
+func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices []Device, resp *Response, err error) {
+	params := "include=facility"
+	if listOpt != nil {
+		params = listOpt.createURL()
+	}
 	path := fmt.Sprintf("%s/%s/devices?%s", projectBasePath, projectID, params)
 
 	for {

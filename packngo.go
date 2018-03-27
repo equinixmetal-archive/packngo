@@ -40,6 +40,28 @@ type ListOptions struct {
 	Includes string
 }
 
+func (l *ListOptions) createURL() (url string) {
+	if l.Includes != "" {
+		url += fmt.Sprintf("includes=%s", l.Includes)
+	}
+
+	if l.Page != 0 {
+		if url != "" {
+			url += "&"
+		}
+		url += fmt.Sprintf("page=%d", l.Page)
+	}
+
+	if l.PerPage != 0 {
+		if url != "" {
+			url += "&"
+		}
+		url += fmt.Sprintf("per_page=%d", l.PerPage)
+	}
+
+	return
+}
+
 // Response is the http response from api calls
 type Response struct {
 	*http.Response
