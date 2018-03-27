@@ -8,8 +8,8 @@ const (
 
 // SSHKeyService interface defines available device methods
 type SSHKeyService interface {
-	List() ([]SSHKey, *Response, error)
-	ProjectList(string) ([]SSHKey, *Response, error)
+	List(*ListOptions) ([]SSHKey, *Response, error)
+	ProjectList(string, *ListOptions) ([]SSHKey, *Response, error)
 	Get(string) (*SSHKey, *Response, error)
 	Create(*SSHKeyCreateRequest) (*SSHKey, *Response, error)
 	Update(*SSHKeyUpdateRequest) (*SSHKey, *Response, error)
@@ -18,6 +18,7 @@ type SSHKeyService interface {
 
 type sshKeyRoot struct {
 	SSHKeys []SSHKey `json:"ssh_keys"`
+	Meta    meta     `json:"meta"`
 }
 
 // SSHKey represents a user's ssh key
@@ -63,26 +64,39 @@ type SSHKeyServiceOp struct {
 	client *Client
 }
 
-func (s *SSHKeyServiceOp) list(url string) ([]SSHKey, *Response, error) {
-	root := new(sshKeyRoot)
-
-	resp, err := s.client.DoRequest("GET", url, nil, root)
-	if err != nil {
-		return nil, resp, err
+func (s *SSHKeyServiceOp) list(url string, listOpt *ListOptions) (sshKeys []SSHKey, resp *Response, err error) {
+	var params string
+	if listOpt != nil {
+		params = listOpt.createURL()
 	}
 
-	return root.SSHKeys, resp, err
+	for {
+		subset := new(sshKeyRoot)
+
+		resp, err = s.client.DoRequest("GET", url, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		sshKeys = append(sshKeys, subset.SSHKeys...)
+
+		if subset.Meta.Next != nil {
+			url = fmt.Sprintf("%s&%s", subset.Meta.Next.Href, params)
+			continue
+		}
+
+		return
+	}
 }
 
 // ProjectList lists ssh keys of a project
-func (s *SSHKeyServiceOp) ProjectList(projectID string) ([]SSHKey, *Response, error) {
-	return s.list(fmt.Sprintf("%s/%s%s", projectBasePath, projectID, sshKeyBasePath))
-
+func (s *SSHKeyServiceOp) ProjectList(projectID string, listOpt *ListOptions) ([]SSHKey, *Response, error) {
+	return s.list(fmt.Sprintf("%s/%s%s", projectBasePath, projectID, sshKeyBasePath), listOpt)
 }
 
 // List returns a user's ssh keys
-func (s *SSHKeyServiceOp) List() ([]SSHKey, *Response, error) {
-	return s.list(sshKeyBasePath)
+func (s *SSHKeyServiceOp) List(listOpt *ListOptions) ([]SSHKey, *Response, error) {
+	return s.list(sshKeyBasePath, listOpt)
 }
 
 // Get returns an ssh key by id

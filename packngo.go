@@ -62,6 +62,18 @@ func (l *ListOptions) createURL() (url string) {
 	return
 }
 
+// meta contains pagination information
+type meta struct {
+	Self           *Href `json:"self"`
+	First          *Href `json:"first"`
+	Last           *Href `json:"last"`
+	Previous       *Href `json:"previous,omitempty"`
+	Next           *Href `json:"next,omitempty"`
+	Total          int   `json:"total"`
+	CurrentPageNum int   `json:"current_page"`
+	LastPageNum    int   `json:"last_page"`
+}
+
 // Response is the http response from api calls
 type Response struct {
 	*http.Response

@@ -58,17 +58,6 @@ type Device struct {
 	NetworkPorts        []Port                 `json:"network_ports,omitempty"`
 }
 
-type meta struct {
-	Self           *Href `json:"self"`
-	First          *Href `json:"first"`
-	Last           *Href `json:"last"`
-	Previous       *Href `json:"previous,omitempty"`
-	Next           *Href `json:"next,omitempty"`
-	Total          int   `json:"total"`
-	CurrentPageNum int   `json:"current_page"`
-	LastPageNum    int   `json:"last_page"`
-}
-
 type ProvisionEvent struct {
 	ID            string     `json:"id"`
 	Body          string     `json:"body"`
