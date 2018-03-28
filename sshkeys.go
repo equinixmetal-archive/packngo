@@ -83,7 +83,7 @@ func (s *SSHKeyServiceOp) list(url string, listOpt *ListOptions) (sshKeys []SSHK
 
 		sshKeys = append(sshKeys, subset.SSHKeys...)
 
-		if subset.Meta.Next != nil {
+		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
 			url = subset.Meta.Next.Href
 			if params != "" {
 				url = fmt.Sprintf("%s&%s", url, params)
