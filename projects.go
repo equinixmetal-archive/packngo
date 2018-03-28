@@ -11,11 +11,12 @@ type ProjectService interface {
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
 	Update(*ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
-	ListVolumes(string) ([]Volume, *Response, error)
+	ListVolumes(string, *ListOptions) ([]Volume, *Response, error)
 }
 
 type volumesRoot struct {
 	Volumes []Volume `json:"volumes"`
+	Meta    meta     `json:"meta"`
 }
 
 type projectsRoot struct {
@@ -124,14 +125,34 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 }
 
 // ListVolumes returns Volumes for a project
-func (s *ProjectServiceOp) ListVolumes(projectID string) ([]Volume, *Response, error) {
+func (s *ProjectServiceOp) ListVolumes(projectID string, listOpt *ListOptions) (volumes []Volume, resp *Response, err error) {
 	url := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, volumeBasePath)
-	root := new(volumesRoot)
-
-	resp, err := s.client.DoRequest("GET", url, nil, root)
-	if err != nil {
-		return nil, resp, err
+	var params string
+	if listOpt != nil {
+		params = listOpt.createURL()
+		if params != "" {
+			url = fmt.Sprintf("%s?%s", url, params)
+		}
 	}
 
-	return root.Volumes, resp, err
+	for {
+		subset := new(volumesRoot)
+
+		resp, err = s.client.DoRequest("GET", url, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		volumes = append(volumes, subset.Volumes...)
+
+		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
+			url = subset.Meta.Next.Href
+			if params != "" {
+				url = fmt.Sprintf("%s&%s", url, params)
+			}
+			continue
+		}
+
+		return
+	}
 }
