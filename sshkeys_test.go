@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"reflect"
-	"sync"
 	"testing"
 
 	"golang.org/x/crypto/ssh"
@@ -46,7 +45,7 @@ func TestAccSSHKeyList(t *testing.T) {
 	key := createKey(t, c, "")
 	defer c.SSHKeys.Delete(key.ID)
 
-	keys, _, err := c.SSHKeys.List(nil)
+	keys, _, err := c.SSHKeys.List()
 	if err != nil {
 		t.Fatalf("failed to get list of sshkeys: %v", err)
 	}
@@ -59,56 +58,6 @@ func TestAccSSHKeyList(t *testing.T) {
 	t.Error("failed to find created key in list of keys retrieved")
 }
 
-func TestAccSSHKeyLargeList(t *testing.T) {
-	skipUnlessAcceptanceTestsAllowed(t)
-	t.Parallel()
-	c, _, teardown := setupWithProject(t)
-	defer teardown()
-
-	var wg sync.WaitGroup
-	numOfKeys := 11
-	sshKeys := make([]*SSHKey, numOfKeys)
-	wg.Add(numOfKeys)
-	for i := 0; i < numOfKeys; i++ {
-		go func(i int) {
-			defer wg.Done()
-			sshKeys[i] = createKey(t, c, "")
-		}(i)
-	}
-	wg.Wait()
-
-	defer func() {
-		wg.Add(len(sshKeys))
-		for _, sshKey := range sshKeys {
-			go func(sshKey *SSHKey) {
-				defer wg.Done()
-				c.SSHKeys.Delete(sshKey.ID)
-			}(sshKey)
-		}
-		wg.Wait()
-	}()
-
-	keys, _, err := c.SSHKeys.List(nil)
-	if err != nil {
-		t.Fatalf("failed to get list of sshkeys: %v", err)
-	}
-
-	if len(keys) < numOfKeys {
-		t.Fatalf("failed due to expecting %d keys, but actually got %d", numOfKeys, len(keys))
-	}
-
-	keyMap := map[string]SSHKey{}
-	for _, key := range keys {
-		keyMap[key.ID] = key
-	}
-
-	for _, k := range sshKeys {
-		if _, ok := keyMap[k.ID]; !ok {
-			t.Fatalf("failed to find expected key in list: %s", k.ID)
-		}
-	}
-}
-
 func TestAccSSHKeyProjectList(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
@@ -118,7 +67,7 @@ func TestAccSSHKeyProjectList(t *testing.T) {
 	key := createKey(t, c, projectID)
 	defer c.SSHKeys.Delete(key.ID)
 
-	keys, _, err := c.SSHKeys.ProjectList(projectID, nil)
+	keys, _, err := c.SSHKeys.ProjectList(projectID)
 	if err != nil {
 		t.Fatalf("failed to get list of project sshkeys: %v", err)
 	}
