@@ -128,7 +128,7 @@ func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices 
 	if listOpt != nil {
 		params = listOpt.createURL()
 	}
-	path := fmt.Sprintf("%s/%s/devices?%s", projectBasePath, projectID, params)
+	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, deviceBasePath, params)
 
 	for {
 		subset := new(devicesRoot)
@@ -178,7 +178,7 @@ func (s *DeviceServiceOp) GetExtra(deviceID string, includes, excludes []string)
 
 // Create creates a new device
 func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s/devices", projectBasePath, createRequest.ProjectID)
+	path := fmt.Sprintf("%s/%s%s", projectBasePath, createRequest.ProjectID, deviceBasePath)
 	device := new(Device)
 
 	resp, err := s.client.DoRequest("POST", path, createRequest, device)
