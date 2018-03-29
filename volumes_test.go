@@ -9,7 +9,6 @@ import (
 func waitVolumeActive(id string, c *Client) (*Volume, error) {
 	// 15 minutes = 180 * 5sec-retry
 	for i := 0; i < 180; i++ {
-		<-time.After(5 * time.Second)
 		c, _, err := c.Volumes.Get(id)
 		if err != nil {
 			return nil, err
@@ -17,6 +16,7 @@ func waitVolumeActive(id string, c *Client) (*Volume, error) {
 		if c.State == "active" {
 			return c, nil
 		}
+		<-time.After(5 * time.Second)
 	}
 	return nil, fmt.Errorf("volume %s is still not active after timeout", id)
 }
@@ -46,6 +46,9 @@ func TestAccVolume(t *testing.T) {
 	}
 
 	v, err = waitVolumeActive(v.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer c.Volumes.Delete(v.ID)
 
 	if len(v.SnapshotPolicies) != 1 {
@@ -62,5 +65,78 @@ func TestAccVolume(t *testing.T) {
 
 	if v.Facility.Code != testFacility() {
 		t.Fatal("Test volume has wrong facility")
+	}
+}
+
+func TestAccVolumeLargeList(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	sp := SnapshotPolicy{
+		SnapshotFrequency: "1day",
+		SnapshotCount:     3,
+	}
+
+	vcr := VolumeCreateRequest{
+		Size:             10,
+		BillingCycle:     "hourly",
+		PlanID:           "storage_1",
+		FacilityID:       testFacility(),
+		SnapshotPolicies: []*SnapshotPolicy{&sp},
+	}
+
+	numOfVolumes := 11
+	createdVolumes := make([]Volume, numOfVolumes)
+	for i := 0; i < numOfVolumes; i++ {
+		vcr.Description = randString8()
+		v, _, err := c.Volumes.Create(&vcr, projectID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer c.Volumes.Delete(v.ID)
+		createdVolumes[i] = *v
+	}
+
+	for _, volume := range createdVolumes {
+		if _, err := waitVolumeActive(volume.ID, c); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	volumes, _, err := c.Volumes.List(projectID, nil)
+	if err != nil {
+		t.Fatalf("failed to get list of volumes: %v", err)
+	}
+
+	if len(volumes) < numOfVolumes {
+		t.Fatalf("failed due to expecting at least %d volumes, but actually got %d", numOfVolumes, len(volumes))
+	}
+
+	volumeMap := map[string]Volume{}
+	for _, volume := range volumes {
+		volumeMap[volume.ID] = volume
+	}
+
+	for _, k := range createdVolumes {
+		if _, ok := volumeMap[k.ID]; !ok {
+			t.Fatalf("failed to find expected volume in list: %s", k.ID)
+		}
+	}
+
+	perPage := 4
+	listOpt := &ListOptions{
+		Page:    2,
+		PerPage: perPage,
+	}
+
+	volumes, _, err = c.Volumes.List(projectID, listOpt)
+	if err != nil {
+		t.Fatalf("failed to get list of volumes: %v", err)
+	}
+
+	if len(volumes) != perPage {
+		t.Fatalf("failed due to expecting %d volumes, but actually got %d", perPage, len(volumes))
 	}
 }

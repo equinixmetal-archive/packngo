@@ -9,6 +9,7 @@ const (
 
 // VolumeService interface defines available Volume methods
 type VolumeService interface {
+	List(string, *ListOptions) ([]Volume, *Response, error)
 	Get(string) (*Volume, *Response, error)
 	Update(*VolumeUpdateRequest) (*Volume, *Response, error)
 	Delete(string) (*Response, error)
@@ -20,6 +21,11 @@ type VolumeAttachmentService interface {
 	Get(string) (*VolumeAttachment, *Response, error)
 	Create(string, string) (*VolumeAttachment, *Response, error)
 	Delete(string) (*Response, error)
+}
+
+type volumesRoot struct {
+	Volumes []Volume `json:"volumes"`
+	Meta    meta     `json:"meta"`
 }
 
 // Volume represents a volume
@@ -95,6 +101,39 @@ type VolumeAttachmentServiceOp struct {
 // VolumeServiceOp implements VolumeService
 type VolumeServiceOp struct {
 	client *Client
+}
+
+// List returns the volumes for a project
+func (v *VolumeServiceOp) List(projectID string, listOpt *ListOptions) (volumes []Volume, resp *Response, err error) {
+	url := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, volumeBasePath)
+	var params string
+	if listOpt != nil {
+		params = listOpt.createURL()
+		if params != "" {
+			url = fmt.Sprintf("%s?%s", url, params)
+		}
+	}
+
+	for {
+		subset := new(volumesRoot)
+
+		resp, err = v.client.DoRequest("GET", url, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		volumes = append(volumes, subset.Volumes...)
+
+		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
+			url = subset.Meta.Next.Href
+			if params != "" {
+				url = fmt.Sprintf("%s&%s", url, params)
+			}
+			continue
+		}
+
+		return
+	}
 }
 
 // Get returns a volume by id
