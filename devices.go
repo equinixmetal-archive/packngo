@@ -9,7 +9,7 @@ const deviceBasePath = "/devices"
 
 // DeviceService interface defines available device methods
 type DeviceService interface {
-	List(ProjectID string) ([]Device, *Response, error)
+	List(ProjectID string, listOpt *ListOptions) ([]Device, *Response, error)
 	Get(string) (*Device, *Response, error)
 	GetExtra(deviceID string, includes, excludes []string) (*Device, *Response, error)
 	Create(*DeviceCreateRequest) (*Device, *Response, error)
@@ -24,6 +24,7 @@ type DeviceService interface {
 
 type devicesRoot struct {
 	Devices []Device `json:"devices"`
+	Meta    meta     `json:"meta"`
 }
 
 // Device represents a Packet device
@@ -122,16 +123,33 @@ type DeviceServiceOp struct {
 }
 
 // List returns devices on a project
-func (s *DeviceServiceOp) List(projectID string) ([]Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s/devices?include=facility", projectBasePath, projectID)
-	root := new(devicesRoot)
-
-	resp, err := s.client.DoRequest("GET", path, nil, root)
-	if err != nil {
-		return nil, resp, err
+func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices []Device, resp *Response, err error) {
+	params := "include=facility"
+	if listOpt != nil {
+		params = listOpt.createURL()
 	}
+	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, deviceBasePath, params)
 
-	return root.Devices, resp, err
+	for {
+		subset := new(devicesRoot)
+
+		resp, err = s.client.DoRequest("GET", path, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		devices = append(devices, subset.Devices...)
+
+		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
+			path = subset.Meta.Next.Href
+			if params != "" {
+				path = fmt.Sprintf("%s&%s", path, params)
+			}
+			continue
+		}
+
+		return
+	}
 }
 
 // Get returns a device by id
@@ -160,7 +178,7 @@ func (s *DeviceServiceOp) GetExtra(deviceID string, includes, excludes []string)
 
 // Create creates a new device
 func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s/devices", projectBasePath, createRequest.ProjectID)
+	path := fmt.Sprintf("%s/%s%s", projectBasePath, createRequest.ProjectID, deviceBasePath)
 	device := new(Device)
 
 	resp, err := s.client.DoRequest("POST", path, createRequest, device)

@@ -11,11 +11,6 @@ type ProjectService interface {
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
 	Update(*ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
-	ListVolumes(string) ([]Volume, *Response, error)
-}
-
-type volumesRoot struct {
-	Volumes []Volume `json:"volumes"`
 }
 
 type projectsRoot struct {
@@ -121,17 +116,4 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", projectBasePath, projectID)
 
 	return s.client.DoRequest("DELETE", path, nil, nil)
-}
-
-// ListVolumes returns Volumes for a project
-func (s *ProjectServiceOp) ListVolumes(projectID string) ([]Volume, *Response, error) {
-	url := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, volumeBasePath)
-	root := new(volumesRoot)
-
-	resp, err := s.client.DoRequest("GET", url, nil, root)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return root.Volumes, resp, err
 }
