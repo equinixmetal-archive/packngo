@@ -154,7 +154,7 @@ func TestAccDevicePXE(t *testing.T) {
 		ProjectID:     projectID,
 		BillingCycle:  "hourly",
 		OS:            "custom_ipxe",
-		IPXEScriptURL: "https://boot.netboot.xyz",
+		IPXEScriptURL: pxeURL,
 		AlwaysPXE:     true,
 	}
 
@@ -170,11 +170,30 @@ func TestAccDevicePXE(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Check that settings were persisted
 	if !d.AlwaysPXE {
-		t.Fatal("always_pxe should be set")
+		t.Fatal("always_pxe should be true")
 	}
 	if d.IPXEScriptURL != pxeURL {
-		t.Fatalf("ipxe_script_url should be %s", pxeURL)
+		t.Fatalf("ipxe_script_url should be \"%s\"", pxeURL)
+	}
+
+	// Check that we can update PXE options
+	pxeURL = "http://boot.netboot.xyz"
+	d, _, err = c.Devices.Update(d.ID,
+		&DeviceUpdateRequest{
+			AlwaysPXE:     false,
+			IPXEScriptURL: pxeURL,
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d.AlwaysPXE {
+		t.Fatalf("always_pxe should have been updated to false")
+	}
+	if d.IPXEScriptURL != pxeURL {
+		t.Fatalf("ipxe_script_url should have been updated to \"%s\"", pxeURL)
 	}
 }
 
