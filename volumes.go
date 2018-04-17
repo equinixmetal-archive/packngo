@@ -11,7 +11,7 @@ const (
 type VolumeService interface {
 	List(string, *ListOptions) ([]Volume, *Response, error)
 	Get(string) (*Volume, *Response, error)
-	Update(*VolumeUpdateRequest) (*Volume, *Response, error)
+	Update(string, *VolumeUpdateRequest) (*Volume, *Response, error)
 	Delete(string) (*Response, error)
 	Create(*VolumeCreateRequest, string) (*Volume, *Response, error)
 }
@@ -76,9 +76,8 @@ func (v VolumeCreateRequest) String() string {
 
 // VolumeUpdateRequest type used to update a Packet volume
 type VolumeUpdateRequest struct {
-	ID          string `json:"id"`
-	Description string `json:"description,omitempty"`
-	Plan        string `json:"plan,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Plan        *string `json:"plan,omitempty"`
 }
 
 // VolumeAttachment is a type from Packet API
@@ -150,8 +149,8 @@ func (v *VolumeServiceOp) Get(volumeID string) (*Volume, *Response, error) {
 }
 
 // Update updates a volume
-func (v *VolumeServiceOp) Update(updateRequest *VolumeUpdateRequest) (*Volume, *Response, error) {
-	path := fmt.Sprintf("%s/%s", volumeBasePath, updateRequest.ID)
+func (v *VolumeServiceOp) Update(id string, updateRequest *VolumeUpdateRequest) (*Volume, *Response, error) {
+	path := fmt.Sprintf("%s/%s", volumeBasePath, id)
 	volume := new(Volume)
 
 	resp, err := v.client.DoRequest("PATCH", path, updateRequest, volume)

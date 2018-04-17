@@ -12,7 +12,7 @@ type SSHKeyService interface {
 	ProjectList(string) ([]SSHKey, *Response, error)
 	Get(string) (*SSHKey, *Response, error)
 	Create(*SSHKeyCreateRequest) (*SSHKey, *Response, error)
-	Update(*SSHKeyUpdateRequest) (*SSHKey, *Response, error)
+	Update(string, *SSHKeyUpdateRequest) (*SSHKey, *Response, error)
 	Delete(string) (*Response, error)
 }
 
@@ -49,9 +49,8 @@ func (s SSHKeyCreateRequest) String() string {
 
 // SSHKeyUpdateRequest type used to update an ssh key
 type SSHKeyUpdateRequest struct {
-	ID    string `json:"id"`
-	Label string `json:"label,omitempty"`
-	Key   string `json:"key,omitempty"`
+	Label *string `json:"label,omitempty"`
+	Key   *string `json:"key,omitempty"`
 }
 
 func (s SSHKeyUpdateRequest) String() string {
@@ -115,11 +114,11 @@ func (s *SSHKeyServiceOp) Create(createRequest *SSHKeyCreateRequest) (*SSHKey, *
 }
 
 // Update updates an ssh key
-func (s *SSHKeyServiceOp) Update(updateRequest *SSHKeyUpdateRequest) (*SSHKey, *Response, error) {
-	if updateRequest.Label == "" && updateRequest.Key == "" {
+func (s *SSHKeyServiceOp) Update(id string, updateRequest *SSHKeyUpdateRequest) (*SSHKey, *Response, error) {
+	if updateRequest.Label == nil && updateRequest.Key == nil {
 		return nil, nil, fmt.Errorf("You must set either Label or Key string for SSH Key update")
 	}
-	path := fmt.Sprintf("%s/%s", sshKeyBasePath, updateRequest.ID)
+	path := fmt.Sprintf("%s/%s", sshKeyBasePath, id)
 
 	sshKey := new(SSHKey)
 

@@ -95,13 +95,13 @@ type DeviceCreateRequest struct {
 
 // DeviceUpdateRequest type used to update a Packet device
 type DeviceUpdateRequest struct {
-	Hostname      string   `json:"hostname,omitempty"`
-	Description   string   `json:"description"`
-	UserData      string   `json:"userdata"`
-	Locked        bool     `json:"locked"`
-	Tags          []string `json:"tags"`
-	AlwaysPXE     bool     `json:"always_pxe"`
-	IPXEScriptURL string   `json:"ipxe_script_url,omitempty"`
+	Hostname      *string   `json:"hostname,omitempty"`
+	Description   *string   `json:"description,omitempty"`
+	UserData      *string   `json:"userdata,omitempty"`
+	Locked        *bool     `json:"locked,omitempty"`
+	Tags          *[]string `json:"tags,omitempty"`
+	AlwaysPXE     *bool     `json:"always_pxe,omitempty"`
+	IPXEScriptURL *string   `json:"ipxe_script_url,omitempty"`
 }
 
 func (d DeviceCreateRequest) String() string {

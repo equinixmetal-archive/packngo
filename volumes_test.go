@@ -68,6 +68,53 @@ func TestAccVolume(t *testing.T) {
 	}
 }
 
+func TestAccVolumeUpdate(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	sp := SnapshotPolicy{
+		SnapshotFrequency: "1day",
+		SnapshotCount:     3,
+	}
+
+	vcr := VolumeCreateRequest{
+		Size:             10,
+		BillingCycle:     "hourly",
+		PlanID:           "storage_1",
+		FacilityID:       testFacility(),
+		SnapshotPolicies: []*SnapshotPolicy{&sp},
+	}
+
+	v, _, err := c.Volumes.Create(&vcr, projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v, err = waitVolumeActive(v.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Volumes.Delete(v.ID)
+
+	vDesc := "new Desc"
+
+	vur := VolumeUpdateRequest{Description: &vDesc}
+
+	_, _, err = c.Volumes.Update(v.ID, &vur)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v, _, err = c.Volumes.Get(v.ID)
+
+	if v.Description != vDesc {
+		t.Fatalf("Volume desc should be %q, but is %q", vDesc, v.Description)
+	}
+
+}
+
 func TestAccVolumeLargeList(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()

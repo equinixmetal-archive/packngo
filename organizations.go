@@ -10,7 +10,7 @@ type OrganizationService interface {
 	List() ([]Organization, *Response, error)
 	Get(string) (*Organization, *Response, error)
 	Create(*OrganizationCreateRequest) (*Organization, *Response, error)
-	Update(*OrganizationUpdateRequest) (*Organization, *Response, error)
+	Update(string, *OrganizationUpdateRequest) (*Organization, *Response, error)
 	Delete(string) (*Response, error)
 	ListPaymentMethods(string) ([]PaymentMethod, *Response, error)
 }
@@ -60,12 +60,11 @@ func (o OrganizationCreateRequest) String() string {
 
 // OrganizationUpdateRequest type used to update a Packet organization
 type OrganizationUpdateRequest struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Website     string `json:"website"`
-	Twitter     string `json:"twitter"`
-	Logo        string `json:"logo"`
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Website     *string `json:"website,omitempty"`
+	Twitter     *string `json:"twitter,omitempty"`
+	Logo        *string `json:"logo,omitempty"`
 }
 
 func (o OrganizationUpdateRequest) String() string {
@@ -115,8 +114,8 @@ func (s *OrganizationServiceOp) Create(createRequest *OrganizationCreateRequest)
 }
 
 // Update updates an organization
-func (s *OrganizationServiceOp) Update(updateRequest *OrganizationUpdateRequest) (*Organization, *Response, error) {
-	path := fmt.Sprintf("%s/%s", organizationBasePath, updateRequest.ID)
+func (s *OrganizationServiceOp) Update(id string, updateRequest *OrganizationUpdateRequest) (*Organization, *Response, error) {
+	path := fmt.Sprintf("%s/%s", organizationBasePath, id)
 	organization := new(Organization)
 
 	resp, err := s.client.DoRequest("PATCH", path, updateRequest, organization)

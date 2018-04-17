@@ -68,7 +68,7 @@ func TestAccDeviceUpdate(t *testing.T) {
 		t.Fatal("root_password is empty or non-existent")
 	}
 	newHN := randString8()
-	ur := DeviceUpdateRequest{Hostname: newHN}
+	ur := DeviceUpdateRequest{Hostname: &newHN}
 
 	newD, _, err := c.Devices.Update(dID, &ur)
 	if err != nil {
@@ -180,10 +180,10 @@ func TestAccDevicePXE(t *testing.T) {
 
 	// Check that we can update PXE options
 	pxeURL = "http://boot.netboot.xyz"
+	bFalse := false
 	d, _, err = c.Devices.Update(d.ID,
 		&DeviceUpdateRequest{
-			AlwaysPXE:     false,
-			IPXEScriptURL: pxeURL,
+			AlwaysPXE: &bFalse,
 		},
 	)
 	if err != nil {
@@ -191,6 +191,14 @@ func TestAccDevicePXE(t *testing.T) {
 	}
 	if d.AlwaysPXE {
 		t.Fatalf("always_pxe should have been updated to false")
+	}
+	d, _, err = c.Devices.Update(d.ID,
+		&DeviceUpdateRequest{
+			IPXEScriptURL: &pxeURL,
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
 	}
 	if d.IPXEScriptURL != pxeURL {
 		t.Fatalf("ipxe_script_url should have been updated to \"%s\"", pxeURL)

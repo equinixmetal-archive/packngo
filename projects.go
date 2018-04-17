@@ -9,7 +9,7 @@ type ProjectService interface {
 	List() ([]Project, *Response, error)
 	Get(string) (*Project, *Response, error)
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
-	Update(*ProjectUpdateRequest) (*Project, *Response, error)
+	Update(string, *ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
 }
 
@@ -47,9 +47,8 @@ func (p ProjectCreateRequest) String() string {
 
 // ProjectUpdateRequest type used to update a Packet project
 type ProjectUpdateRequest struct {
-	ID              string `json:"id"`
-	Name            string `json:"name,omitempty"`
-	PaymentMethodID string `json:"payment_method_id,omitempty"`
+	Name            *string `json:"name,omitempty"`
+	PaymentMethodID *string `json:"payment_method_id,omitempty"`
 }
 
 func (p ProjectUpdateRequest) String() string {
@@ -99,8 +98,8 @@ func (s *ProjectServiceOp) Create(createRequest *ProjectCreateRequest) (*Project
 }
 
 // Update updates a project
-func (s *ProjectServiceOp) Update(updateRequest *ProjectUpdateRequest) (*Project, *Response, error) {
-	path := fmt.Sprintf("%s/%s", projectBasePath, updateRequest.ID)
+func (s *ProjectServiceOp) Update(id string, updateRequest *ProjectUpdateRequest) (*Project, *Response, error) {
+	path := fmt.Sprintf("%s/%s", projectBasePath, id)
 	project := new(Project)
 
 	resp, err := s.client.DoRequest("PATCH", path, updateRequest, project)

@@ -20,8 +20,8 @@ func TestAccProject(t *testing.T) {
 		t.Fatalf("Expected new project name to be %s, not %s", rs, p.Name)
 	}
 	rs = testProjectPrefix + randString8()
-	pur := ProjectUpdateRequest{ID: p.ID, Name: rs}
-	p, _, err = c.Projects.Update(&pur)
+	pur := ProjectUpdateRequest{Name: &rs}
+	p, _, err = c.Projects.Update(p.ID, &pur)
 	if err != nil {
 		t.Fatal(err)
 	}
