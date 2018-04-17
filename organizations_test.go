@@ -23,14 +23,16 @@ func TestAccOrg(t *testing.T) {
 		t.Fatalf("Expected new project name to be %s, not %s", rs, p.Name)
 	}
 	rs = testProjectPrefix + randString8()
+	oDesc := "Managed by Packngo."
+	oWeb := "http://quux.example.com"
+	oTwi := "bar"
 	pur := OrganizationUpdateRequest{
-		ID:          p.ID,
-		Name:        rs,
-		Description: "Managed by Packngo.",
-		Website:     "http://quux.example.com",
-		Twitter:     "bar",
+		Name:        &rs,
+		Description: &oDesc,
+		Website:     &oWeb,
+		Twitter:     &oTwi,
 	}
-	p, _, err = c.Organizations.Update(&pur)
+	p, _, err = c.Organizations.Update(p.ID, &pur)
 	if err != nil {
 		t.Fatal(err)
 	}

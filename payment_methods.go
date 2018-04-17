@@ -8,7 +8,7 @@ type PaymentMethodService interface {
 	List() ([]PaymentMethod, *Response, error)
 	Get(string) (*PaymentMethod, *Response, error)
 	Create(*PaymentMethodCreateRequest) (*PaymentMethod, *Response, error)
-	Update(*PaymentMethodUpdateRequest) (*PaymentMethod, *Response, error)
+	Update(string, *PaymentMethodUpdateRequest) (*PaymentMethod, *Response, error)
 	Delete(string) (*Response, error)
 }
 
@@ -55,12 +55,11 @@ func (pm PaymentMethodCreateRequest) String() string {
 
 // PaymentMethodUpdateRequest type used to update a Packet payment method of an organization
 type PaymentMethodUpdateRequest struct {
-	ID             string `json:"id"`
-	Name           string `json:"name,omitempty"`
-	CardholderName string `json:"cardholder_name,omitempty"`
-	ExpMonth       string `json:"expiration_month,omitempty"`
-	ExpYear        string `json:"expiration_year,omitempty"`
-	BillingAddress string `json:"billing_address,omitempty"`
+	Name           *string `json:"name,omitempty"`
+	CardholderName *string `json:"cardholder_name,omitempty"`
+	ExpMonth       *string `json:"expiration_month,omitempty"`
+	ExpYear        *string `json:"expiration_year,omitempty"`
+	BillingAddress *string `json:"billing_address,omitempty"`
 }
 
 func (pm PaymentMethodUpdateRequest) String() string {

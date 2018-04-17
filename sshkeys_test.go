@@ -136,10 +136,8 @@ func TestWrongSSHKeyUpdate(t *testing.T) {
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 	key := createKey(t, c, projectID)
-	req := SSHKeyUpdateRequest{
-		ID: key.ID,
-	}
-	_, _, err := c.SSHKeys.Update(&req)
+	req := SSHKeyUpdateRequest{}
+	_, _, err := c.SSHKeys.Update(key.ID, &req)
 	if err == nil {
 		t.Fatalf("SSHKey update by request without label or key string should be invalid")
 	}
@@ -154,10 +152,9 @@ func TestAccSSHKeyStringUpdate(t *testing.T) {
 
 	newKey := makePubKey(t)
 	req := SSHKeyUpdateRequest{
-		ID:  key.ID,
-		Key: newKey,
+		Key: &newKey,
 	}
-	got, _, err := c.SSHKeys.Update(&req)
+	got, _, err := c.SSHKeys.Update(key.ID, &req)
 	if err != nil {
 		t.Fatalf("failed to update key: %v", err)
 	}
@@ -178,11 +175,10 @@ func TestAccSSHKeyLabelUpdate(t *testing.T) {
 	defer teardown()
 	key := createKey(t, c, projectID)
 
-	req := SSHKeyUpdateRequest{
-		ID:    key.ID,
-		Label: key.Label + "-updated",
-	}
-	got, _, err := c.SSHKeys.Update(&req)
+	kLabel := key.Label + "-updated"
+
+	req := SSHKeyUpdateRequest{Label: &kLabel}
+	got, _, err := c.SSHKeys.Update(key.ID, &req)
 	if err != nil {
 		t.Fatalf("failed to update key: %v", err)
 	}
@@ -204,12 +200,12 @@ func TestAccSSHKeyUpdate(t *testing.T) {
 	key := createKey(t, c, projectID)
 
 	newKey := makePubKey(t)
+	kLabel := key.Label + "-updated"
 	req := SSHKeyUpdateRequest{
-		ID:    key.ID,
-		Key:   newKey,
-		Label: key.Label + "-updated",
+		Key:   &newKey,
+		Label: &kLabel,
 	}
-	got, _, err := c.SSHKeys.Update(&req)
+	got, _, err := c.SSHKeys.Update(key.ID, &req)
 	if err != nil {
 		t.Fatalf("failed to update key: %v", err)
 	}
