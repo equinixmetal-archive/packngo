@@ -216,7 +216,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 	}
 
 	if nType != NetworkHybrid {
-		t.Fatalf("the device shoud be in network type L2 Bonded", plan)
+		t.Fatalf("the device should be in network type L2 Bonded")
 	}
 
 	if len(eth1.AttachedVirtualNetworks) != 0 {
@@ -366,7 +366,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 	}
 
 	if nType != NetworkL2Bonded {
-		t.Fatalf("the device shoud be in network type L2 Bonded", plan)
+		t.Fatalf("the device should be in network type L2 Bonded")
 	}
 
 	bond0, err := c.DevicePorts.GetBondPort(d.ID)
