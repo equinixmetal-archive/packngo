@@ -67,7 +67,6 @@ type VolumeCreateRequest struct {
 	Description      string            `json:"description,omitempty"`
 	Locked           bool              `json:"locked,omitempty"`
 	Size             int               `json:"size"`
-	ProjectID        string            `json:"project_id"`
 	PlanID           string            `json:"plan_id"`
 	FacilityID       string            `json:"facility_id"`
 	SnapshotPolicies []*SnapshotPolicy `json:"snapshot_policies,omitempty"`
