@@ -47,11 +47,11 @@ func TestAccVolumeBasic(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	defer c.Volumes.Delete(v.ID)
+	v, err = waitVolumeActive(v.ID, c)
 	if err != nil {
 		t.Fatal(err)
 	}
-	v, err = waitVolumeActive(v.ID, c)
+	defer c.Volumes.Delete(v.ID)
 
 	if len(v.SnapshotPolicies) != 1 {
 		t.Fatal("Test volume should have one snapshot policy")
