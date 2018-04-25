@@ -192,7 +192,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	response.populateRate()
 	if c.debug {
 		o, _ := httputil.DumpResponse(response.Response, true)
-		log.Printf("%s\n", string(o))
+		log.Printf("\n=======[RESPONSE]============\n%s\n\n", string(o))
 	}
 	c.RateLimit = response.Rate
 
@@ -223,7 +223,7 @@ func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response,
 	req, err := c.NewRequest(method, path, body)
 	if c.debug {
 		o, _ := httputil.DumpRequestOut(req, true)
-		log.Printf("%s\n", string(o))
+		log.Printf("\n=======[REQUEST]=============\n%s\n", string(o))
 	}
 	if err != nil {
 		return nil, err
