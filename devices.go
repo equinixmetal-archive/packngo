@@ -233,22 +233,22 @@ func (s *DeviceServiceOp) PowerOn(deviceID string) (*Response, error) {
 	return s.client.DoRequest("POST", path, action, nil)
 }
 
-type lockDeviceType struct {
+type lockType struct {
 	Locked bool `json:"locked"`
 }
 
 // Lock sets a device to "locked"
 func (s *DeviceServiceOp) Lock(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
-	action := lockDeviceType{Locked: true}
+	action := lockType{Locked: true}
 
 	return s.client.DoRequest("PATCH", path, action, nil)
 }
 
-// Unlock sets a device to "locked"
+// Unlock sets a device to "unlocked"
 func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
-	action := lockDeviceType{Locked: false}
+	action := lockType{Locked: false}
 
 	return s.client.DoRequest("PATCH", path, action, nil)
 }
