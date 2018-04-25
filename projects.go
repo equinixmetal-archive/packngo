@@ -39,6 +39,7 @@ func (p Project) String() string {
 type ProjectCreateRequest struct {
 	Name            string `json:"name"`
 	PaymentMethodID string `json:"payment_method_id,omitempty"`
+	OrganizationID  string `json:"organization_id,omitempty"`
 }
 
 func (p ProjectCreateRequest) String() string {
