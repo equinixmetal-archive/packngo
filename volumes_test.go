@@ -21,7 +21,7 @@ func waitVolumeActive(id string, c *Client) (*Volume, error) {
 	return nil, fmt.Errorf("volume %s is still not active after timeout", id)
 }
 
-func TestAccVolume(t *testing.T) {
+func TestAccVolumeBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
 	c, projectID, teardown := setupWithProject(t)
@@ -38,6 +38,8 @@ func TestAccVolume(t *testing.T) {
 		PlanID:           "storage_1",
 		FacilityID:       testFacility(),
 		SnapshotPolicies: []*SnapshotPolicy{&sp},
+		Description:      "ahoj!",
+		Locked:           true,
 	}
 
 	v, _, err := c.Volumes.Create(&vcr, projectID)
@@ -45,11 +47,11 @@ func TestAccVolume(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	v, err = waitVolumeActive(v.ID, c)
+	defer c.Volumes.Delete(v.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.Volumes.Delete(v.ID)
+	v, err = waitVolumeActive(v.ID, c)
 
 	if len(v.SnapshotPolicies) != 1 {
 		t.Fatal("Test volume should have one snapshot policy")
@@ -66,6 +68,11 @@ func TestAccVolume(t *testing.T) {
 	if v.Facility.Code != testFacility() {
 		t.Fatal("Test volume has wrong facility")
 	}
+	_, err = c.Volumes.Unlock(v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }
 
 func TestAccVolumeUpdate(t *testing.T) {
@@ -111,6 +118,34 @@ func TestAccVolumeUpdate(t *testing.T) {
 
 	if v.Description != vDesc {
 		t.Fatalf("Volume desc should be %q, but is %q", vDesc, v.Description)
+	}
+
+	newSize := 15
+
+	vur = VolumeUpdateRequest{Size: &newSize}
+
+	_, _, err = c.Volumes.Update(v.ID, &vur)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v, _, err = c.Volumes.Get(v.ID)
+	if v.Size != newSize {
+		t.Fatalf("Volume size should be %q, but is %q", newSize, v.Size)
+	}
+
+	newPlan := "storage_2"
+
+	vur = VolumeUpdateRequest{PlanID: &newPlan}
+
+	_, _, err = c.Volumes.Update(v.ID, &vur)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v, _, err = c.Volumes.Get(v.ID)
+	if v.Plan.Slug != newPlan {
+		t.Fatalf("Plan should be %q, but is %q", newPlan, v.Plan.Slug)
 	}
 
 }
