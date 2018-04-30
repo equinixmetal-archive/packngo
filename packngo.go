@@ -17,11 +17,12 @@ import (
 )
 
 const (
-	libraryVersion = "0.1.0"
-	baseURL        = "https://api.packet.net/"
-	userAgent      = "packngo/" + libraryVersion
-	mediaType      = "application/json"
-	debugEnvVar    = "PACKNGO_DEBUG"
+	packetTokenEnvVar = "PACKET_AUTH_TOKEN"
+	libraryVersion    = "0.1.0"
+	baseURL           = "https://api.packet.net/"
+	userAgent         = "packngo/" + libraryVersion
+	mediaType         = "application/json"
+	debugEnvVar       = "PACKNGO_DEBUG"
 
 	headerRateLimit     = "X-RateLimit-Limit"
 	headerRateRemaining = "X-RateLimit-Remaining"
@@ -231,11 +232,21 @@ func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response,
 	return c.Do(req, v)
 }
 
-// NewClient initializes and returns a Client, use this to get an API Client to operate on
+func NewClient() (*Client, error) {
+	apiToken := os.Getenv(packetTokenEnvVar)
+	if apiToken == "" {
+		return nil, fmt.Errorf("you must export %s.", packetTokenEnvVar)
+	}
+	c := NewClientWithAuth("packngo lib", apiToken, nil)
+	return c, nil
+
+}
+
+// NewClientWithAuth initializes and returns a Client, use this to get an API Client to operate on
 // N.B.: Packet's API certificate requires Go 1.5+ to successfully parse. If you are using
 // an older version of Go, pass in a custom http.Client with a custom TLS configuration
 // that sets "InsecureSkipVerify" to "true"
-func NewClient(consumerToken string, apiKey string, httpClient *http.Client) *Client {
+func NewClientWithAuth(consumerToken string, apiKey string, httpClient *http.Client) *Client {
 	client, _ := NewClientWithBaseURL(consumerToken, apiKey, httpClient, baseURL)
 	return client
 }
