@@ -36,7 +36,7 @@ func main() {
 		log.Fatal(err)
 	}
 	for _, p := range ps {
-		log.Println(p.Name, p.ID)
+		log.Println(p.ID, p.Name)
 	}
 }
 
