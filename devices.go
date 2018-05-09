@@ -91,6 +91,7 @@ type DeviceCreateRequest struct {
 	SpotInstance          bool       `json:"spot_instance,omitempty"`
 	SpotPriceMax          float64    `json:"spot_price_max,omitempty,string"`
 	TerminationTime       *Timestamp `json:"termination_time,omitempty"`
+	CustomData            string     `json:"customdata,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
