@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	packetTokenEnvVar = "PACKET_AUTH_TOKEN"
 	packetURLEnvVar   = "PACKET_API_URL"
 	packngoAccTestVar = "PACKNGO_TEST_ACTUAL_API"
 	testProjectPrefix = "PACKNGO_TEST_DELME_2d768716_"
@@ -107,7 +106,7 @@ func organizationTeardown(c *Client) {
 
 func TestAccInvalidCredentials(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
-	c := NewClient("packngo test", "wrongApiToken", nil)
+	c := NewClientWithAuth("packngo test", "wrongApiToken", nil)
 	_, r, expectedErr := c.Projects.List()
 	matched, err := regexp.MatchString(".*Invalid.*", expectedErr.Error())
 	if err != nil {
