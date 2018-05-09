@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"errors"
 	"fmt"
 	"path"
 	"testing"
@@ -453,5 +454,63 @@ func TestAccDeviceSpotInstance(t *testing.T) {
 	if !d.TerminationTime.Time.Truncate(time.Minute).Equal(testTerm.Time.Truncate(time.Minute)) {
 		t.Fatalf("termination_time is %s, should be %s",
 			d.TerminationTime.Time.Local(), testTerm.Time.Local())
+	}
+}
+
+func TestAccDeviceCustomData(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+
+	initialCustomData := `{"hello":"world"}`
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     testFacility(),
+		Plan:         "baremetal_0",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+		CustomData:   initialCustomData,
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+
+	dID := d.ID
+
+	d, err = waitDeviceActive(dID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	device, _, err := c.Devices.Get(dID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if device.CustomData["hello"] != "world" {
+		t.Fatal(errors.New("Did not properly set custom data when creating device"))
+	}
+
+	updateCustomData := `{"hi":"earth"}`
+	c.Devices.Update(dID, &DeviceUpdateRequest{
+		CustomData: updateCustomData,
+	})
+
+	device, _, err = c.Devices.Get(dID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if device.CustomData["hi"] != "earth" {
+		t.Fatal(errors.New("Did not properly update custom data"))
 	}
 }
