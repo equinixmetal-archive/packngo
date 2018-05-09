@@ -56,6 +56,7 @@ type Device struct {
 	SpotPriceMax        float64                `json:"spot_price_max,omitempty"`
 	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
 	NetworkPorts        []Port                 `json:"network_ports,omitempty"`
+	CustomData          map[string]interface{} `json:"customdata,omitempty"`
 }
 
 type ProvisionEvent struct {
