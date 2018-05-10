@@ -3,6 +3,7 @@ package packngo
 import (
 	"errors"
 	"fmt"
+	"log"
 	"path"
 	"testing"
 	"time"
@@ -501,9 +502,12 @@ func TestAccDeviceCustomData(t *testing.T) {
 	}
 
 	updateCustomData := `{"hi":"earth"}`
-	c.Devices.Update(dID, &DeviceUpdateRequest{
+	_, _, err = c.Devices.Update(dID, &DeviceUpdateRequest{
 		CustomData: &updateCustomData,
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	device, _, err = c.Devices.Get(dID)
 	if err != nil {
@@ -512,5 +516,22 @@ func TestAccDeviceCustomData(t *testing.T) {
 
 	if device.CustomData["hi"] != "earth" {
 		t.Fatal(errors.New("Did not properly update custom data"))
+	}
+
+	updateCustomData = ""
+	_, _, err = c.Devices.Update(dID, &DeviceUpdateRequest{
+		CustomData: &updateCustomData,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	device, _, err = c.Devices.Get(dID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Println(device.CustomData)
+	if len(device.CustomData) != 0 {
+		t.Fatal(errors.New("Did not properly erase custom data"))
 	}
 }
