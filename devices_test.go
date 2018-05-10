@@ -3,7 +3,6 @@ package packngo
 import (
 	"errors"
 	"fmt"
-	"log"
 	"path"
 	"testing"
 	"time"
@@ -530,7 +529,6 @@ func TestAccDeviceCustomData(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Println(device.CustomData)
 	if len(device.CustomData) != 0 {
 		t.Fatal(errors.New("Did not properly erase custom data"))
 	}
