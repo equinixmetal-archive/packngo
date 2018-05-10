@@ -502,7 +502,7 @@ func TestAccDeviceCustomData(t *testing.T) {
 
 	updateCustomData := `{"hi":"earth"}`
 	c.Devices.Update(dID, &DeviceUpdateRequest{
-		CustomData: updateCustomData,
+		CustomData: &updateCustomData,
 	})
 
 	device, _, err = c.Devices.Get(dID)
