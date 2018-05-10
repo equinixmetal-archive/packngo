@@ -56,6 +56,7 @@ type Device struct {
 	SpotPriceMax        float64                `json:"spot_price_max,omitempty"`
 	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
 	NetworkPorts        []Port                 `json:"network_ports,omitempty"`
+	CustomData          map[string]interface{} `json:"customdata,omitempty"`
 }
 
 type ProvisionEvent struct {
@@ -91,6 +92,7 @@ type DeviceCreateRequest struct {
 	SpotInstance          bool       `json:"spot_instance,omitempty"`
 	SpotPriceMax          float64    `json:"spot_price_max,omitempty,string"`
 	TerminationTime       *Timestamp `json:"termination_time,omitempty"`
+	CustomData            string     `json:"customdata,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
@@ -102,6 +104,7 @@ type DeviceUpdateRequest struct {
 	Tags          *[]string `json:"tags,omitempty"`
 	AlwaysPXE     *bool     `json:"always_pxe,omitempty"`
 	IPXEScriptURL *string   `json:"ipxe_script_url,omitempty"`
+	CustomData    *string   `json:"customdata,omitempty"`
 }
 
 func (d DeviceCreateRequest) String() string {
