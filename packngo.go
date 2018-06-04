@@ -43,7 +43,7 @@ type ListOptions struct {
 
 func (l *ListOptions) createURL() (url string) {
 	if l.Includes != "" {
-		url += fmt.Sprintf("includes=%s", l.Includes)
+		url += fmt.Sprintf("include=%s", l.Includes)
 	}
 
 	if l.Page != 0 {
