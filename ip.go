@@ -182,7 +182,7 @@ func (i *ProjectIPServiceOp) Remove(ipReservationID string) (*Response, error) {
 
 // AvailableAddresses lists addresses available from a reserved block
 func (i *ProjectIPServiceOp) AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error) {
-	path := fmt.Sprintf("%s/%s/available", ipBasePath, ipReservationID)
+	path := fmt.Sprintf("%s/%s/available?cidr=%d", ipBasePath, ipReservationID, r.CIDR)
 	ar := new(AvailableResponse)
 
 	resp, err := i.client.DoRequest("GET", path, r, ar)
