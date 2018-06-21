@@ -101,16 +101,17 @@ func (m BondingMode) String() string {
 }
 
 type CurrentDevice struct {
-	ID       string          `json:"id"`
-	Hostname string          `json:"hostname"`
-	IQN      string          `json:"iqn"`
-	Plan     string          `json:"plan"`
-	Facility string          `json:"facility"`
-	Tags     []string        `json:"tags"`
-	SSHKeys  []string        `json:"ssh_keys"`
-	OS       OperatingSystem `json:"operating_system"`
-	Network  NetworkInfo     `json:"network"`
-	Volumes  []VolumeInfo    `json:"volume"`
+	ID         string                 `json:"id"`
+	Hostname   string                 `json:"hostname"`
+	IQN        string                 `json:"iqn"`
+	Plan       string                 `json:"plan"`
+	Facility   string                 `json:"facility"`
+	Tags       []string               `json:"tags"`
+	SSHKeys    []string               `json:"ssh_keys"`
+	OS         OperatingSystem        `json:"operating_system"`
+	Network    NetworkInfo            `json:"network"`
+	Volumes    []VolumeInfo           `json:"volume"`
+	CustomData map[string]interface{} `json:"customdata"`
 
 	// This is available, but is actually inaccurate, currently:
 	//   APIBaseURL string          `json:"api_url"`
