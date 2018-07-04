@@ -9,7 +9,7 @@ const batchBasePath = "/batches"
 // BatchService interface defines available batch methods
 type BatchService interface {
 	Get(batchID string, listOpt *ListOptions) (*Batch, *Response, error)
-	List(ProjectID string, listOpt *ListOptions) (*[]Batch, *Response, error)
+	List(ProjectID string, listOpt *ListOptions) ([]Batch, *Response, error)
 	Create(projectID string, batches *InstanceBatchCreateRequest) (*Batch, *Response, error)
 }
 
@@ -24,6 +24,11 @@ type Batch struct {
 	Instances              Href       `json:"instances,omitempty"`
 	Facilities             []Facility `json:"facilities,omitempty"`
 	FacilityDiversityLevel int32      `json:"facility_diversity_level,omitempty"`
+}
+
+//BatchesList represents collection of batches
+type batchesList struct {
+	Batches []Batch `json:"batches,omitempty"`
 }
 
 // InstanceBatchCreateRequest type used to create batch of device instances
@@ -75,18 +80,19 @@ func (s *BatchServiceOp) Get(batchID string, listOpt *ListOptions) (*Batch, *Res
 }
 
 // List returns batches on a project
-func (s *BatchServiceOp) List(projectID string, listOpt *ListOptions) (batches *[]Batch, resp *Response, err error) {
+func (s *BatchServiceOp) List(projectID string, listOpt *ListOptions) (batches []Batch, resp *Response, err error) {
 	var params string
 	if listOpt != nil {
 		params = listOpt.createURL()
 	}
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, batchBasePath, params)
-
-	resp, err = s.client.DoRequest("GET", path, nil, batches)
+	subset := new(batchesList)
+	resp, err = s.client.DoRequest("GET", path, nil, subset)
 	if err != nil {
 		return nil, resp, err
 	}
 
+	batches = append(batches, subset.Batches...)
 	return batches, resp, err
 }
 
@@ -94,7 +100,7 @@ func (s *BatchServiceOp) List(projectID string, listOpt *ListOptions) (batches *
 func (s *BatchServiceOp) Create(projectID string, batches *InstanceBatchCreateRequest) (*Batch, *Response, error) {
 	path := fmt.Sprintf("%s/%s/devices/batch", projectBasePath, projectID)
 
-	var batch *Batch
+	batch := new(Batch)
 	resp, err := s.client.DoRequest("POST", path, batches, batch)
 
 	if err != nil {

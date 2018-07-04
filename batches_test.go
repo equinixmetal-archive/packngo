@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -25,7 +26,7 @@ func TestAccCreateBatch(t *testing.T) {
 		},
 	}
 
-	batch, _, err := c.Batches.Create("6e505da6-c861-487f-adcb-adfe3959da49", batches)
+	batch, _, err := c.Batches.Create("93125c2a-8b78-4d4f-a3c4-7367d6b7cca8", batches)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +38,7 @@ func TestAccCreateBatch(t *testing.T) {
 func TestAccListBatches(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
-	batches, _, err := c.Batches.List("", nil)
+	batches, _, err := c.Batches.List("93125c2a-8b78-4d4f-a3c4-7367d6b7cca8", nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -46,6 +47,8 @@ func TestAccListBatches(t *testing.T) {
 	if batches == nil {
 		t.Fatal("No batches have been created")
 	}
+
+	fmt.Println(len(batches))
 }
 
 func TestAccGetBatch(t *testing.T) {
