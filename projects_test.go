@@ -116,3 +116,48 @@ func TestAccCreateNonDefaultOrgProject(t *testing.T) {
 		t.Fatalf("Expected new project to not be part of org %s", orgPath)
 	}
 }
+
+func TestAccListProjects(t *testing.T) {
+	c := setup(t)
+	defer projectTeardown(c)
+
+	rs := testProjectPrefix + randString8()
+
+	u, _, err := c.Users.Current()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	orgPath := "/organizations/" + u.DefaultOrganizationID
+
+	pcr := ProjectCreateRequest{Name: rs}
+	p, _, err := c.Projects.Create(&pcr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if p.Organization.URL != orgPath {
+		t.Fatalf("Expected new project to be part of org %s, not %v", orgPath, p.Organization)
+	}
+
+	listOpt := &ListOptions{
+		Includes: "members",
+	}
+	projs, _, err := c.Projects.List(listOpt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, proj := range projs {
+		if proj.ID == p.ID {
+			if len(proj.Users) == 0 {
+				t.Fatal("Project users not returned.")
+			}
+
+			if proj.Users[0].FirstName != u.FirstName {
+				t.Fatal("Project user details not returned.")
+			}
+			break
+		}
+	}
+}
