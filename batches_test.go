@@ -11,7 +11,7 @@ func TestAccCreateBatch(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
 
-	batches := &InstanceBatchCreateRequest{
+	req := &InstanceBatchCreateRequest{
 		Batches: []BatchInstance{
 			{
 				Hostname:        "test1",
@@ -26,13 +26,13 @@ func TestAccCreateBatch(t *testing.T) {
 		},
 	}
 
-	batch, _, err := c.Batches.Create("93125c2a-8b78-4d4f-a3c4-7367d6b7cca8", batches)
+	batches, _, err := c.Batches.Create("93125c2a-8b78-4d4f-a3c4-7367d6b7cca8", req)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if batch != nil {
-		batchID = batch.ID
+	if len(batches) != 0 {
+		batchID = batches[0].ID
 	}
 }
 func TestAccListBatches(t *testing.T) {
@@ -49,6 +49,10 @@ func TestAccListBatches(t *testing.T) {
 	}
 
 	fmt.Println(len(batches))
+	projects, _, err := c.Projects.List()
+	for _, p := range projects {
+		fmt.Println(p.PaymentMethod)
+	}
 }
 
 func TestAccGetBatch(t *testing.T) {

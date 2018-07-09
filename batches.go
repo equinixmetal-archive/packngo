@@ -10,7 +10,7 @@ const batchBasePath = "/batches"
 type BatchService interface {
 	Get(batchID string, listOpt *ListOptions) (*Batch, *Response, error)
 	List(ProjectID string, listOpt *ListOptions) ([]Batch, *Response, error)
-	Create(projectID string, batches *InstanceBatchCreateRequest) (*Batch, *Response, error)
+	Create(projectID string, batches *InstanceBatchCreateRequest) ([]Batch, *Response, error)
 }
 
 // Batch type
@@ -97,15 +97,15 @@ func (s *BatchServiceOp) List(projectID string, listOpt *ListOptions) (batches [
 }
 
 // Create function to create batch of device instances
-func (s *BatchServiceOp) Create(projectID string, batches *InstanceBatchCreateRequest) (*Batch, *Response, error) {
+func (s *BatchServiceOp) Create(projectID string, request *InstanceBatchCreateRequest) ([]Batch, *Response, error) {
 	path := fmt.Sprintf("%s/%s/devices/batch", projectBasePath, projectID)
 
-	batch := new(Batch)
-	resp, err := s.client.DoRequest("POST", path, batches, batch)
+	batches := new(batchesList)
+	resp, err := s.client.DoRequest("POST", path, request, batches)
 
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return batch, resp, err
+	return batches.Batches, resp, err
 }
