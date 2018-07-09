@@ -118,7 +118,9 @@ func TestAccCreateNonDefaultOrgProject(t *testing.T) {
 }
 
 func TestAccListProjects(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
+
 	defer projectTeardown(c)
 
 	rs := testProjectPrefix + randString8()
