@@ -152,11 +152,7 @@ func TestAccListProjects(t *testing.T) {
 
 	for _, proj := range projs {
 		if proj.ID == p.ID {
-			if len(proj.Users) == 0 {
-				t.Fatal("Project users not returned.")
-			}
-
-			if proj.Users[0].FirstName != u.FirstName {
+			if proj.Users[0].ID != u.ID {
 				t.Fatal("Project user details not returned.")
 			}
 			break
