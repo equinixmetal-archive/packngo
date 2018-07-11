@@ -31,7 +31,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ps, _, err := c.Projects.List()
+	ps, _, err := c.Projects.List(nil)
 	if err != nil {
 		log.Fatal(err)
 	}
