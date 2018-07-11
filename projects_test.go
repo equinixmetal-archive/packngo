@@ -28,7 +28,7 @@ func TestAccProject(t *testing.T) {
 	if p.Name != rs {
 		t.Fatalf("Expected the name of the updated project to be %s, not %s", rs, p.Name)
 	}
-	gotProject, _, err := c.Projects.Get(p.ID)
+	gotProject, _, err := c.Projects.Get(p.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
