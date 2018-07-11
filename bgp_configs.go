@@ -23,7 +23,7 @@ type CreateBGPConfigRequest struct {
 	UseCase        string `json:"use_case,omitempty"`
 }
 
-// BgpConfig represents a Packet BGP Config
+// BGPConfig represents a Packet BGP Config
 type BGPConfig struct {
 	ID             string     `json:"id,omitempty"`
 	Status         string     `json:"status,omitempty"`
@@ -40,7 +40,7 @@ type BGPConfig struct {
 }
 
 // Create function
-func (s *BGPSessionServiceOp) Create(projectID string, request CreateBGPConfigRequest) (*BGPConfig, *Response, error) {
+func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigRequest) (*BGPConfig, *Response, error) {
 	path := fmt.Sprintf("%s/%s/%ss", projectBasePath, projectID, bgpConfigBasePath)
 	session := new(BGPConfig)
 
@@ -52,8 +52,8 @@ func (s *BGPSessionServiceOp) Create(projectID string, request CreateBGPConfigRe
 	return session, resp, err
 }
 
-// ListByProject function
-func (s *BGPSessionServiceOp) Get(projectID string, listOpt *ListOptions) (bgpConfig *BGPConfig, resp *Response, err error) {
+// Get function
+func (s *BGPConfigServiceOp) Get(projectID string, listOpt *ListOptions) (bgpConfig *BGPConfig, resp *Response, err error) {
 	var params string
 	if listOpt != nil {
 		params = listOpt.createURL()

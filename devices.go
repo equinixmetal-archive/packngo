@@ -20,6 +20,7 @@ type DeviceService interface {
 	PowerOn(string) (*Response, error)
 	Lock(string) (*Response, error)
 	Unlock(string) (*Response, error)
+	ListBGPSessions(deviceID string, listOpt *ListOptions) ([]BGPSession, *Response, error)
 }
 
 type devicesRoot struct {
@@ -254,4 +255,33 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 	action := lockType{Locked: false}
 
 	return s.client.DoRequest("PATCH", path, action, nil)
+}
+
+// ListBGPSessions returns all BGP Sessions associated with the device
+func (s *DeviceServiceOp) ListBGPSessions(deviceID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
+	var params string
+	if listOpt != nil {
+		params = listOpt.createURL()
+	}
+	path := fmt.Sprintf("%s/%s%s?%s", deviceBasePath, deviceID, bgpSessionBasePath, params)
+
+	for {
+		subset := new(bgpSessionsRoot)
+
+		resp, err = s.client.DoRequest("GET", path, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		bgpSessions = append(bgpSessions, subset.Sessions...)
+
+		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
+			path = subset.Meta.Next.Href
+			if params != "" {
+				path = fmt.Sprintf("%s&%s", path, params)
+			}
+			continue
+		}
+		return
+	}
 }

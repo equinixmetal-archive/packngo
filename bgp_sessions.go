@@ -6,8 +6,6 @@ var bgpSessionBasePath = "/bgp/sessions"
 
 // BGPSessionService interface defines available BGP session methods
 type BGPSessionService interface {
-	ListByDevice(string, listOpt *ListOptions) ([]BGPSession, *Response, error)
-	ListByProject(string, listOpt *ListOptions) ([]BGPSession, *Response, error)
 	Get(string, *ListOptions) (*BGPSession, *Response, error)
 	Create(string, CreateBGPSessionRequest) (*BGPSession, *Response, error)
 	Delete(string) (*Response, error)
@@ -23,7 +21,7 @@ type BGPSessionServiceOp struct {
 	client *Client
 }
 
-// BgpSession represents a Packet BGP Session
+// BGPSession represents a Packet BGP Session
 type BGPSession struct {
 	ID            string   `json:"id,omitempty"`
 	Status        string   `json:"status,omitempty"`
@@ -39,7 +37,7 @@ type CreateBGPSessionRequest struct {
 }
 
 // Create function
-func (s *BGPConfigServiceOp) Create(deviceID string, request CreateBGPSessionRequest) (*BGPSession, *Response, error) {
+func (s *BGPSessionServiceOp) Create(deviceID string, request CreateBGPSessionRequest) (*BGPSession, *Response, error) {
 	path := fmt.Sprintf("%s/%s/%s", deviceBasePath, deviceID, bgpSessionBasePath)
 	session := new(BGPSession)
 
@@ -58,64 +56,18 @@ func (s *BGPSessionServiceOp) Delete(id string) (*Response, error) {
 	return s.client.DoRequest("DELETE", path, nil, nil)
 }
 
-// ListByDevice function
-func (s *BGPSessionServiceOp) ListByDevice(deviceID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
+// Get function
+func (s *BGPSessionServiceOp) Get(id string, listOpt *ListOptions) (session *BGPSession, response *Response, err error) {
 	var params string
 	if listOpt != nil {
 		params = listOpt.createURL()
 	}
-	path := fmt.Sprintf("%s/%s/%s?%s", deviceBasePath, deviceID, bgpSessionBasePath, params)
-
-	for {
-		subset := new(bgpSessionsRoot)
-
-		resp, err = s.client.DoRequest("GET", path, nil, subset)
-		if err != nil {
-			return nil, resp, err
-		}
-
-		bgpSessions = append(bgpSessions, subset.Sessions...)
-
-		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
-			path = subset.Meta.Next.Href
-			if params != "" {
-				path = fmt.Sprintf("%s&%s", path, params)
-			}
-			continue
-		}
-
-		return
+	path := fmt.Sprintf("%s/%s?%s", bgpSessionBasePath, id, params)
+	session = new(BGPSession)
+	response, err = s.client.DoRequest("GET", path, nil, session)
+	if err != nil {
+		return nil, response, err
 	}
 
-}
-
-// ListByProject function
-func (s *BGPSessionServiceOp) ListByProject(projectID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
-	path := fmt.Sprintf("%s/%s/%s?%s", projectBasePath, projectID, bgpSessionBasePath, params)
-
-	for {
-		subset := new(bgpSessionsRoot)
-
-		resp, err = s.client.DoRequest("GET", path, nil, subset)
-		if err != nil {
-			return nil, resp, err
-		}
-
-		bgpSessions = append(bgpSessions, subset.Sessions...)
-
-		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
-			path = subset.Meta.Next.Href
-			if params != "" {
-				path = fmt.Sprintf("%s&%s", path, params)
-			}
-			continue
-		}
-
-		return
-	}
-
+	return session, response, err
 }
