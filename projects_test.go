@@ -159,3 +159,46 @@ func TestAccListProjects(t *testing.T) {
 		}
 	}
 }
+
+func TestAccProjectListPagination(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	c := setup(t)
+	defer projectTeardown(c)
+	for i := 0; i < 3; i++ {
+		pcr := ProjectCreateRequest{
+			Name: testProjectPrefix + randString8(),
+		}
+		_, _, err := c.Projects.Create(&pcr)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	listOpts := &ListOptions{
+		Page:    1,
+		PerPage: 3,
+	}
+
+	projects, _, err := c.Projects.List(listOpts)
+	if err != nil {
+		t.Fatalf("failed to get list of projects: %v", err)
+	}
+	// The user account that runs this test probably have some projects on
+	// his own, keep it in mind when improving/extending this test.
+	if len(projects) != 3 {
+		t.Fatalf("exactly 3 projects should have been fetched: %v", err)
+	}
+
+	listOpts = &ListOptions{
+		Page:    2,
+		PerPage: 1,
+	}
+
+	projects, _, err = c.Projects.List(listOpts)
+	if err != nil {
+		t.Fatalf("failed to get list of projects: %v", err)
+	}
+	if len(projects) != 1 {
+		t.Fatalf("only 1 project should have been fetched: %v", err)
+	}
+
+}
