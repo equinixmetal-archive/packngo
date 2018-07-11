@@ -38,7 +38,7 @@ type CreateBGPSessionRequest struct {
 
 // Create function
 func (s *BGPSessionServiceOp) Create(deviceID string, request CreateBGPSessionRequest) (*BGPSession, *Response, error) {
-	path := fmt.Sprintf("%s/%s/%s", deviceBasePath, deviceID, bgpSessionBasePath)
+	path := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, bgpSessionBasePath)
 	session := new(BGPSession)
 
 	resp, err := s.client.DoRequest("POST", path, request, session)

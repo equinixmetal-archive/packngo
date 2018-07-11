@@ -13,7 +13,6 @@ func TestAccCreateBGPSession(t *testing.T) {
 
 	c, projectID, _ := setupWithProject(t)
 	hn := randString8()
-
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     testFacility(),
