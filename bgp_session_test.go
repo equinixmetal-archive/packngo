@@ -9,7 +9,7 @@ var projectID string
 var sessionID string
 
 func TestAccCreateBGPSession(t *testing.T) {
-	// skipUnlessAcceptanceTestsAllowed(t)
+	skipUnlessAcceptanceTestsAllowed(t)
 
 	c, projectID, _ := setupWithProject(t)
 	hn := randString8()
@@ -42,6 +42,7 @@ func TestAccCreateBGPSession(t *testing.T) {
 }
 
 func TestAccListBGPSessionsByDevice(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
 
 	sessions, _, err := c.Devices.ListBGPSessions(deviceID, nil)
@@ -63,6 +64,7 @@ func TestAccListBGPSessionsByDevice(t *testing.T) {
 }
 
 func TestAccListBGPSessionsByProject(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
 
 	sessions, _, err := c.Projects.ListBGPSessions(projectID, nil)
@@ -84,6 +86,7 @@ func TestAccListBGPSessionsByProject(t *testing.T) {
 }
 
 func TestAccGetBgpSession(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
 
 	session, _, err := c.BGPSessions.Get(sessionID, nil)
@@ -97,6 +100,7 @@ func TestAccGetBgpSession(t *testing.T) {
 }
 
 func TestAccDeleteBgpSession(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
 
 	_, err := c.BGPSessions.Delete(sessionID)
@@ -113,6 +117,7 @@ func TestAccDeleteBgpSession(t *testing.T) {
 }
 
 func TestAccCleanup(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
 
 	c.Devices.Delete(deviceID)
