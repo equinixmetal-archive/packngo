@@ -15,7 +15,7 @@ type BatchService interface {
 
 // Batch type
 type Batch struct {
-	ID                     string     `json:"id,omitempty"`
+	ID                     string     `json:"id"`
 	State                  string     `json:"state,omitempty"`
 	Quantity               int32      `json:"quantity,omitempty"`
 	CreatedAt              *Timestamp `json:"created_at,omitempty"`
@@ -33,17 +33,19 @@ type batchesList struct {
 
 // InstanceBatchCreateRequest type used to create batch of device instances
 type InstanceBatchCreateRequest struct {
-	Batches []BatchInstance `json:"batches,omitempty"`
+	Batches []BatchInstance `json:"batches"`
 }
 
 // BatchInstance type used to describe batch instances
 type BatchInstance struct {
-	Plan            string     `json:"plan,omitempty"`
-	Hostname        string     `json:"hostname,omitempty"`
+	Plan            string     `json:"plan"`
+	Hostname        string     `json:"hostname"`
+	Facility        string     `json:"facility"`
+	BillingCycle    string     `json:"billing_cycle"`
+	OperatingSystem string     `json:"operating_system"`
+	Quantity        int        `json:"quantity"`
 	Hostnames       []string   `json:"hostnames,omitempty"`
 	Description     string     `json:"description,omitempty"`
-	BillingCycle    string     `json:"billing_cycle,omitempty"`
-	OperatingSystem string     `json:"operating_system,omitempty"`
 	AlwaysPxe       bool       `json:"always_pxe,omitempty"`
 	Userdata        string     `json:"userdata,omitempty"`
 	Locked          bool       `json:"locked,omitempty"`
@@ -53,8 +55,6 @@ type BatchInstance struct {
 	UserSSSHKeys    []string   `json:"user_ssh_keys,omitempty"`
 	Features        []string   `json:"features,omitempty"`
 	Customdata      string     `json:"customdata,omitempty"`
-	Quantity        int        `json:"quantity,omitempty"`
-	Facility        string     `json:"facility,omitempty"`
 }
 
 // BatchServiceOp implements BatchService
