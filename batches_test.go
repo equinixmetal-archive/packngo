@@ -49,7 +49,7 @@ func TestAccListBatches(t *testing.T) {
 	}
 
 	fmt.Println(len(batches))
-	projects, _, err := c.Projects.List()
+	projects, _, err := c.Projects.List(nil)
 	for _, p := range projects {
 		fmt.Println(p.PaymentMethod)
 	}
