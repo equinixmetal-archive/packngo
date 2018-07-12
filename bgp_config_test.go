@@ -10,8 +10,7 @@ var configRequest CreateBGPConfigRequest
 func TestAccCreateBGPConfig(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c, projectID, teardown := setupWithProject(t)
-	defer teardown()
+	c, projectID, _ := setupWithProject(t)
 
 	configRequest = CreateBGPConfigRequest{
 		DeploymentType: "local",
@@ -45,4 +44,10 @@ func TestAccGetBgpConfig(t *testing.T) {
 	if config.Asn != configRequest.Asn {
 		t.Fatal("BGP config is not set up properly")
 	}
+
+	_, err = c.BGPConfig.Delete(config.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	projectTeardown(c)
 }
