@@ -1,6 +1,9 @@
 package packngo
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const projectBasePath = "/projects"
 
@@ -8,6 +11,7 @@ const projectBasePath = "/projects"
 type ProjectService interface {
 	List(listOpt *ListOptions) ([]Project, *Response, error)
 	Get(string) (*Project, *Response, error)
+	GetExtra(projectID string, includes, excludes []string) (*Project, *Response, error)
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
 	Update(string, *ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
@@ -90,6 +94,24 @@ func (s *ProjectServiceOp) List(listOpt *ListOptions) (projects []Project, resp 
 
 		return
 	}
+}
+
+// GetExtra returns a project by id with extra information
+func (s *ProjectServiceOp) GetExtra(projectID string, includes, excludes []string) (*Project, *Response, error) {
+	path := fmt.Sprintf("%s/%s", projectBasePath, projectID)
+	if includes != nil {
+		path += fmt.Sprintf("?include=%s", strings.Join(includes, ","))
+	} else if excludes != nil {
+		path += fmt.Sprintf("?exclude=%s", strings.Join(excludes, ","))
+	}
+
+	project := new(Project)
+	resp, err := s.client.DoRequest("GET", path, nil, project)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return project, resp, err
 }
 
 // Get returns a project by id
