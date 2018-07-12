@@ -41,7 +41,7 @@ type BGPConfig struct {
 
 // Create function
 func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigRequest) (*Response, error) {
-	path := fmt.Sprintf("%s/%s/%ss", projectBasePath, projectID, bgpConfigBasePath)
+	path := fmt.Sprintf("%s/%s%ss", projectBasePath, projectID, bgpConfigBasePath)
 
 	resp, err := s.client.DoRequest("POST", path, request, nil)
 	if err != nil {
