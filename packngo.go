@@ -144,6 +144,7 @@ type Client struct {
 	SpotMarket             SpotMarketService
 	Organizations          OrganizationService
 	BGPSessions            BGPSessionService
+	BGPConfig              BGPConfigService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -286,7 +287,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
 	c.SpotMarket = &SpotMarketServiceOp{client: c}
 	c.BGPSessions = &BGPSessionServiceOp{client: c}
-
+	c.BGPConfig = &BGPConfigServiceOp{client: c}
 	return c, nil
 }
 

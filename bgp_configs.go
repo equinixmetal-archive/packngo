@@ -6,8 +6,8 @@ var bgpConfigBasePath = "/bgp-config"
 
 // BGPConfigService interface defines available BGP config methods
 type BGPConfigService interface {
-	Get(string, *ListOptions) (*BGPConfig, *Response, error)
-	Create(string, CreateBGPSessionRequest) (*BGPConfig, *Response, error)
+	Get(projectID string) (*BGPConfig, *Response, error)
+	Create(string, CreateBGPConfigRequest) (*Response, error)
 }
 
 // BGPConfigServiceOp implements BgpConfigService
@@ -28,10 +28,10 @@ type BGPConfig struct {
 	ID             string     `json:"id,omitempty"`
 	Status         string     `json:"status,omitempty"`
 	DeploymentType string     `json:"deployment_type,omitempty"`
-	Asn            int32      `json:"asn,omitempty"`
+	Asn            int        `json:"asn,omitempty"`
 	RouteObject    string     `json:"route_object,omitempty"`
 	Md5            string     `json:"md5,omitempty"`
-	MaxPrefix      int32      `json:"max_prefix,omitempty"`
+	MaxPrefix      int        `json:"max_prefix,omitempty"`
 	Project        Project    `json:"project,omitempty"`
 	CreatedAt      Timestamp  `json:"created_at,omitempty"`
 	RequestedAt    Timestamp  `json:"requested_at,omitempty"`
@@ -40,25 +40,20 @@ type BGPConfig struct {
 }
 
 // Create function
-func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigRequest) (*BGPConfig, *Response, error) {
+func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigRequest) (*Response, error) {
 	path := fmt.Sprintf("%s/%s/%ss", projectBasePath, projectID, bgpConfigBasePath)
-	session := new(BGPConfig)
 
-	resp, err := s.client.DoRequest("POST", path, request, session)
+	resp, err := s.client.DoRequest("POST", path, request, nil)
 	if err != nil {
-		return nil, resp, err
+		return resp, err
 	}
 
-	return session, resp, err
+	return resp, err
 }
 
 // Get function
-func (s *BGPConfigServiceOp) Get(projectID string, listOpt *ListOptions) (bgpConfig *BGPConfig, resp *Response, err error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
-	path := fmt.Sprintf("%s/%s/%s?%s", projectBasePath, projectID, bgpConfigBasePath, params)
+func (s *BGPConfigServiceOp) Get(projectID string) (bgpConfig *BGPConfig, resp *Response, err error) {
+	path := fmt.Sprintf("%s/%s/%s", projectBasePath, projectID, bgpConfigBasePath)
 
 	subset := new(BGPConfig)
 
