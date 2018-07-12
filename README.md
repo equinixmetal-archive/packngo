@@ -1,7 +1,7 @@
 # packngo
 Packet Go Api Client
 
-![](https://www.packet.net/media/labs/images/1679091c5a880faf6fb5e6087eb1b2dc/ULY7-hero.png)
+![](https://www.packet.net/media/images/xeiw-packettwitterprofilew.png)
 
 
 Installation
@@ -31,7 +31,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ps, _, err := c.Projects.List()
+	ps, _, err := c.Projects.List(nil)
 	if err != nil {
 		log.Fatal(err)
 	}

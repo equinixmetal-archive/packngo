@@ -1,13 +1,17 @@
 package packngo
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const projectBasePath = "/projects"
 
 // ProjectService interface defines available project methods
 type ProjectService interface {
-	List() ([]Project, *Response, error)
+	List(listOpt *ListOptions) ([]Project, *Response, error)
 	Get(string) (*Project, *Response, error)
+	GetExtra(projectID string, includes, excludes []string) (*Project, *Response, error)
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
 	Update(string, *ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
@@ -15,6 +19,7 @@ type ProjectService interface {
 
 type projectsRoot struct {
 	Projects []Project `json:"projects"`
+	Meta     meta      `json:"meta"`
 }
 
 // Project represents a Packet project
@@ -62,15 +67,51 @@ type ProjectServiceOp struct {
 }
 
 // List returns the user's projects
-func (s *ProjectServiceOp) List() ([]Project, *Response, error) {
+func (s *ProjectServiceOp) List(listOpt *ListOptions) (projects []Project, resp *Response, err error) {
+	var params string
+	if listOpt != nil {
+		params = listOpt.createURL()
+	}
 	root := new(projectsRoot)
 
-	resp, err := s.client.DoRequest("GET", projectBasePath, nil, root)
+	path := fmt.Sprintf("%s?%s", projectBasePath, params)
+
+	for {
+		resp, err = s.client.DoRequest("GET", path, nil, root)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		projects = append(projects, root.Projects...)
+
+		if root.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
+			path = root.Meta.Next.Href
+			if params != "" {
+				path = fmt.Sprintf("%s&%s", path, params)
+			}
+			continue
+		}
+
+		return
+	}
+}
+
+// GetExtra returns a project by id with extra information
+func (s *ProjectServiceOp) GetExtra(projectID string, includes, excludes []string) (*Project, *Response, error) {
+	path := fmt.Sprintf("%s/%s", projectBasePath, projectID)
+	if includes != nil {
+		path += fmt.Sprintf("?include=%s", strings.Join(includes, ","))
+	} else if excludes != nil {
+		path += fmt.Sprintf("?exclude=%s", strings.Join(excludes, ","))
+	}
+
+	project := new(Project)
+	resp, err := s.client.DoRequest("GET", path, nil, project)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return root.Projects, resp, err
+	return project, resp, err
 }
 
 // Get returns a project by id
