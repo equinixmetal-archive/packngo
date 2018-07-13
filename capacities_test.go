@@ -8,6 +8,7 @@ import (
 )
 
 func TestAccCheckCapacity(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
 
 	input := &CapacityInput{
@@ -29,7 +30,7 @@ func TestAccCheckCapacity(t *testing.T) {
 		t.Fatal("List of capacities not fetched")
 	}
 
-	// Getting facility where a plan is unavailable 
+	// Getting facility where a plan is unavailable
 	s := reflect.ValueOf(list).Elem()
 	typeOfT := s.Type()
 	for i := 0; i < s.NumField(); i++ {
