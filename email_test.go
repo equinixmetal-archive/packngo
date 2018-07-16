@@ -5,6 +5,7 @@ import (
 )
 
 func TestAccCreateEmail(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
 	updatedAddress := "update@domain.com"
 	c := setup(t)
 
