@@ -39,6 +39,16 @@ func TestAccProject(t *testing.T) {
 	if gotProject.PaymentMethod.URL == "" {
 		t.Fatalf("Empty payment_method: %v", gotProject)
 	}
+
+	events, _, err := c.Projects.ListEvents(gotProject.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(events) == 0 {
+		t.Fatal("Project events not returned")
+	}
+	
 	_, err = c.Projects.Delete(p.ID)
 	if err != nil {
 		t.Fatal(err)

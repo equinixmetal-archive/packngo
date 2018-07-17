@@ -20,6 +20,7 @@ type DeviceService interface {
 	PowerOn(string) (*Response, error)
 	Lock(string) (*Response, error)
 	Unlock(string) (*Response, error)
+	ListEvents(string, *ListOptions) ([]Event, *Response, error)
 }
 
 type devicesRoot struct {
@@ -254,4 +255,11 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 	action := lockType{Locked: false}
 
 	return s.client.DoRequest("PATCH", path, action, nil)
+}
+
+// ListEvents returns list of device events
+func (s *DeviceServiceOp) ListEvents(deviceID string, listOpt *ListOptions) ([]Event, *Response, error) {
+	path := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, eventBasePath)
+
+	return list(s.client, path, listOpt)
 }
