@@ -27,14 +27,17 @@ type EventService interface {
 	Get(string, *ListOptions) (*Event, *Response, error)
 }
 
+// EventServiceOp implements EventService
 type EventServiceOp struct {
 	client *Client
 }
 
+// List returns all events
 func (s *EventServiceOp) List(listOpt *ListOptions) ([]Event, *Response, error) {
 	return list(s.client, eventBasePath, listOpt)
 }
 
+// Get returns an event by ID
 func (s *EventServiceOp) Get(eventID string, listOpt *ListOptions) (*Event, *Response, error) {
 	path := fmt.Sprintf("%s/%s", eventBasePath, eventID)
 	return get(s.client, path, listOpt)
