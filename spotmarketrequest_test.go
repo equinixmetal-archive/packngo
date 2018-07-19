@@ -7,6 +7,9 @@ import (
 )
 
 func TestAccSpotMarketRequestBasic(t *testing.T) {
+	// This test is only going to create the spot market request with
+	// max bid price set to half of current spot price, so that the devices
+	// are not run at all.
 	skipUnlessAcceptanceTestsAllowed(t)
 
 	c, projectID, teardown := setupWithProject(t)
@@ -15,15 +18,21 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 	ps := InstanceParameters{
 		BillingCycle:    "hourly",
 		Plan:            "baremetal_0",
-		OperatingSystem: "ubuntu_16_04",
+		OperatingSystem: "rancher",
 		Hostname:        "test{{index}}",
+	}
+
+	prices, _, err := c.SpotMarket.Prices()
+	pri := prices["ewr1"]["baremetal_0"]
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	cr := SpotMarketRequestCreateRequest{
 		DevicesMax:  3,
 		DevicesMin:  2,
 		FacilityIDs: []string{"ewr1", "ewr1"},
-		MaxBidPrice: 0.02,
+		MaxBidPrice: pri / 2,
 		Parameters:  ps,
 	}
 
@@ -72,7 +81,7 @@ func TestAccSpotMarketRequestPriceAware(t *testing.T) {
 	ps := InstanceParameters{
 		BillingCycle:    "hourly",
 		Plan:            "baremetal_0",
-		OperatingSystem: "ubuntu_16_04",
+		OperatingSystem: "rancher",
 		Hostname:        "test{{index}}",
 	}
 
