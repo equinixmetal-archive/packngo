@@ -565,7 +565,7 @@ func TestAccListDeviceEvents(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	if len(events) == 0 {
 		t.Fatal("Device events not returned")
 	}

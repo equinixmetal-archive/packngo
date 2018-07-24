@@ -48,7 +48,7 @@ func TestAccProject(t *testing.T) {
 	if len(events) == 0 {
 		t.Fatal("Project events not returned")
 	}
-	
+
 	_, err = c.Projects.Delete(p.ID)
 	if err != nil {
 		t.Fatal(err)
