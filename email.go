@@ -4,10 +4,10 @@ import "fmt"
 
 const emailBasePath = "/emails"
 
-// EmailCreateRequest type used to add an email address to the current user
+// EmailRequest type used to add an email address to the current user
 type EmailRequest struct {
 	Address string `json:"address,omitempty"`
-	Default bool   `json:"default,omitempty"`
+	Default *bool  `json:"default,omitempty"`
 }
 
 // EmailService interface defines available email methods
