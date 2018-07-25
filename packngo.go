@@ -143,6 +143,7 @@ type Client struct {
 	VolumeAttachments      VolumeAttachmentService
 	SpotMarket             SpotMarketService
 	Organizations          OrganizationService
+	HardwareReservations   HardwareReservationService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -284,7 +285,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Volumes = &VolumeServiceOp{client: c}
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
 	c.SpotMarket = &SpotMarketServiceOp{client: c}
-
+	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
 	return c, nil
 }
 

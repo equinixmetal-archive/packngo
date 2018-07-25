@@ -6,9 +6,9 @@ const hardwareReservationBasePath = "/hardware-reservations"
 
 // HardwareReservationService interface defines available hardware reservation functions
 type HardwareReservationService interface {
-	Get(string, listOpt *ListOptions) (*HardwareReservation, Response, error)
-	List(string, listOpt *ListOptions) ([]HardwareReservation, Response, error)
-	Move(string, string) (*HardwareReservation, Response, error)
+	Get(hardwareReservationID string, listOpt *ListOptions) (*HardwareReservation, *Response, error)
+	List(projectID string, listOpt *ListOptions) ([]HardwareReservation, *Response, error)
+	Move(string, string) (*HardwareReservation, *Response, error)
 }
 
 // HardwareReservationServiceOp implements HardwareReservationService
