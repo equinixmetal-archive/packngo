@@ -11,7 +11,7 @@ type SpotMarketRequestService interface {
 	List(string) ([]SpotMarketRequest, *Response, error)
 	Create(*SpotMarketRequestCreateRequest, string) (*SpotMarketRequest, *Response, error)
 	Delete(string, bool) (*Response, error)
-	Get(string) (*SpotMarketRequest, *Response, error)
+	Get(string, *ListOptions) (*SpotMarketRequest, *Response, error)
 }
 
 type SpotMarketRequestCreateRequest struct {
@@ -21,7 +21,7 @@ type SpotMarketRequestCreateRequest struct {
 	FacilityIDs []string   `json:"facility_ids"`
 	MaxBidPrice float64    `json:"max_bid_price"`
 
-	Parameters InstanceParameters `json:"instance_parameters"`
+	Parameters SpotMarketRequestInstanceParameters `json:"instance_parameters"`
 }
 
 type SpotMarketRequest struct {
@@ -33,7 +33,7 @@ type SpotMarketRequest struct {
 	Href       string     `json:"href"`
 }
 
-type InstanceParameters struct {
+type SpotMarketRequestInstanceParameters struct {
 	AlwaysPXE       bool       `json:"always_pxe,omitempty"`
 	BillingCycle    string     `json:"billing_cycle"`
 	CustomData      string     `json:"customdata,omitempty"`
@@ -86,8 +86,12 @@ func (s *SpotMarketRequestServiceOp) List(pID string) ([]SpotMarketRequest, *Res
 	return smrRoot.SMRs, resp, nil
 }
 
-func (s *SpotMarketRequestServiceOp) Get(rID string) (*SpotMarketRequest, *Response, error) {
-	path := fmt.Sprintf("%s/%s?include=devices,project", spotMarketRequestBasePath, rID)
+func (s *SpotMarketRequestServiceOp) Get(id string, listOpt *ListOptions) (*SpotMarketRequest, *Response, error) {
+	var params string
+	if listOpt != nil {
+		params = listOpt.createURL()
+	}
+	path := fmt.Sprintf("%s/%s?%s", spotMarketRequestBasePath, id, params)
 	smr := new(SpotMarketRequest)
 
 	resp, err := s.client.DoRequest("GET", path, nil, &smr)
@@ -98,8 +102,8 @@ func (s *SpotMarketRequestServiceOp) Get(rID string) (*SpotMarketRequest, *Respo
 	return smr, resp, err
 }
 
-func (s *SpotMarketRequestServiceOp) Delete(rID string, forceDelete bool) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", spotMarketRequestBasePath, rID)
+func (s *SpotMarketRequestServiceOp) Delete(id string, forceDelete bool) (*Response, error) {
+	path := fmt.Sprintf("%s/%s", spotMarketRequestBasePath, id)
 	var params *map[string]bool
 	if forceDelete {
 		params = &map[string]bool{"force_termination": true}

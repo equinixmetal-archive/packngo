@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -15,11 +16,13 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 
-	ps := InstanceParameters{
+	hn := randString8()
+
+	ps := SpotMarketRequestInstanceParameters{
 		BillingCycle:    "hourly",
 		Plan:            "baremetal_0",
 		OperatingSystem: "rancher",
-		Hostname:        "test{{index}}",
+		Hostname:        fmt.Sprintf("%s{{index}}", hn),
 	}
 
 	prices, _, err := c.SpotMarket.Prices()
@@ -31,7 +34,7 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 	cr := SpotMarketRequestCreateRequest{
 		DevicesMax:  3,
 		DevicesMin:  2,
-		FacilityIDs: []string{"ewr1", "ewr1"},
+		FacilityIDs: []string{"ewr1", "sjc1"},
 		MaxBidPrice: pri / 2,
 		Parameters:  ps,
 	}
@@ -55,7 +58,7 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 		t.Fatal("there should be only one SpotMarketRequest")
 	}
 
-	smr2, _, err := c.SpotMarketRequests.Get(smr.ID)
+	smr2, _, err := c.SpotMarketRequests.Get(smr.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,12 +80,13 @@ func TestAccSpotMarketRequestPriceAware(t *testing.T) {
 
 	pri := prices["ewr1"]["baremetal_0"]
 	thr := pri * 2.0
+	hn := randString8()
 
-	ps := InstanceParameters{
+	ps := SpotMarketRequestInstanceParameters{
 		BillingCycle:    "hourly",
 		Plan:            "baremetal_0",
 		OperatingSystem: "rancher",
-		Hostname:        "test{{index}}",
+		Hostname:        fmt.Sprintf("%s{{index}}", hn),
 	}
 
 	nDevices := 3
@@ -104,7 +108,10 @@ out:
 	for {
 		select {
 		case <-time.Tick(5 * time.Second):
-			smr, _, err = c.SpotMarketRequests.Get(smr.ID)
+			smr, _, err = c.SpotMarketRequests.Get(
+				smr.ID,
+				&ListOptions{Includes: "devices"},
+			)
 			if err != nil {
 				t.Fatal(err)
 			}
