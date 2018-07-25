@@ -8,7 +8,17 @@ func TestAccListHardwareReservations(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
 
-	projectID := "93125c2a-8b78-4d4f-a3c4-7367d6b7cca8"
+	projects, _, err := c.Projects.List(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(projects) == 0 {
+		t.Fatal("No projects returned.")
+	}
+
+	projectID := projects[0].ID
+
 	hardwareReservations, _, err := c.HardwareReservations.List(projectID, nil)
 	if err != nil {
 		t.Fatal(err)
