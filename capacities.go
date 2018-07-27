@@ -24,23 +24,8 @@ type capacityRoot struct {
 	Capacity CapacityReport `json:"capacity,omitempty"`
 }
 
-// CapacityReport struct
-type CapacityReport struct {
-	Ams1 *CapacityPerFacility `json:"ams1,omitempty"`
-	Ewr1 *CapacityPerFacility `json:"ewr1,omitempty"`
-	Sjc1 *CapacityPerFacility `json:"sjc1,omitempty"`
-	Atl1 *CapacityPerFacility `json:"atl1,omitempty"`
-	Dfw1 *CapacityPerFacility `json:"dfw1,omitempty"`
-	Fra1 *CapacityPerFacility `json:"fra1,omitempty"`
-	Iad1 *CapacityPerFacility `json:"iad1,omitempty"`
-	Lax1 *CapacityPerFacility `json:"lax1,omitempty"`
-	Nrt1 *CapacityPerFacility `json:"nrt1,omitempty"`
-	Ord1 *CapacityPerFacility `json:"ord1,omitempty"`
-	Sea1 *CapacityPerFacility `json:"sea1,omitempty"`
-	Sin1 *CapacityPerFacility `json:"sin1,omitempty"`
-	Syd1 *CapacityPerFacility `json:"syd1,omitempty"`
-	Yyz1 *CapacityPerFacility `json:"yyz1,omitempty"`
-}
+// CapacityReport map
+type CapacityReport map[string]map[string]CapacityPerBaremetal
 
 // CapacityPerFacility struct
 type CapacityPerFacility struct {
