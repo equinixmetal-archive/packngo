@@ -34,6 +34,7 @@ func (s *VPNServiceOp) Disable() (resp *Response, err error) {
 
 // Get returns the client vpn config for the currently logged-in user.
 func (s *VPNServiceOp) Get(code string) (config *VPNConfig, resp *Response, err error) {
+	config = &VPNConfig{}
 	path := fmt.Sprintf("%s?code=%s", vpnBasePath, code)
 
 	resp, err = s.client.DoRequest("GET", path, nil, config)
