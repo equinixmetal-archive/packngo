@@ -43,7 +43,53 @@ func TestAccProject(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
 
+func TestAccProjectExtra(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+
+	c := setup(t)
+	defer projectTeardown(c)
+	u, _, err := c.Users.Current()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rs := testProjectPrefix + randString8()
+	pcr := ProjectCreateRequest{Name: rs}
+	p, _, err := c.Projects.Create(&pcr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.Name != rs {
+		t.Fatalf("Expected new project name to be %s, not %s", rs, p.Name)
+	}
+	rs = testProjectPrefix + randString8()
+	pur := ProjectUpdateRequest{Name: &rs}
+	p, _, err = c.Projects.Update(p.ID, &pur)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.Name != rs {
+		t.Fatalf("Expected the name of the updated project to be %s, not %s", rs, p.Name)
+	}
+	gotProject, _, err := c.Projects.GetExtra(p.ID, []string{"members"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, user := range gotProject.Users {
+		if user.ID == "" {
+			t.Fatal("Project user details not returned.")
+		} else if user.ID == u.ID {
+			break
+		}
+	}
+
+	_, err = c.Projects.Delete(p.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestAccCreateOrgProject(t *testing.T) {
