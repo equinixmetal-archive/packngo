@@ -561,6 +561,11 @@ func TestAccListDeviceEvents(t *testing.T) {
 	}
 	defer deleteDevice(t, c, d.ID)
 
+	d, err = waitDeviceActive(d.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	events, _, err := c.Devices.ListEvents(d.ID, nil)
 	if err != nil {
 		t.Fatal(err)
