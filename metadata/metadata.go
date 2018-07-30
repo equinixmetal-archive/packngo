@@ -12,7 +12,11 @@ import (
 const BaseURL = "https://metadata.packet.net"
 
 func GetMetadata() (*CurrentDevice, error) {
-	res, err := http.Get(BaseURL + "/metadata")
+	return getMetadataFromURL(BaseURL)
+}
+
+func getMetadataFromURL(baseURL string) (*CurrentDevice, error) {
+	res, err := http.Get(baseURL + "/metadata")
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +44,11 @@ func GetMetadata() (*CurrentDevice, error) {
 }
 
 func GetUserData() ([]byte, error) {
-	res, err := http.Get(BaseURL + "/userdata")
+	return getUserDataFromURL(BaseURL)
+}
+
+func getUserDataFromURL(baseURL string) ([]byte, error) {
+	res, err := http.Get(baseURL + "/userdata")
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +118,7 @@ type CurrentDevice struct {
 	SSHKeys    []string               `json:"ssh_keys"`
 	OS         OperatingSystem        `json:"operating_system"`
 	Network    NetworkInfo            `json:"network"`
-	Volumes    []VolumeInfo           `json:"volume"`
+	Volumes    []VolumeInfo           `json:"volumes"`
 	CustomData map[string]interface{} `json:"customdata"`
 
 	// This is available, but is actually inaccurate, currently:

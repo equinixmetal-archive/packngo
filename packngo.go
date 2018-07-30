@@ -142,6 +142,7 @@ type Client struct {
 	Volumes                VolumeService
 	VolumeAttachments      VolumeAttachmentService
 	SpotMarket             SpotMarketService
+	SpotMarketRequests     SpotMarketRequestService
 	Organizations          OrganizationService
 	Batches                BatchService
 }
@@ -286,6 +287,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
 	c.SpotMarket = &SpotMarketServiceOp{client: c}
 	c.Batches = &BatchServiceOp{client: c}
+	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
 
 	return c, nil
 }
