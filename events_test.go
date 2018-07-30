@@ -7,6 +7,7 @@ import (
 func TestAccListEvents(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
+
 	events, _, err := c.Events.List(nil)
 	if err != nil {
 		t.Fatal(err)
