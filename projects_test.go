@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestAccProject(t *testing.T) {
+func TestAccProjectBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
 	c := setup(t)
