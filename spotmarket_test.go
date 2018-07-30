@@ -2,7 +2,7 @@ package packngo
 
 import "testing"
 
-func TestAccSpotMarket(t *testing.T) {
+func TestAccSpotMarketBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 
