@@ -10,7 +10,7 @@ type TransferRequestsService interface {
 	List(string, *ListOptions) ([]TransferRequest, *Response, error)
 	Accept(string) (*Response, error)
 	Decline(string) (*Response, error)
-	TransferProject(string, string) (*TransferRequest, *Response, error)
+	TransferProject(string, string) (*Response, error)
 }
 
 // TransferRequestsServiceOp implements TransferRequestsService
@@ -34,18 +34,18 @@ type TransferRequest struct {
 }
 
 // TransferProject allows organization owners can transfer their projects to other organizations.
-func (s *TransferRequestsServiceOp) TransferProject(projectID, organizationID string) (transferRequest *TransferRequest, resp *Response, err error) {
+func (s *TransferRequestsServiceOp) TransferProject(projectID, organizationID string) (resp *Response, err error) {
 	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, transferRequestBasePath)
 
 	body := map[string]string{}
 	body["target_organization_id"] = organizationID
 
-	resp, err = s.client.DoRequest("POST", path, body, transferRequest)
+	resp, err = s.client.DoRequest("POST", path, body, nil)
 	if err != nil {
-		return nil, resp, err
+		return resp, err
 	}
 
-	return transferRequest, resp, err
+	return resp, err
 }
 
 // List retrieves all project transfer requests from or to an organization
@@ -92,14 +92,14 @@ func (s *TransferRequestsServiceOp) Get(transferRequestID string, listOpt *ListO
 
 // Accept a transfer request
 func (s *TransferRequestsServiceOp) Accept(projectID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, transferRequestBasePath)
+	path := fmt.Sprintf("%s/%s", transferRequestBasePath, projectID)
 
 	return s.client.DoRequest("PUT", path, nil, nil)
 }
 
 // Decline a transfer request
 func (s *TransferRequestsServiceOp) Decline(projectID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, transferRequestBasePath)
+	path := fmt.Sprintf("%s/%s", transferRequestBasePath, projectID)
 
 	return s.client.DoRequest("DELETE", path, nil, nil)
 }
