@@ -2,7 +2,7 @@ package packngo
 
 import "testing"
 
-func TestAccOrg(t *testing.T) {
+func TestAccOrgBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
 	c := setup(t)
