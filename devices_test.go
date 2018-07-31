@@ -533,3 +533,45 @@ func TestAccDeviceCustomData(t *testing.T) {
 		t.Fatal(errors.New("Did not properly erase custom data"))
 	}
 }
+
+func TestAccListDeviceEvents(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+
+	initialCustomData := `{"hello":"world"}`
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     testFacility(),
+		Plan:         "baremetal_0",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+		CustomData:   initialCustomData,
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+
+	d, err = waitDeviceActive(d.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	events, _, err := c.Devices.ListEvents(d.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(events) == 0 {
+		t.Fatal("Device events not returned")
+	}
+}
