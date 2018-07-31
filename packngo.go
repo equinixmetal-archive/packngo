@@ -146,6 +146,7 @@ type Client struct {
 	Organizations          OrganizationService
 	BGPSessions            BGPSessionService
 	BGPConfig              BGPConfigService
+	Events                 EventService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -290,6 +291,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.BGPSessions = &BGPSessionServiceOp{client: c}
 	c.BGPConfig = &BGPConfigServiceOp{client: c}
 	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
+	c.Events = &EventServiceOp{client: c}
 
 	return c, nil
 }
