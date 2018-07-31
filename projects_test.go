@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestAccProject(t *testing.T) {
+func TestAccProjectBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
 	c := setup(t)
@@ -39,6 +39,12 @@ func TestAccProject(t *testing.T) {
 	if gotProject.PaymentMethod.URL == "" {
 		t.Fatalf("Empty payment_method: %v", gotProject)
 	}
+
+	_, _, err = c.Projects.ListEvents(gotProject.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	_, err = c.Projects.Delete(p.ID)
 	if err != nil {
 		t.Fatal(err)

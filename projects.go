@@ -15,6 +15,7 @@ type ProjectService interface {
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
 	Update(string, *ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
+	ListEvents(string, *ListOptions) ([]Event, *Response, error)
 }
 
 type projectsRoot struct {
@@ -157,4 +158,11 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", projectBasePath, projectID)
 
 	return s.client.DoRequest("DELETE", path, nil, nil)
+}
+
+// ListEvents returns list of project events
+func (s *ProjectServiceOp) ListEvents(projectID string, listOpt *ListOptions) ([]Event, *Response, error) {
+	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, eventBasePath)
+
+	return list(s.client, path, listOpt)
 }
