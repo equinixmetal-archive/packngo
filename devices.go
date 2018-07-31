@@ -274,6 +274,7 @@ func (s *DeviceServiceOp) ListBGPSessions(deviceID string, listOpt *ListOptions)
 		}
 		return
 	}
+}
 
 // ListEvents returns list of device events
 func (s *DeviceServiceOp) ListEvents(deviceID string, listOpt *ListOptions) ([]Event, *Response, error) {

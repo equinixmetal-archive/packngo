@@ -189,6 +189,7 @@ func (s *ProjectServiceOp) ListBGPSessions(projectID string, listOpt *ListOption
 
 		return
 	}
+}
 
 // ListEvents returns list of project events
 func (s *ProjectServiceOp) ListEvents(projectID string, listOpt *ListOptions) ([]Event, *Response, error) {
