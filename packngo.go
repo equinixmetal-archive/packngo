@@ -145,6 +145,7 @@ type Client struct {
 	SpotMarketRequests     SpotMarketRequestService
 	Organizations          OrganizationService
 	TransferRequest        TransferRequestsService
+	Events                 EventService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -288,6 +289,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.SpotMarket = &SpotMarketServiceOp{client: c}
 	c.TransferRequest = &TransferRequestsServiceOp{client: c}
 	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
+	c.Events = &EventServiceOp{client: c}
 
 	return c, nil
 }
