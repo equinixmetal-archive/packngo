@@ -115,6 +115,9 @@ func TestAccVolumeUpdate(t *testing.T) {
 	}
 
 	v, _, err = c.Volumes.Get(v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if v.Description != vDesc {
 		t.Fatalf("Volume desc should be %q, but is %q", vDesc, v.Description)
@@ -130,6 +133,10 @@ func TestAccVolumeUpdate(t *testing.T) {
 	}
 
 	v, _, err = c.Volumes.Get(v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if v.Size != newSize {
 		t.Fatalf("Volume size should be %q, but is %q", newSize, v.Size)
 	}
@@ -144,6 +151,10 @@ func TestAccVolumeUpdate(t *testing.T) {
 	}
 
 	v, _, err = c.Volumes.Get(v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if v.Plan.Slug != newPlan {
 		t.Fatalf("Plan should be %q, but is %q", newPlan, v.Plan.Slug)
 	}
