@@ -24,7 +24,7 @@ type HardwareReservation struct {
 	Plan      Plan      `json:"plan,omitempty"`
 	Href      string    `json:"href,omitempty"`
 	Project   Project   `json:"project,omitempty"`
-	Device    Device    `json:"device,omitempty"`
+	Device    *Device   `json:"device,omitempty"`
 	CreatedAt Timestamp `json:"created_at,omitempty"`
 }
 
@@ -87,7 +87,7 @@ func (s *HardwareReservationServiceOp) Get(hardwareReservationdID string, listOp
 // Move a hardware reservation to another project
 func (s *HardwareReservationServiceOp) Move(hardwareReservationdID, projectID string) (*HardwareReservation, *Response, error) {
 	hardwareReservation := new(HardwareReservation)
-	path := fmt.Sprintf("%s/%s%s", hardwareReservationBasePath, hardwareReservationdID, "move/")
+	path := fmt.Sprintf("%s/%s/%s", hardwareReservationBasePath, hardwareReservationdID, "move")
 	body := map[string]string{}
 	body["project_id"] = projectID
 
