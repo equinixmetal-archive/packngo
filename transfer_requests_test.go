@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestAccTransferRequest(t *testing.T) {
+func TestAccTransferRequests(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
 
@@ -30,22 +30,22 @@ func TestAccTransferRequest(t *testing.T) {
 	}
 	defer projectTeardown(c)
 
-	_, err = c.TransferRequest.TransferProject(p.ID, org.ID)
+	_, err = c.TransferRequests.TransferProject(p.ID, org.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = c.TransferRequest.Accept(p.ID)
+	_, err = c.TransferRequests.Accept(p.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = c.TransferRequest.Decline(p.ID)
+	_, err = c.TransferRequests.Decline(p.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = c.TransferRequest.TransferProject(p.ID, org.ID)
+	_, err = c.TransferRequests.TransferProject(p.ID, org.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
