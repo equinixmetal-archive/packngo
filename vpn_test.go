@@ -19,6 +19,10 @@ func TestAccVPN(t *testing.T) {
 		t.Fatal("VPN can't be used with with disabled 2FA")
 	}
 
+	if u.VPN {
+		t.Fatal("You must disable VPN in your account before this test")
+	}
+
 	_, err = c.VPN.Enable()
 	if err != nil {
 		t.Fatal(err)
