@@ -28,6 +28,7 @@ type User struct {
 	Emails                []Email `json:"emails,omitempty"`
 	PhoneNumber           string  `json:"phone_number,omitempty"`
 	URL                   string  `json:"href,omitempty"`
+	VPN                   bool    `json:"vpn"`
 }
 
 func (u User) String() string {
