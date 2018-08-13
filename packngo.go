@@ -146,6 +146,8 @@ type Client struct {
 	Organizations          OrganizationService
 	BGPSessions            BGPSessionService
 	BGPConfig              BGPConfigService
+	VPN                    VPNService
+	HardwareReservations   HardwareReservationService
 	Events                 EventService
 }
 
@@ -290,6 +292,8 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.SpotMarket = &SpotMarketServiceOp{client: c}
 	c.BGPSessions = &BGPSessionServiceOp{client: c}
 	c.BGPConfig = &BGPConfigServiceOp{client: c}
+	c.VPN = &VPNServiceOp{client: c}
+	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
 	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
 	c.Events = &EventServiceOp{client: c}
 
