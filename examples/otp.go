@@ -26,7 +26,7 @@ func GetPacketOtpSms(c *packngo.Client) (string, error) {
 }
 
 func SeedPacketOtpApp(c *packngo.Client) (string, error) {
-	otpUri, _, err := c.TwoFactorAuth.ReceiveApp()
+	otpUri, _, err := c.TwoFactorAuth.SeedApp()
 	if err != nil {
 		return "", err
 	}
