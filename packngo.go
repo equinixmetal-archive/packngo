@@ -144,6 +144,7 @@ type Client struct {
 	SpotMarket             SpotMarketService
 	SpotMarketRequests     SpotMarketRequestService
 	Organizations          OrganizationService
+	TwoFactorAuth          TwoFactorAuthService
 	VPN                    VPNService
 	HardwareReservations   HardwareReservationService
 	Events                 EventService
@@ -236,10 +237,28 @@ func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response,
 	return c.Do(req, v)
 }
 
+// DoRequestWithHeader same as DoRequest
+func (c *Client) DoRequestWithHeader(method string, headers map[string]string, path string, body, v interface{}) (*Response, error) {
+	req, err := c.NewRequest(method, path, body)
+	for k, v := range headers {
+		req.Header.Add(k, v)
+	}
+
+	if c.debug {
+		o, _ := httputil.DumpRequestOut(req, true)
+		log.Printf("\n=======[REQUEST]=============\n%s\n", string(o))
+	}
+	if err != nil {
+		return nil, err
+	}
+	return c.Do(req, v)
+}
+
+// NewClient initializes and returns a Client
 func NewClient() (*Client, error) {
 	apiToken := os.Getenv(packetTokenEnvVar)
 	if apiToken == "" {
-		return nil, fmt.Errorf("you must export %s.", packetTokenEnvVar)
+		return nil, fmt.Errorf("you must export %s", packetTokenEnvVar)
 	}
 	c := NewClientWithAuth("packngo lib", apiToken, nil)
 	return c, nil
@@ -288,6 +307,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Volumes = &VolumeServiceOp{client: c}
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
 	c.SpotMarket = &SpotMarketServiceOp{client: c}
+	c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
 	c.VPN = &VPNServiceOp{client: c}
 	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
 	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
