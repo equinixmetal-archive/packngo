@@ -10,7 +10,7 @@ type TwoFactorAuthService interface {
 	EnableSms(string) (*Response, error)
 	DisableSms(string) (*Response, error)
 	ReceiveSms() (*Response, error)
-	ReceiveApp() (string, *Response, error)
+	SeedApp() (string, *Response, error)
 }
 
 // TwoFactorAuthServiceOp implements TwoFactorAuthService
@@ -47,8 +47,8 @@ func (s *TwoFactorAuthServiceOp) DisableSms(token string) (resp *Response, err e
 	return s.client.DoRequestWithHeader("DELETE", headers, twoFactorAuthSmsPath, nil, nil)
 }
 
-// ReceiveApp orders the auth service to issue an SMS token
-func (s *TwoFactorAuthServiceOp) ReceiveApp() (otpURI string, resp *Response, err error) {
+// SeedApp orders the auth service to issue a token via google authenticator
+func (s *TwoFactorAuthServiceOp) SeedApp() (otpURI string, resp *Response, err error) {
 	ret := &map[string]string{}
 	resp, err = s.client.DoRequest("POST", twoFactorAuthAppPath+"/receive", nil, ret)
 
