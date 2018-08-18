@@ -6,16 +6,16 @@ const notificationBasePath = "/notifications"
 
 // Notification struct
 type Notification struct {
-	ID        string `json:"id,omitempty"`
-	Type      string `json:"type,omitempty"`
-	Body      string `json:"body,omitempty"`
-	Severity  string `json:"severity,omitempty"`
-	Read      bool   `json:"read,omitempty"`
-	Context   string `json:"context,omitempty"`
-	CreatedAt string `json:"created_at,omitempty"`
-	UpdatedAt string `json:"updated_at,omitempty"`
-	User      Href   `json:"user,omitempty"`
-	Href      string `json:"href,omitempty"`
+	ID        string    `json:"id,omitempty"`
+	Type      string    `json:"type,omitempty"`
+	Body      string    `json:"body,omitempty"`
+	Severity  string    `json:"severity,omitempty"`
+	Read      bool      `json:"read,omitempty"`
+	Context   string    `json:"context,omitempty"`
+	CreatedAt Timestamp `json:"created_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
+	User      Href      `json:"user,omitempty"`
+	Href      string    `json:"href,omitempty"`
 }
 
 type notificationsRoot struct {
