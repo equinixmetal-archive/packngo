@@ -26,6 +26,8 @@ type notificationsRoot struct {
 // NotificationService interface defines available event functions
 type NotificationService interface {
 	List(*ListOptions) ([]Notification, *Response, error)
+	Get(string) (*Notification, *Response, error)
+	MarkAsRead(string) (*Notification, *Response, error)
 }
 
 // NotificationServiceOp implements NotificationService
@@ -36,6 +38,18 @@ type NotificationServiceOp struct {
 // List returns all notifications
 func (s *NotificationServiceOp) List(listOpt *ListOptions) ([]Notification, *Response, error) {
 	return listNotifications(s.client, notificationBasePath, listOpt)
+}
+
+// Get returns a notification by ID
+func (s *NotificationServiceOp) Get(notificationID string) (*Notification, *Response, error) {
+	path := fmt.Sprintf("%s/%s", notificationBasePath, notificationID)
+	return getNotifications(s.client, path)
+}
+
+// Marks notification as read by ID
+func (s *NotificationServiceOp) MarkAsRead(notificationID string) (*Notification, *Response, error) {
+	path := fmt.Sprintf("%s/%s", notificationBasePath, notificationID)
+	return putNotifications(s.client, path)
 }
 
 // list helper function for all notification functions
@@ -55,4 +69,28 @@ func listNotifications(client *Client, path string, listOpt *ListOptions) ([]Not
 	}
 
 	return root.Notifications, resp, err
+}
+
+func getNotifications(client *Client, path string) (*Notification, *Response, error) {
+
+	notification := new(Notification)
+
+	resp, err := client.DoRequest("GET", path, nil, notification)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return notification, resp, err
+}
+
+func putNotifications(client *Client, path string) (*Notification, *Response, error) {
+
+	notification := new(Notification)
+
+	resp, err := client.DoRequest("PUT", path, nil, notification)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return notification, resp, err
 }
