@@ -49,7 +49,7 @@ func (s *NotificationServiceOp) Get(notificationID string) (*Notification, *Resp
 // Marks notification as read by ID
 func (s *NotificationServiceOp) MarkAsRead(notificationID string) (*Notification, *Response, error) {
 	path := fmt.Sprintf("%s/%s", notificationBasePath, notificationID)
-	return putNotifications(s.client, path)
+	return markAsRead(s.client, path)
 }
 
 // list helper function for all notification functions
@@ -83,7 +83,7 @@ func getNotifications(client *Client, path string) (*Notification, *Response, er
 	return notification, resp, err
 }
 
-func putNotifications(client *Client, path string) (*Notification, *Response, error) {
+func markAsRead(client *Client, path string) (*Notification, *Response, error) {
 
 	notification := new(Notification)
 
