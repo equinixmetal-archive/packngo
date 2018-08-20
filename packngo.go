@@ -148,6 +148,7 @@ type Client struct {
 	VPN                    VPNService
 	HardwareReservations   HardwareReservationService
 	Events                 EventService
+	Notifications          NotificationService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -312,6 +313,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
 	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
 	c.Events = &EventServiceOp{client: c}
+	c.Notifications = &NotificationServiceOp{client: c}
 
 	return c, nil
 }
