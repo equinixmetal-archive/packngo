@@ -11,6 +11,7 @@ type BatchService interface {
 	Get(batchID string, listOpt *ListOptions) (*Batch, *Response, error)
 	List(ProjectID string, listOpt *ListOptions) ([]Batch, *Response, error)
 	Create(projectID string, batches *InstanceBatchCreateRequest) ([]Batch, *Response, error)
+	Delete(string, bool) (*Response, error)
 }
 
 // Batch type
@@ -24,6 +25,7 @@ type Batch struct {
 	Instances              Href       `json:"instances,omitempty"`
 	Facilities             []Facility `json:"facilities,omitempty"`
 	FacilityDiversityLevel int32      `json:"facility_diversity_level,omitempty"`
+	Devices                []Device   `json:"devices,omitempty"`
 }
 
 //BatchesList represents collection of batches
@@ -108,4 +110,11 @@ func (s *BatchServiceOp) Create(projectID string, request *InstanceBatchCreateRe
 	}
 
 	return batches.Batches, resp, err
+}
+
+// Delete function to remove an instance batch
+func (s *BatchServiceOp) Delete(id string, removeDevices bool) (*Response, error) {
+	path := fmt.Sprintf("%s/%s", batchBasePath, id)
+
+	return s.client.DoRequest("DELETE", path, nil, nil)
 }

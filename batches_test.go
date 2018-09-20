@@ -1,15 +1,16 @@
 package packngo
 
 import (
-	"fmt"
 	"testing"
+	"time"
 )
 
-var batchID string
-
-func TestAccCreateBatch(t *testing.T) {
+func TestAccInstanceBatches(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	c := setup(t)
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
 
 	req := &InstanceBatchCreateRequest{
 		Batches: []BatchInstance{
@@ -26,19 +27,17 @@ func TestAccCreateBatch(t *testing.T) {
 		},
 	}
 
-	batches, _, err := c.Batches.Create("93125c2a-8b78-4d4f-a3c4-7367d6b7cca8", req)
+	batches, _, err := c.Batches.Create(projectID, req)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	var batchID string
 	if len(batches) != 0 {
 		batchID = batches[0].ID
 	}
-}
-func TestAccListBatches(t *testing.T) {
-	skipUnlessAcceptanceTestsAllowed(t)
-	c := setup(t)
-	batches, _, err := c.Batches.List("93125c2a-8b78-4d4f-a3c4-7367d6b7cca8", nil)
+
+	batches, _, err = c.Batches.List(projectID, nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -48,24 +47,41 @@ func TestAccListBatches(t *testing.T) {
 		t.Fatal("No batches have been created")
 	}
 
-	fmt.Println(len(batches))
-	projects, _, err := c.Projects.List(nil)
-	for _, p := range projects {
-		fmt.Println(p.PaymentMethod)
-	}
-}
-
-func TestAccGetBatch(t *testing.T) {
-	skipUnlessAcceptanceTestsAllowed(t)
-	c := setup(t)
-
-	batch, _, err := c.Batches.Get(batchID, nil)
+	batch, _, err := c.Batches.Get(batchID, &ListOptions{Includes: "devices"})
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	var finished bool
+
+	// Wait for all devices to become 'active'
+	for {
+		if len(batch.Devices) == 0 {
+			break
+		}
+		for _, d := range batch.Devices {
+
+			dev, _, _ := c.Devices.Get(d.ID)
+			if dev.State == "active" {
+				finished = true
+			}
+		}
+
+		if finished {
+			break
+		} else {
+			time.Sleep(5 * time.Second)
+		}
+	}
+
 	if batch == nil {
 		t.Fatal("Batch not found")
+	}
+
+	_, err = c.Batches.Delete(batchID, true)
+
+	if err != nil {
+		t.Fatal(err)
 	}
 }
