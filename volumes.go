@@ -1,6 +1,9 @@
 package packngo
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	volumeBasePath      = "/storage"
@@ -11,6 +14,7 @@ const (
 type VolumeService interface {
 	List(string, *ListOptions) ([]Volume, *Response, error)
 	Get(string) (*Volume, *Response, error)
+	GetExtra(volumeID string, includes, excludes []string) (*Volume, *Response, error)
 	Update(string, *VolumeUpdateRequest) (*Volume, *Response, error)
 	Delete(string) (*Response, error)
 	Create(*VolumeCreateRequest, string) (*Volume, *Response, error)
@@ -141,7 +145,26 @@ func (v *VolumeServiceOp) List(projectID string, listOpt *ListOptions) (volumes 
 
 // Get returns a volume by id
 func (v *VolumeServiceOp) Get(volumeID string) (*Volume, *Response, error) {
-	path := fmt.Sprintf("%s/%s?include=facility,snapshot_policies,attachments.device", volumeBasePath, volumeID)
+	path := fmt.Sprintf("%s/%s", volumeBasePath, volumeID)
+	volume := new(Volume)
+
+	resp, err := v.client.DoRequest("GET", path, nil, volume)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return volume, resp, err
+}
+
+// GetExtra returns Volume by id. Specifying either includes/excludes provides more or less desired
+// detailed information about resources which would otherwise be represented with an href link
+func (v *VolumeServiceOp) GetExtra(volumeID string, includes, excludes []string) (*Volume, *Response, error) {
+	path := fmt.Sprintf("%s/%s", volumeBasePath, volumeID)
+	if includes != nil {
+		path += fmt.Sprintf("?include=%s", strings.Join(includes, ","))
+	} else if excludes != nil {
+		path += fmt.Sprintf("?exclude=%s", strings.Join(excludes, ","))
+	}
 	volume := new(Volume)
 
 	resp, err := v.client.DoRequest("GET", path, nil, volume)

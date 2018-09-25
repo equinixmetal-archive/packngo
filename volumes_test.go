@@ -53,6 +53,12 @@ func TestAccVolumeBasic(t *testing.T) {
 	}
 	defer c.Volumes.Delete(v.ID)
 
+	v, _, err = c.Volumes.GetExtra(v.ID,
+		[]string{"snapshot_policies", "facility"}, []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if len(v.SnapshotPolicies) != 1 {
 		t.Fatal("Test volume should have one snapshot policy")
 	}
