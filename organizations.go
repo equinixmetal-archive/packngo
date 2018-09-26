@@ -13,6 +13,7 @@ type OrganizationService interface {
 	Update(string, *OrganizationUpdateRequest) (*Organization, *Response, error)
 	Delete(string) (*Response, error)
 	ListPaymentMethods(string) ([]PaymentMethod, *Response, error)
+	ListEvents(string, *ListOptions) ([]Event, *Response, error)
 }
 
 type organizationsRoot struct {
@@ -144,4 +145,11 @@ func (s *OrganizationServiceOp) ListPaymentMethods(organizationID string) ([]Pay
 	}
 
 	return root.PaymentMethods, resp, err
+}
+
+// ListEvents returns list of organization events
+func (s *OrganizationServiceOp) ListEvents(organizationID string, listOpt *ListOptions) ([]Event, *Response, error) {
+	path := fmt.Sprintf("%s/%s%s", organizationBasePath, organizationID, eventBasePath)
+
+	return list(s.client, path, listOpt)
 }

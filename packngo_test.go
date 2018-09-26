@@ -75,7 +75,7 @@ func setup(t *testing.T) *Client {
 }
 
 func projectTeardown(c *Client) {
-	ps, _, err := c.Projects.List()
+	ps, _, err := c.Projects.List(nil)
 	if err != nil {
 		panic(fmt.Errorf("while teardown: %s", err))
 	}
@@ -107,7 +107,7 @@ func organizationTeardown(c *Client) {
 func TestAccInvalidCredentials(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	c := NewClientWithAuth("packngo test", "wrongApiToken", nil)
-	_, r, expectedErr := c.Projects.List()
+	_, r, expectedErr := c.Projects.List(nil)
 	matched, err := regexp.MatchString(".*Invalid.*", expectedErr.Error())
 	if err != nil {
 		t.Fatalf("Err while matching err string from response err %s: %s", expectedErr, err)
