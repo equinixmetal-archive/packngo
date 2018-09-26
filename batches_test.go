@@ -17,11 +17,11 @@ func TestAccInstanceBatches(t *testing.T) {
 				Hostname:        "test1",
 				Description:     "test batch",
 				Plan:            "baremetal_0",
-				OperatingSystem: "coreos_stable",
+				OperatingSystem: "ubuntu_16_04",
 				Facility:        "ewr1",
 				BillingCycle:    "hourly",
 				Tags:            []string{"abc"},
-				Quantity:        1,
+				Quantity:        3,
 			},
 		},
 	}
@@ -52,38 +52,12 @@ func TestAccInstanceBatches(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var finished bool
-
-	// Wait for all devices to become 'active'
-	for {
-		if len(batch.Devices) == 0 {
-			break
-		}
-		for _, d := range batch.Devices {
-			dev, _, _ := c.Devices.Get(d.ID)
-			if dev.State == "active" {
-				finished = true
-			} else { //if at least one is not "active" set finished to false and break the loop
-				finished = false
-				break
-			}
-		}
-
-		if finished {
-			break
-		} else {
-			time.Sleep(5 * time.Second)
-		}
-	}
-
-	// for _, d := range batch.Devices {
-	// 	_, err := c.Devices.Delete(d.ID)
-	// 	if err != nil {
-	// 		t.Fatal(err)
-	// 	}
-	// }
 	if batch == nil {
 		t.Fatal("Batch not found")
+	}
+
+	for _, d := range batch.Devices {
+		waitDeviceActive(d.ID, c)
 	}
 
 	_, err = c.Batches.Delete(batchID, true)
