@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -17,9 +18,16 @@ func TestAccCheckCapacity(t *testing.T) {
 		},
 	}
 
-	_, err := c.CapacityService.Check(input)
+	cap, _, err := c.CapacityService.Check(input)
 	if err != nil {
-		t.Fatal("Requested check should have passed for:", input.Servers[0].Facility, input.Servers[0].Plan, input.Servers[0].Quantity)
+		t.Fatal(err)
+	}
+
+	for _, s := range cap.Servers {
+		if !s.Available {
+			t.Fatal(fmt.Errorf("Capacity of %d severs should have been available.", input.Servers[0].Quantity))
+			break
+		}
 	}
 
 	list, _, err := c.CapacityService.List()
@@ -35,8 +43,15 @@ func TestAccCheckCapacity(t *testing.T) {
 		}
 	}
 
-	_, err = c.CapacityService.Check(input)
+	cap, _, err = c.CapacityService.Check(input)
 	if err == nil {
-		t.Fatal("Requested check should have failed for:", input.Servers[0].Facility, input.Servers[0].Plan, input.Servers[0].Quantity)
+		t.Fatal(err)
+	}
+
+	for _, s := range cap.Servers {
+		if s.Available {
+			t.Fatal(fmt.Errorf("Capacity of %d severs should not have been available.", input.Servers[0].Quantity))
+			break
+		}
 	}
 }
