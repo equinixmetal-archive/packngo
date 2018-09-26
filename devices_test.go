@@ -385,7 +385,8 @@ func TestAccDeviceAttachVolume(t *testing.T) {
 		t.Fatalf("wrong device href in the attachment: %s, should be %s", a.Device.Href, d.ID)
 	}
 
-	v, _, err = c.Volumes.Get(v.ID)
+	v, _, err = c.Volumes.GetExtra(v.ID,
+		[]string{"attachments.device"}, []string{})
 	if err != nil {
 		t.Fatal(err)
 	}
