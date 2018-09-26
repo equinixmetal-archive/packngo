@@ -65,6 +65,9 @@ func TestAccInstanceBatches(t *testing.T) {
 			dev, _, _ := c.Devices.Get(d.ID)
 			if dev.State == "active" {
 				finished = true
+			} else { //if at least one is not "active" set finished to false and break the loop
+				finished = false
+				break
 			}
 		}
 
