@@ -22,7 +22,6 @@ type Batch struct {
 	CreatedAt              *Timestamp `json:"created_at,omitempty"`
 	Href                   string     `json:"href,omitempty"`
 	Project                Href       `json:"project,omitempty"`
-	Instances              Href       `json:"instances,omitempty"`
 	Facilities             []Facility `json:"facilities,omitempty"`
 	FacilityDiversityLevel int32      `json:"facility_diversity_level,omitempty"`
 	Devices                []Device   `json:"devices,omitempty"`
@@ -54,7 +53,7 @@ type BatchInstance struct {
 	TerminationTime *Timestamp `json:"termination_time,omitempty"`
 	Tags            []string   `json:"tags,omitempty"`
 	ProjectSSHKeys  []string   `json:"project_ssh_keys,omitempty"`
-	UserSSSHKeys    []string   `json:"user_ssh_keys,omitempty"`
+	UserSSHKeys     []string   `json:"user_ssh_keys,omitempty"`
 	Features        []string   `json:"features,omitempty"`
 	Customdata      string     `json:"customdata,omitempty"`
 }
@@ -114,7 +113,7 @@ func (s *BatchServiceOp) Create(projectID string, request *InstanceBatchCreateRe
 
 // Delete function to remove an instance batch
 func (s *BatchServiceOp) Delete(id string, removeDevices bool) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", batchBasePath, id)
+	path := fmt.Sprintf("%s/%s?remove_associated_instances=%t", batchBasePath, id, removeDevices)
 
 	return s.client.DoRequest("DELETE", path, nil, nil)
 }

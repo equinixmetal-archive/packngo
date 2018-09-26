@@ -7,7 +7,6 @@ import (
 
 func TestAccInstanceBatches(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
-	c := setup(t)
 
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
@@ -46,7 +45,7 @@ func TestAccInstanceBatches(t *testing.T) {
 	if batches == nil {
 		t.Fatal("No batches have been created")
 	}
-
+	time.Sleep(5 * time.Second)
 	batch, _, err := c.Batches.Get(batchID, &ListOptions{Includes: "devices"})
 
 	if err != nil {
@@ -61,7 +60,6 @@ func TestAccInstanceBatches(t *testing.T) {
 			break
 		}
 		for _, d := range batch.Devices {
-
 			dev, _, _ := c.Devices.Get(d.ID)
 			if dev.State == "active" {
 				finished = true
@@ -78,6 +76,12 @@ func TestAccInstanceBatches(t *testing.T) {
 		}
 	}
 
+	// for _, d := range batch.Devices {
+	// 	_, err := c.Devices.Delete(d.ID)
+	// 	if err != nil {
+	// 		t.Fatal(err)
+	// 	}
+	// }
 	if batch == nil {
 		t.Fatal("Batch not found")
 	}
