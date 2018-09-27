@@ -145,6 +145,7 @@ type Client struct {
 	SpotMarketRequests     SpotMarketRequestService
 	Organizations          OrganizationService
 	CapacityService        CapacityService
+	Batches                BatchService
 	TwoFactorAuth          TwoFactorAuthService
 	VPN                    VPNService
 	HardwareReservations   HardwareReservationService
@@ -310,6 +311,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
 	c.SpotMarket = &SpotMarketServiceOp{client: c}
 	c.CapacityService = &CapacityServiceOp{client: c}
+	c.Batches = &BatchServiceOp{client: c}
 	c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
 	c.VPN = &VPNServiceOp{client: c}
 	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
