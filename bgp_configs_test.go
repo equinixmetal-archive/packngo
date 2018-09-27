@@ -37,9 +37,9 @@ func TestAccBGPConfig(t *testing.T) {
 		t.Fatal("BGP config is not set up properly")
 	}
 
-	_, err = c.BGPConfig.Delete(config.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// _, err = c.BGPConfig.Delete(config.ID)
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 	projectTeardown(c)
 }

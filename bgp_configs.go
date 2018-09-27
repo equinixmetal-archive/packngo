@@ -8,7 +8,7 @@ var bgpConfigBasePath = "/bgp-config"
 type BGPConfigService interface {
 	Get(projectID string) (*BGPConfig, *Response, error)
 	Create(string, CreateBGPConfigRequest) (*Response, error)
-	Delete(configID string) (resp *Response, err error)
+	// Delete(configID string) (resp *Response, err error) TODO: Not in Packet API
 }
 
 // BGPConfigServiceOp implements BgpConfigService
@@ -66,14 +66,14 @@ func (s *BGPConfigServiceOp) Get(projectID string) (bgpConfig *BGPConfig, resp *
 	return subset, resp, err
 }
 
-// Delete function
-func (s *BGPConfigServiceOp) Delete(configID string) (resp *Response, err error) {
-	path := fmt.Sprintf("%ss/%s", bgpConfigBasePath, configID)
+// Delete function TODO: this is not implemented in the Packet API
+// func (s *BGPConfigServiceOp) Delete(configID string) (resp *Response, err error) {
+// 	path := fmt.Sprintf("%ss/%s", bgpConfigBasePath, configID)
 
-	resp, err = s.client.DoRequest("DELETE", path, nil, nil)
-	if err != nil {
-		return resp, err
-	}
+// 	resp, err = s.client.DoRequest("DELETE", path, nil, nil)
+// 	if err != nil {
+// 		return resp, err
+// 	}
 
-	return resp, err
-}
+// 	return resp, err
+// }
