@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -83,6 +84,7 @@ type DeviceCreateRequest struct {
 	SpotPriceMax          float64    `json:"spot_price_max,omitempty,string"`
 	TerminationTime       *Timestamp `json:"termination_time,omitempty"`
 	CustomData            string     `json:"customdata,omitempty"`
+	Facilities            []string   `json:",omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
@@ -167,6 +169,21 @@ func (s *DeviceServiceOp) GetExtra(deviceID string, includes, excludes []string)
 	}
 
 	return device, resp, err
+}
+
+// MarshalJSON
+func (dcr *DeviceCreateRequest) MarshalJSON() ([]byte, error) {
+	if len(dcr.Facilities) == 0 {
+		return json.Marshal(dcr)
+	}
+	type Alias DeviceCreateRequest
+	return json.Marshal(&struct {
+		Facility []string `json:"facility"`
+		*Alias
+	}{
+		Facility: dcr.Facilities,
+		Alias:    (*Alias)(dcr),
+	})
 }
 
 // Create creates a new device

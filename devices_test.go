@@ -576,3 +576,49 @@ func TestAccListDeviceEvents(t *testing.T) {
 		t.Fatal("Device events not returned")
 	}
 }
+
+func TestAccDeviceCreateFacilities(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+
+	facilities := []string{"nrt1", "dfw1", "fra1"}
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     "ewr1",
+		Plan:         "baremetal_0",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+		Facilities:   facilities,
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+
+	dID := d.ID
+
+	d, err = waitDeviceActive(dID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	placedInRequestedFacility := false
+	for _, fac := range facilities {
+		if d.Facility.Code == fac {
+			placedInRequestedFacility = true
+		}
+	}
+	if !placedInRequestedFacility {
+		t.Fatal("Did not properly assign facility to device")
+	}
+
+}
