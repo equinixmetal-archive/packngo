@@ -32,7 +32,7 @@ func TestAccCheckCapacity(t *testing.T) {
 
 	list, _, err := c.CapacityService.List()
 	if err != nil {
-		t.Fatal("List of capacities not fetched")
+		t.Fatal(err)
 	}
 
 	for k, v := range *list {
