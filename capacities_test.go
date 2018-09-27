@@ -37,14 +37,14 @@ func TestAccCheckCapacity(t *testing.T) {
 
 	for k, v := range *list {
 		if v["baremetal_2a2"].Level == "unavailable" {
-			input.Servers[0].Plan = v["baremetal_2a2"].Level
+			input.Servers[0].Plan = "baremetal_2a2"
 			input.Servers[0].Facility = k
 			break
 		}
 	}
 
 	cap, _, err = c.CapacityService.Check(input)
-	if err == nil {
+	if err != nil {
 		t.Fatal(err)
 	}
 
