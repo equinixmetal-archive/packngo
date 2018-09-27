@@ -67,24 +67,25 @@ func (d Device) String() string {
 
 // DeviceCreateRequest type used to create a Packet device
 type DeviceCreateRequest struct {
-	Hostname              string     `json:"hostname"`
-	Plan                  string     `json:"plan"`
-	Facility              string     `json:"facility"`
-	OS                    string     `json:"operating_system"`
-	BillingCycle          string     `json:"billing_cycle"`
-	ProjectID             string     `json:"project_id"`
-	UserData              string     `json:"userdata"`
-	Storage               string     `json:"storage,omitempty"`
-	Tags                  []string   `json:"tags"`
-	IPXEScriptURL         string     `json:"ipxe_script_url,omitempty"`
-	PublicIPv4SubnetSize  int        `json:"public_ipv4_subnet_size,omitempty"`
-	AlwaysPXE             bool       `json:"always_pxe,omitempty"`
-	HardwareReservationID string     `json:"hardware_reservation_id,omitempty"`
-	SpotInstance          bool       `json:"spot_instance,omitempty"`
-	SpotPriceMax          float64    `json:"spot_price_max,omitempty,string"`
-	TerminationTime       *Timestamp `json:"termination_time,omitempty"`
-	CustomData            string     `json:"customdata,omitempty"`
-	Facilities            []string   `json:",omitempty"`
+	Hostname              string            `json:"hostname"`
+	Plan                  string            `json:"plan"`
+	Facility              string            `json:"facility"`
+	OS                    string            `json:"operating_system"`
+	BillingCycle          string            `json:"billing_cycle"`
+	ProjectID             string            `json:"project_id"`
+	UserData              string            `json:"userdata"`
+	Storage               string            `json:"storage,omitempty"`
+	Tags                  []string          `json:"tags"`
+	IPXEScriptURL         string            `json:"ipxe_script_url,omitempty"`
+	PublicIPv4SubnetSize  int               `json:"public_ipv4_subnet_size,omitempty"`
+	AlwaysPXE             bool              `json:"always_pxe,omitempty"`
+	HardwareReservationID string            `json:"hardware_reservation_id,omitempty"`
+	SpotInstance          bool              `json:"spot_instance,omitempty"`
+	SpotPriceMax          float64           `json:"spot_price_max,omitempty,string"`
+	TerminationTime       *Timestamp        `json:"termination_time,omitempty"`
+	CustomData            string            `json:"customdata,omitempty"`
+	Facilities            []string          `json:",omitempty"`
+	Features              map[string]string `json:"features,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
@@ -171,19 +172,24 @@ func (s *DeviceServiceOp) GetExtra(deviceID string, includes, excludes []string)
 	return device, resp, err
 }
 
-// MarshalJSON
-func (dcr *DeviceCreateRequest) MarshalJSON() ([]byte, error) {
-	if len(dcr.Facilities) == 0 {
-		return json.Marshal(dcr)
-	}
+// MarshalJSON marshals *DeviceCreateRequest to json, override facilities if necessary
+func (d *DeviceCreateRequest) MarshalJSON() ([]byte, error) {
 	type Alias DeviceCreateRequest
-	return json.Marshal(&struct {
-		Facility []string `json:"facility"`
-		*Alias
-	}{
-		Facility: dcr.Facilities,
-		Alias:    (*Alias)(dcr),
-	})
+	if len(d.Facilities) == 0 {
+		return json.Marshal(&struct {
+			*Alias
+		}{
+			Alias: (*Alias)(d),
+		})
+	} else {
+		return json.Marshal(&struct {
+			Facility []string `json:"facility"`
+			*Alias
+		}{
+			Facility: d.Facilities,
+			Alias:    (*Alias)(d),
+		})
+	}
 }
 
 // Create creates a new device

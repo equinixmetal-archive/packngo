@@ -596,6 +596,7 @@ func TestAccDeviceCreateFacilities(t *testing.T) {
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		Facilities:   facilities,
+		Features:     map[string]string{},
 	}
 
 	d, _, err := c.Devices.Create(&cr)
