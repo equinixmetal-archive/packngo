@@ -146,6 +146,7 @@ type Client struct {
 	Organizations          OrganizationService
 	BGPSessions            BGPSessionService
 	BGPConfig              BGPConfigService
+	Batches                BatchService
 	TwoFactorAuth          TwoFactorAuthService
 	VPN                    VPNService
 	HardwareReservations   HardwareReservationService
@@ -312,6 +313,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.SpotMarket = &SpotMarketServiceOp{client: c}
 	c.BGPSessions = &BGPSessionServiceOp{client: c}
 	c.BGPConfig = &BGPConfigServiceOp{client: c}
+	c.Batches = &BatchServiceOp{client: c}
 	c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
 	c.VPN = &VPNServiceOp{client: c}
 	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
