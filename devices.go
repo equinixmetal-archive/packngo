@@ -181,15 +181,16 @@ func (d *DeviceCreateRequest) MarshalJSON() ([]byte, error) {
 		}{
 			Alias: (*Alias)(d),
 		})
-	} else {
-		return json.Marshal(&struct {
-			Facility []string `json:"facility"`
-			*Alias
-		}{
-			Facility: d.Facilities,
-			Alias:    (*Alias)(d),
-		})
 	}
+	return json.Marshal(&struct {
+		Facility   []string `json:"facility"`
+		Facilities []string `json:",omitempty"`
+		*Alias
+	}{
+		Facility:   d.Facilities,
+		Facilities: []string{},
+		Alias:      (*Alias)(d),
+	})
 }
 
 // Create creates a new device
