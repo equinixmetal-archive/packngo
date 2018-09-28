@@ -11,17 +11,18 @@ func TestAccInstanceBatches(t *testing.T) {
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 
-	req := &InstanceBatchCreateRequest{
-		Batches: []BatchInstance{
+	req := &BatchDeviceCreateRequest{
+		Batches: []BatchCreateDevice{
 			{
-				Hostname:        "test1",
-				Description:     "test batch",
-				Plan:            "baremetal_0",
-				OperatingSystem: "ubuntu_16_04",
-				Facility:        "ewr1",
-				BillingCycle:    "hourly",
-				Tags:            []string{"abc"},
-				Quantity:        3,
+				DeviceCreateRequest: DeviceCreateRequest{
+					Hostname:     "test1",
+					Plan:         "baremetal_0",
+					OS:           "ubuntu_16_04",
+					Facility:     "ewr1",
+					BillingCycle: "hourly",
+					Tags:         []string{"abc"},
+				},
+				Quantity: 3,
 			},
 		},
 	}

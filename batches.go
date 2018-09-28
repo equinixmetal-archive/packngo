@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -10,7 +11,7 @@ const batchBasePath = "/batches"
 type BatchService interface {
 	Get(batchID string, listOpt *ListOptions) (*Batch, *Response, error)
 	List(ProjectID string, listOpt *ListOptions) ([]Batch, *Response, error)
-	Create(projectID string, batches *DeviceBatchCreateRequest) ([]Batch, *Response, error)
+	Create(projectID string, batches *BatchDeviceCreateRequest) ([]Batch, *Response, error)
 	Delete(string, bool) (*Response, error)
 }
 
@@ -31,8 +32,8 @@ type batchesList struct {
 	Batches []Batch `json:"batches,omitempty"`
 }
 
-// DeviceBatchCreateRequest type used to create batch of device instances
-type DeviceBatchCreateRequest struct {
+// BatchDeviceCreateRequest type used to create batch of device instances
+type BatchDeviceCreateRequest struct {
 	Batches []BatchCreateDevice `json:"batches"`
 }
 
@@ -41,6 +42,24 @@ type BatchCreateDevice struct {
 	DeviceCreateRequest
 	Quantity               int32 `json:"quantity"`
 	FacilityDiversityLevel int32 `json:"facility_diversity_level,omitempty"`
+}
+
+// MarshalJSON custom marshalling to handle DeviceCreateRequest and additional fields
+func (bcd *BatchCreateDevice) MarshalJSON() ([]byte, error) {
+	dcr, err := bcd.DeviceCreateRequest.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	temp := make(map[string]interface{})
+	err = json.Unmarshal(dcr, &temp)
+	if err != nil {
+		return nil, err
+	}
+	temp["quantity"] = bcd.Quantity
+	if bcd.FacilityDiversityLevel != 0 {
+		temp["facility_diversity_level"] = bcd.FacilityDiversityLevel
+	}
+	return json.Marshal(temp)
 }
 
 // BatchServiceOp implements BatchService
@@ -83,7 +102,7 @@ func (s *BatchServiceOp) List(projectID string, listOpt *ListOptions) (batches [
 }
 
 // Create function to create batch of device instances
-func (s *BatchServiceOp) Create(projectID string, request *DeviceBatchCreateRequest) ([]Batch, *Response, error) {
+func (s *BatchServiceOp) Create(projectID string, request *BatchDeviceCreateRequest) ([]Batch, *Response, error) {
 	path := fmt.Sprintf("%s/%s/devices/batch", projectBasePath, projectID)
 
 	batches := new(batchesList)
