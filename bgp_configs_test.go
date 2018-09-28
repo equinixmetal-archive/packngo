@@ -25,10 +25,6 @@ func TestAccBGPConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if config == nil {
-		t.Fatal("BGP config not retrieved")
-	}
-
 	if config.Md5 != configRequest.Md5 {
 		t.Fatal("BGP config is not set up properly")
 	}

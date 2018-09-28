@@ -70,20 +70,11 @@ func TestAccBGPSession(t *testing.T) {
 		t.Fatal("BGP Session not returned.")
 	}
 
-	session, _, err := c.BGPSessions.Get(sessionID, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if session == nil {
-		t.Fatal("Session not retrieved")
-	}
-
 	_, err = c.BGPSessions.Delete(sessionID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, _, err = c.BGPSessions.Get(sessionID, nil)
+	session, _, err := c.BGPSessions.Get(sessionID, nil)
 	if session != nil {
 		t.Fatal("Session not deleted")
 	}
