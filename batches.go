@@ -48,11 +48,6 @@ type BatchServiceOp struct {
 	client *Client
 }
 
-// MarshalJSON
-func (bcd *BatchCreateDevice) MarshalJSON() ([]byte, error) {
-
-}
-
 // Get returns batch details
 func (s *BatchServiceOp) Get(batchID string, listOpt *ListOptions) (*Batch, *Response, error) {
 	var params string
