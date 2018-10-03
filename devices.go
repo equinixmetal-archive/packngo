@@ -58,8 +58,7 @@ type Device struct {
 	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
 	NetworkPorts        []Port                 `json:"network_ports,omitempty"`
 	CustomData          map[string]interface{} `json:"customdata,omitempty"`
-	UserSSHKeys         []string               `json:"user_ssh_keys,omitempty"`
-	ProjectSSHKeys      []string               `json:"project_ssh_keys,omitempty"`
+	SSHKeys             []SSHKey               `json:"ssh_keys,omitempty"`
 }
 
 func (d Device) String() string {
@@ -91,16 +90,14 @@ type DeviceCreateRequest struct {
 
 // DeviceUpdateRequest type used to update a Packet device
 type DeviceUpdateRequest struct {
-	Hostname       *string   `json:"hostname,omitempty"`
-	Description    *string   `json:"description,omitempty"`
-	UserData       *string   `json:"userdata,omitempty"`
-	Locked         *bool     `json:"locked,omitempty"`
-	Tags           *[]string `json:"tags,omitempty"`
-	AlwaysPXE      *bool     `json:"always_pxe,omitempty"`
-	IPXEScriptURL  *string   `json:"ipxe_script_url,omitempty"`
-	CustomData     *string   `json:"customdata,omitempty"`
-	UserSSHKeys    []string  `json:"user_ssh_keys,omitempty"`
-	ProjectSSHKeys []string  `json:"project_ssh_keys,omitempty"`
+	Hostname      *string   `json:"hostname,omitempty"`
+	Description   *string   `json:"description,omitempty"`
+	UserData      *string   `json:"userdata,omitempty"`
+	Locked        *bool     `json:"locked,omitempty"`
+	Tags          *[]string `json:"tags,omitempty"`
+	AlwaysPXE     *bool     `json:"always_pxe,omitempty"`
+	IPXEScriptURL *string   `json:"ipxe_script_url,omitempty"`
+	CustomData    *string   `json:"customdata,omitempty"`
 }
 
 func (d DeviceCreateRequest) String() string {

@@ -576,3 +576,63 @@ func TestAccListDeviceEvents(t *testing.T) {
 		t.Fatal("Device events not returned")
 	}
 }
+
+func TestAccDeviceSSHKeys(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+
+	userKey := createKey(t, c, "")
+	defer c.SSHKeys.Delete(userKey.ID)
+	projectKey := createKey(t, c, projectID)
+	defer c.SSHKeys.Delete(projectKey.ID)
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     testFacility(),
+		Plan:         "baremetal_0",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+
+	dID := d.ID
+
+	d, err = waitDeviceActive(dID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	d, _, err = c.Devices.GetExtra(dID,
+		[]string{"ssh_keys"}, []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	userKeyIn := false
+	projectKeyIn := false
+	for _, k := range d.SSHKeys {
+		if k.ID == userKey.ID {
+			userKeyIn = true
+		}
+		if k.ID == projectKey.ID {
+			projectKeyIn = true
+		}
+	}
+	if !userKeyIn {
+		t.Fatalf("User SSH Key %+v is not present at device", userKey)
+	}
+	if !projectKeyIn {
+		t.Fatalf("Project SSH Key %+v is not present at device", projectKey)
+	}
+
+}
