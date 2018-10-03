@@ -11,7 +11,7 @@ func TestAccInstanceBatches(t *testing.T) {
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 
-	req := &BatchDeviceCreateRequest{
+	req := &BatchCreateRequest{
 		Batches: []BatchCreateDevice{
 			{
 				DeviceCreateRequest: DeviceCreateRequest{

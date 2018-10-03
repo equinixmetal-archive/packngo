@@ -11,20 +11,19 @@ const batchBasePath = "/batches"
 type BatchService interface {
 	Get(batchID string, listOpt *ListOptions) (*Batch, *Response, error)
 	List(ProjectID string, listOpt *ListOptions) ([]Batch, *Response, error)
-	Create(projectID string, batches *BatchDeviceCreateRequest) ([]Batch, *Response, error)
+	Create(projectID string, batches *BatchCreateRequest) ([]Batch, *Response, error)
 	Delete(string, bool) (*Response, error)
 }
 
 // Batch type
 type Batch struct {
-	ID         string     `json:"id"`
-	State      string     `json:"state,omitempty"`
-	Quantity   int32      `json:"quantity,omitempty"`
-	CreatedAt  *Timestamp `json:"created_at,omitempty"`
-	Href       string     `json:"href,omitempty"`
-	Project    Href       `json:"project,omitempty"`
-	Facilities []Facility `json:"facilities,omitempty"`
-	Devices    []Device   `json:"devices,omitempty"`
+	ID        string     `json:"id"`
+	State     string     `json:"state,omitempty"`
+	Quantity  int32      `json:"quantity,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
+	Href      string     `json:"href,omitempty"`
+	Project   Href       `json:"project,omitempty"`
+	Devices   []Device   `json:"devices,omitempty"`
 }
 
 //BatchesList represents collection of batches
@@ -32,8 +31,8 @@ type batchesList struct {
 	Batches []Batch `json:"batches,omitempty"`
 }
 
-// BatchDeviceCreateRequest type used to create batch of device instances
-type BatchDeviceCreateRequest struct {
+// BatchCreateRequest type used to create batch of device instances
+type BatchCreateRequest struct {
 	Batches []BatchCreateDevice `json:"batches"`
 }
 
@@ -102,7 +101,7 @@ func (s *BatchServiceOp) List(projectID string, listOpt *ListOptions) (batches [
 }
 
 // Create function to create batch of device instances
-func (s *BatchServiceOp) Create(projectID string, request *BatchDeviceCreateRequest) ([]Batch, *Response, error) {
+func (s *BatchServiceOp) Create(projectID string, request *BatchCreateRequest) ([]Batch, *Response, error) {
 	path := fmt.Sprintf("%s/%s/devices/batch", projectBasePath, projectID)
 
 	batches := new(batchesList)
