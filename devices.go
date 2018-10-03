@@ -198,6 +198,10 @@ func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *
 	path := fmt.Sprintf("%s/%s%s", projectBasePath, createRequest.ProjectID, deviceBasePath)
 	device := new(Device)
 
+	if (createRequest.Facility != "") && len(createRequest.Facilities) > 0 {
+		return nil, nil, fmt.Errorf("You can specify only one of Facility or Facilities")
+	}
+
 	resp, err := s.client.DoRequest("POST", path, createRequest, device)
 	if err != nil {
 		return nil, resp, err

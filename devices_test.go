@@ -590,7 +590,6 @@ func TestAccDeviceCreateFacilities(t *testing.T) {
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     "ewr1",
 		Plan:         "baremetal_0",
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
