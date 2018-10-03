@@ -84,8 +84,16 @@ type DeviceCreateRequest struct {
 	SpotPriceMax          float64    `json:"spot_price_max,omitempty,string"`
 	TerminationTime       *Timestamp `json:"termination_time,omitempty"`
 	CustomData            string     `json:"customdata,omitempty"`
-	UserSSHKeys           []string   `json:"user_ssh_keys,omitempty"`
-	ProjectSSHKeys        []string   `json:"project_ssh_keys,omitempty"`
+	// UserSSHKeys is a list of user UUIDs - essentialy a list of
+	// collaborators. The users must be a collaborator in the same project
+	// where the device is created. The user's SSH keys then go to the
+	// device.
+	UserSSHKeys []string `json:"user_ssh_keys,omitempty"`
+	// Project SSHKeys is a list of SSHKeys resource UUIDs. If this param
+	// is supplied, only the listed SSHKeys will go to the device.
+	// Any other Project SSHKeys and any User SSHKeys will not be present
+	// in the device.
+	ProjectSSHKeys []string `json:"project_ssh_keys,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
