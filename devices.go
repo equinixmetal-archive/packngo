@@ -1,7 +1,6 @@
 package packngo
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -69,7 +68,7 @@ func (d Device) String() string {
 type DeviceCreateRequest struct {
 	Hostname              string            `json:"hostname"`
 	Plan                  string            `json:"plan"`
-	Facility              string            `json:"facility"`
+	Facility              []string          `json:"facility"`
 	OS                    string            `json:"operating_system"`
 	BillingCycle          string            `json:"billing_cycle"`
 	ProjectID             string            `json:"project_id"`
@@ -84,7 +83,6 @@ type DeviceCreateRequest struct {
 	SpotPriceMax          float64           `json:"spot_price_max,omitempty,string"`
 	TerminationTime       *Timestamp        `json:"termination_time,omitempty"`
 	CustomData            string            `json:"customdata,omitempty"`
-	Facilities            []string          `json:",omitempty"`
 	Features              map[string]string `json:"features,omitempty"`
 }
 
@@ -172,35 +170,10 @@ func (s *DeviceServiceOp) GetExtra(deviceID string, includes, excludes []string)
 	return device, resp, err
 }
 
-// MarshalJSON marshals *DeviceCreateRequest to json, override facilities if necessary
-func (d *DeviceCreateRequest) MarshalJSON() ([]byte, error) {
-	type Alias DeviceCreateRequest
-	if len(d.Facilities) == 0 {
-		return json.Marshal(&struct {
-			*Alias
-		}{
-			Alias: (*Alias)(d),
-		})
-	}
-	return json.Marshal(&struct {
-		Facility   []string `json:"facility"`
-		Facilities []string `json:",omitempty"`
-		*Alias
-	}{
-		Facility:   d.Facilities,
-		Facilities: []string{},
-		Alias:      (*Alias)(d),
-	})
-}
-
 // Create creates a new device
 func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", projectBasePath, createRequest.ProjectID, deviceBasePath)
 	device := new(Device)
-
-	if (createRequest.Facility != "") && len(createRequest.Facilities) > 0 {
-		return nil, nil, fmt.Errorf("You can specify only one of Facility or Facilities")
-	}
 
 	resp, err := s.client.DoRequest("POST", path, createRequest, device)
 	if err != nil {

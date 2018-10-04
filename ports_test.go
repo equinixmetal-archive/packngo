@@ -25,7 +25,7 @@ func TestAccPort1E(t *testing.T) {
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     fac,
+		Facility:     []string{fac},
 		Plan:         "baremetal_1e",
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
@@ -149,7 +149,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     fac,
+		Facility:     []string{fac},
 		Plan:         plan,
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
@@ -310,7 +310,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     fac,
+		Facility:     []string{fac},
 		Plan:         plan,
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,

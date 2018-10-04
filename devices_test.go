@@ -38,10 +38,11 @@ func TestAccDeviceUpdate(t *testing.T) {
 	defer teardown()
 
 	hn := randString8()
+	fac := testFacility()
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     testFacility(),
+		Facility:     []string{fac},
 		Plan:         "baremetal_0",
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
@@ -94,10 +95,11 @@ func TestAccDeviceBasic(t *testing.T) {
 	defer teardown()
 
 	hn := randString8()
+	fac := testFacility()
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     testFacility(),
+		Facility:     []string{fac},
 		Plan:         "baremetal_0",
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
@@ -147,10 +149,11 @@ func TestAccDevicePXE(t *testing.T) {
 	defer teardown()
 	hn := randString8()
 	pxeURL := "https://boot.netboot.xyz"
+	fac := testFacility()
 
 	cr := DeviceCreateRequest{
 		Hostname:      "pxe-" + hn,
-		Facility:      testFacility(),
+		Facility:      []string{fac},
 		Plan:          "baremetal_0",
 		ProjectID:     projectID,
 		BillingCycle:  "hourly",
@@ -214,11 +217,11 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	defer teardown()
 	hn := randString8()
 
-	testFac := testFacility()
+	fac := testFacility()
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     testFac,
+		Facility:     []string{fac},
 		Plan:         "baremetal_0",
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -240,7 +243,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 		Type:     "public_ipv4",
 		Quantity: 1,
 		Comments: "packngo test",
-		Facility: testFac,
+		Facility: fac,
 	}
 
 	reservation, _, err := c.ProjectIPs.Request(projectID, &req)
@@ -333,10 +336,11 @@ func TestAccDeviceAttachVolume(t *testing.T) {
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 	hn := randString8()
+	fac := testFacility()
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     testFacility(),
+		Facility:     []string{fac},
 		Plan:         "baremetal_0",
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -420,10 +424,11 @@ func TestAccDeviceSpotInstance(t *testing.T) {
 
 	testSPM := 0.04
 	testTerm := &Timestamp{Time: time.Now().Add(time.Hour - (time.Minute * 10))}
+	fac := testFacility()
 
 	cr := DeviceCreateRequest{
 		Hostname:        hn,
-		Facility:        testFacility(),
+		Facility:        []string{fac},
 		Plan:            "baremetal_0",
 		OS:              "coreos_stable",
 		ProjectID:       projectID,
@@ -468,10 +473,11 @@ func TestAccDeviceCustomData(t *testing.T) {
 	hn := randString8()
 
 	initialCustomData := `{"hello":"world"}`
+	fac := testFacility()
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     testFacility(),
+		Facility:     []string{fac},
 		Plan:         "baremetal_0",
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
@@ -545,10 +551,11 @@ func TestAccListDeviceEvents(t *testing.T) {
 	hn := randString8()
 
 	initialCustomData := `{"hello":"world"}`
+	fac := testFacility()
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     testFacility(),
+		Facility:     []string{fac},
 		Plan:         "baremetal_0",
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
@@ -594,7 +601,7 @@ func TestAccDeviceCreateFacilities(t *testing.T) {
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
-		Facilities:   facilities,
+		Facility:     facilities,
 		Features:     map[string]string{},
 	}
 

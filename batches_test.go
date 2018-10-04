@@ -18,7 +18,7 @@ func TestAccInstanceBatches(t *testing.T) {
 					Hostname:     "test1",
 					Plan:         "baremetal_0",
 					OS:           "ubuntu_16_04",
-					Facility:     "ewr1",
+					Facility:     []string{"ewr1"},
 					BillingCycle: "hourly",
 					Tags:         []string{"abc"},
 				},
