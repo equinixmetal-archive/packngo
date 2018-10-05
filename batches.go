@@ -10,21 +10,19 @@ const batchBasePath = "/batches"
 type BatchService interface {
 	Get(batchID string, listOpt *ListOptions) (*Batch, *Response, error)
 	List(ProjectID string, listOpt *ListOptions) ([]Batch, *Response, error)
-	Create(projectID string, batches *InstanceBatchCreateRequest) ([]Batch, *Response, error)
+	Create(projectID string, batches *BatchCreateRequest) ([]Batch, *Response, error)
 	Delete(string, bool) (*Response, error)
 }
 
 // Batch type
 type Batch struct {
-	ID                     string     `json:"id"`
-	State                  string     `json:"state,omitempty"`
-	Quantity               int32      `json:"quantity,omitempty"`
-	CreatedAt              *Timestamp `json:"created_at,omitempty"`
-	Href                   string     `json:"href,omitempty"`
-	Project                Href       `json:"project,omitempty"`
-	Facilities             []Facility `json:"facilities,omitempty"`
-	FacilityDiversityLevel int32      `json:"facility_diversity_level,omitempty"`
-	Devices                []Device   `json:"devices,omitempty"`
+	ID        string     `json:"id"`
+	State     string     `json:"state,omitempty"`
+	Quantity  int32      `json:"quantity,omitempty"`
+	CreatedAt *Timestamp `json:"created_at,omitempty"`
+	Href      string     `json:"href,omitempty"`
+	Project   Href       `json:"project,omitempty"`
+	Devices   []Device   `json:"devices,omitempty"`
 }
 
 //BatchesList represents collection of batches
@@ -32,30 +30,16 @@ type batchesList struct {
 	Batches []Batch `json:"batches,omitempty"`
 }
 
-// InstanceBatchCreateRequest type used to create batch of device instances
-type InstanceBatchCreateRequest struct {
-	Batches []BatchInstance `json:"batches"`
+// BatchCreateRequest type used to create batch of device instances
+type BatchCreateRequest struct {
+	Batches []BatchCreateDevice `json:"batches"`
 }
 
-// BatchInstance type used to describe batch instances
-type BatchInstance struct {
-	Plan            string     `json:"plan"`
-	Hostname        string     `json:"hostname"`
-	Facility        string     `json:"facility"`
-	BillingCycle    string     `json:"billing_cycle"`
-	OperatingSystem string     `json:"operating_system"`
-	Quantity        int        `json:"quantity"`
-	Hostnames       []string   `json:"hostnames,omitempty"`
-	Description     string     `json:"description,omitempty"`
-	AlwaysPxe       bool       `json:"always_pxe,omitempty"`
-	Userdata        string     `json:"userdata,omitempty"`
-	Locked          bool       `json:"locked,omitempty"`
-	TerminationTime *Timestamp `json:"termination_time,omitempty"`
-	Tags            []string   `json:"tags,omitempty"`
-	ProjectSSHKeys  []string   `json:"project_ssh_keys,omitempty"`
-	UserSSHKeys     []string   `json:"user_ssh_keys,omitempty"`
-	Features        []string   `json:"features,omitempty"`
-	Customdata      string     `json:"customdata,omitempty"`
+// BatchCreateDevice type used to describe batch instances
+type BatchCreateDevice struct {
+	DeviceCreateRequest
+	Quantity               int32 `json:"quantity"`
+	FacilityDiversityLevel int32 `json:"facility_diversity_level,omitempty"`
 }
 
 // BatchServiceOp implements BatchService
@@ -98,7 +82,7 @@ func (s *BatchServiceOp) List(projectID string, listOpt *ListOptions) (batches [
 }
 
 // Create function to create batch of device instances
-func (s *BatchServiceOp) Create(projectID string, request *InstanceBatchCreateRequest) ([]Batch, *Response, error) {
+func (s *BatchServiceOp) Create(projectID string, request *BatchCreateRequest) ([]Batch, *Response, error) {
 	path := fmt.Sprintf("%s/%s/devices/batch", projectBasePath, projectID)
 
 	batches := new(batchesList)
