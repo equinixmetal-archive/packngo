@@ -10,6 +10,17 @@ func TestAccBGPSession(t *testing.T) {
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 
+	configRequest := CreateBGPConfigRequest{
+		DeploymentType: "local",
+		Asn:            65000,
+		Md5:            "c3RhY2twb2ludDIwMTgK",
+	}
+
+	_, err := c.BGPConfig.Create(projectID, configRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	hn := randString8()
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
