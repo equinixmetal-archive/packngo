@@ -93,7 +93,8 @@ type DeviceCreateRequest struct {
 	// is supplied, only the listed SSHKeys will go to the device.
 	// Any other Project SSHKeys and any User SSHKeys will not be present
 	// in the device.
-	ProjectSSHKeys []string `json:"project_ssh_keys,omitempty"`
+	ProjectSSHKeys []string          `json:"project_ssh_keys,omitempty"`
+	Features       map[string]string `json:"features,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
