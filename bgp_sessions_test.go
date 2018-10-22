@@ -85,7 +85,7 @@ func TestAccBGPSession(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, _, err := c.BGPSessions.Get(sessionID, nil)
+	session, _, err := c.BGPSessions.Get(sessionID)
 	if session != nil {
 		t.Fatal("Session not deleted")
 	}

@@ -6,7 +6,7 @@ var bgpSessionBasePath = "/bgp/sessions"
 
 // BGPSessionService interface defines available BGP session methods
 type BGPSessionService interface {
-	Get(string, *ListOptions) (*BGPSession, *Response, error)
+	Get(string) (*BGPSession, *Response, error)
 	Create(string, CreateBGPSessionRequest) (*BGPSession, *Response, error)
 	Delete(string) (*Response, error)
 }
@@ -57,12 +57,8 @@ func (s *BGPSessionServiceOp) Delete(id string) (*Response, error) {
 }
 
 // Get function
-func (s *BGPSessionServiceOp) Get(id string, listOpt *ListOptions) (session *BGPSession, response *Response, err error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
-	path := fmt.Sprintf("%s/%s?%s", bgpSessionBasePath, id, params)
+func (s *BGPSessionServiceOp) Get(id string) (session *BGPSession, response *Response, err error) {
+	path := fmt.Sprintf("%s/%s", bgpSessionBasePath, id)
 	session = new(BGPSession)
 	response, err = s.client.DoRequest("GET", path, nil, session)
 	if err != nil {
