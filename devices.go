@@ -58,6 +58,7 @@ type Device struct {
 	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
 	NetworkPorts        []Port                 `json:"network_ports,omitempty"`
 	CustomData          map[string]interface{} `json:"customdata,omitempty"`
+	SSHKeys             []SSHKey               `json:"ssh_keys,omitempty"`
 }
 
 func (d Device) String() string {
@@ -66,24 +67,34 @@ func (d Device) String() string {
 
 // DeviceCreateRequest type used to create a Packet device
 type DeviceCreateRequest struct {
-	Hostname              string            `json:"hostname"`
-	Plan                  string            `json:"plan"`
-	Facility              []string          `json:"facility"`
-	OS                    string            `json:"operating_system"`
-	BillingCycle          string            `json:"billing_cycle"`
-	ProjectID             string            `json:"project_id"`
-	UserData              string            `json:"userdata"`
-	Storage               string            `json:"storage,omitempty"`
-	Tags                  []string          `json:"tags"`
-	IPXEScriptURL         string            `json:"ipxe_script_url,omitempty"`
-	PublicIPv4SubnetSize  int               `json:"public_ipv4_subnet_size,omitempty"`
-	AlwaysPXE             bool              `json:"always_pxe,omitempty"`
-	HardwareReservationID string            `json:"hardware_reservation_id,omitempty"`
-	SpotInstance          bool              `json:"spot_instance,omitempty"`
-	SpotPriceMax          float64           `json:"spot_price_max,omitempty,string"`
-	TerminationTime       *Timestamp        `json:"termination_time,omitempty"`
-	CustomData            string            `json:"customdata,omitempty"`
-	Features              map[string]string `json:"features,omitempty"`
+	Hostname              string     `json:"hostname"`
+	Plan                  string     `json:"plan"`
+	Facility              []string   `json:"facility"`
+	OS                    string     `json:"operating_system"`
+	BillingCycle          string     `json:"billing_cycle"`
+	ProjectID             string     `json:"project_id"`
+	UserData              string     `json:"userdata"`
+	Storage               string     `json:"storage,omitempty"`
+	Tags                  []string   `json:"tags"`
+	IPXEScriptURL         string     `json:"ipxe_script_url,omitempty"`
+	PublicIPv4SubnetSize  int        `json:"public_ipv4_subnet_size,omitempty"`
+	AlwaysPXE             bool       `json:"always_pxe,omitempty"`
+	HardwareReservationID string     `json:"hardware_reservation_id,omitempty"`
+	SpotInstance          bool       `json:"spot_instance,omitempty"`
+	SpotPriceMax          float64    `json:"spot_price_max,omitempty,string"`
+	TerminationTime       *Timestamp `json:"termination_time,omitempty"`
+	CustomData            string     `json:"customdata,omitempty"`
+	// UserSSHKeys is a list of user UUIDs - essentialy a list of
+	// collaborators. The users must be a collaborator in the same project
+	// where the device is created. The user's SSH keys then go to the
+	// device.
+	UserSSHKeys []string `json:"user_ssh_keys,omitempty"`
+	// Project SSHKeys is a list of SSHKeys resource UUIDs. If this param
+	// is supplied, only the listed SSHKeys will go to the device.
+	// Any other Project SSHKeys and any User SSHKeys will not be present
+	// in the device.
+	ProjectSSHKeys []string          `json:"project_ssh_keys,omitempty"`
+	Features       map[string]string `json:"features,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
