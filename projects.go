@@ -15,6 +15,7 @@ type ProjectService interface {
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
 	Update(string, *ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
+	ListBGPSessions(projectID string, listOpt *ListOptions) ([]BGPSession, *Response, error)
 	ListEvents(string, *ListOptions) ([]Event, *Response, error)
 }
 
@@ -158,6 +159,36 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", projectBasePath, projectID)
 
 	return s.client.DoRequest("DELETE", path, nil, nil)
+}
+
+// ListBGPSessions returns all BGP Sessions associated with the project
+func (s *ProjectServiceOp) ListBGPSessions(projectID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
+	var params string
+	if listOpt != nil {
+		params = listOpt.createURL()
+	}
+	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, bgpSessionBasePath, params)
+
+	for {
+		subset := new(bgpSessionsRoot)
+
+		resp, err = s.client.DoRequest("GET", path, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		bgpSessions = append(bgpSessions, subset.Sessions...)
+
+		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
+			path = subset.Meta.Next.Href
+			if params != "" {
+				path = fmt.Sprintf("%s&%s", path, params)
+			}
+			continue
+		}
+
+		return
+	}
 }
 
 // ListEvents returns list of project events

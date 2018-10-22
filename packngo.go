@@ -144,6 +144,8 @@ type Client struct {
 	SpotMarket             SpotMarketService
 	SpotMarketRequests     SpotMarketRequestService
 	Organizations          OrganizationService
+	BGPSessions            BGPSessionService
+	BGPConfig              BGPConfigService
 	CapacityService        CapacityService
 	Batches                BatchService
 	TwoFactorAuth          TwoFactorAuthService
@@ -310,6 +312,8 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Volumes = &VolumeServiceOp{client: c}
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
 	c.SpotMarket = &SpotMarketServiceOp{client: c}
+	c.BGPSessions = &BGPSessionServiceOp{client: c}
+	c.BGPConfig = &BGPConfigServiceOp{client: c}
 	c.CapacityService = &CapacityServiceOp{client: c}
 	c.Batches = &BatchServiceOp{client: c}
 	c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
