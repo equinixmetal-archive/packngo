@@ -12,7 +12,7 @@ Installation
 Usage
 -----
 
-To authenticate to the Packet API, you must have your API token exported in env var `PACKET_API_TOKEN`.
+To authenticate to the Packet API, you must have your API token exported in env var `PACKET_AUTH_TOKEN`.
 
 This code snippet initializes Packet API client, and lists your Projects:
 
