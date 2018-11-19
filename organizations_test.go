@@ -39,7 +39,7 @@ func TestAccOrgBasic(t *testing.T) {
 	if org.Name != rs {
 		t.Fatalf("Expected the name of the updated project to be %s, not %s", rs, p.Name)
 	}
-	gotOrg, _, err := c.Organizations.Get(org.ID)
+	gotOrg, _, err := c.Organizations.Get(org.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

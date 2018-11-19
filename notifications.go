@@ -26,7 +26,7 @@ type notificationsRoot struct {
 // NotificationService interface defines available event functions
 type NotificationService interface {
 	List(*ListOptions) ([]Notification, *Response, error)
-	Get(string) (*Notification, *Response, error)
+	Get(string, *GetOptions) (*Notification, *Response, error)
 	MarkAsRead(string) (*Notification, *Response, error)
 }
 
@@ -41,8 +41,10 @@ func (s *NotificationServiceOp) List(listOpt *ListOptions) ([]Notification, *Res
 }
 
 // Get returns a notification by ID
-func (s *NotificationServiceOp) Get(notificationID string) (*Notification, *Response, error) {
-	path := fmt.Sprintf("%s/%s", notificationBasePath, notificationID)
+func (s *NotificationServiceOp) Get(notificationID string, getOpt *GetOptions) (*Notification, *Response, error) {
+	params := createGetOptionsURL(getOpt)
+
+	path := fmt.Sprintf("%s/%s?%s", notificationBasePath, notificationID, params)
 	return getNotifications(s.client, path)
 }
 
@@ -54,10 +56,7 @@ func (s *NotificationServiceOp) MarkAsRead(notificationID string) (*Notification
 
 // list helper function for all notification functions
 func listNotifications(client *Client, path string, listOpt *ListOptions) ([]Notification, *Response, error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+	params := createListOptionsURL(listOpt)
 
 	root := new(notificationsRoot)
 

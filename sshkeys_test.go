@@ -94,7 +94,7 @@ func TestAccSSHKeyGet(t *testing.T) {
 	proj := createKey(t, c, projectID)
 
 	for _, k := range []*SSHKey{user, proj} {
-		got, _, err := c.SSHKeys.Get(k.ID)
+		got, _, err := c.SSHKeys.Get(k.ID, nil)
 		if err != nil {
 			t.Fatalf("failed to retrieve created key")
 		}
@@ -234,7 +234,7 @@ func TestAccSSHKeyDelete(t *testing.T) {
 		t.Fatalf("unable to delete key: %v", err)
 	}
 
-	unexpected, _, err := c.SSHKeys.Get(key.ID)
+	unexpected, _, err := c.SSHKeys.Get(key.ID, nil)
 	if err == nil {
 		t.Fatalf("expected an error getting key, got: %v", unexpected)
 	}

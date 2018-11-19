@@ -2,7 +2,6 @@ package packngo
 
 import (
 	"fmt"
-	"strings"
 )
 
 const deviceBasePath = "/devices"
@@ -10,8 +9,7 @@ const deviceBasePath = "/devices"
 // DeviceService interface defines available device methods
 type DeviceService interface {
 	List(ProjectID string, listOpt *ListOptions) ([]Device, *Response, error)
-	Get(string) (*Device, *Response, error)
-	GetExtra(deviceID string, includes, excludes []string) (*Device, *Response, error)
+	Get(DeviceID string, getOpt *GetOptions) (*Device, *Response, error)
 	Create(*DeviceCreateRequest) (*Device, *Response, error)
 	Update(string, *DeviceUpdateRequest) (*Device, *Response, error)
 	Delete(string) (*Response, error)
@@ -130,10 +128,8 @@ type DeviceServiceOp struct {
 
 // List returns devices on a project
 func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices []Device, resp *Response, err error) {
-	params := "include=facility"
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+	listOpt = makeSureListOptionsInclude(listOpt, "facility")
+	params := createListOptionsURL(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, deviceBasePath, params)
 
 	for {
@@ -159,26 +155,16 @@ func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices 
 }
 
 // Get returns a device by id
-func (s *DeviceServiceOp) Get(deviceID string) (*Device, *Response, error) {
-	return s.GetExtra(deviceID, []string{"facility"}, nil)
-}
+func (s *DeviceServiceOp) Get(deviceID string, getOpt *GetOptions) (*Device, *Response, error) {
+	getOpt = makeSureGetOptionsInclude(getOpt, "facility")
+	params := createGetOptionsURL(getOpt)
 
-// GetExtra returns a device by id. Specifying either includes/excludes provides more or less desired
-// detailed information about resources which would otherwise be represented with an href link
-func (s *DeviceServiceOp) GetExtra(deviceID string, includes, excludes []string) (*Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
-	if includes != nil {
-		path += fmt.Sprintf("?include=%s", strings.Join(includes, ","))
-	} else if excludes != nil {
-		path += fmt.Sprintf("?exclude=%s", strings.Join(excludes, ","))
-	}
+	path := fmt.Sprintf("%s/%s?%s", deviceBasePath, deviceID, params)
 	device := new(Device)
-
 	resp, err := s.client.DoRequest("GET", path, nil, device)
 	if err != nil {
 		return nil, resp, err
 	}
-
 	return device, resp, err
 }
 
@@ -261,10 +247,7 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 
 // ListBGPSessions returns all BGP Sessions associated with the device
 func (s *DeviceServiceOp) ListBGPSessions(deviceID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+	params := createListOptionsURL(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", deviceBasePath, deviceID, bgpSessionBasePath, params)
 
 	for {
@@ -292,5 +275,5 @@ func (s *DeviceServiceOp) ListBGPSessions(deviceID string, listOpt *ListOptions)
 func (s *DeviceServiceOp) ListEvents(deviceID string, listOpt *ListOptions) ([]Event, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, eventBasePath)
 
-	return list(s.client, path, listOpt)
+	return listEvents(s.client, path, listOpt)
 }

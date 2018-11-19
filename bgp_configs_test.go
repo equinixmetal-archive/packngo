@@ -20,7 +20,7 @@ func TestAccBGPConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	config, _, err := c.BGPConfig.Get(projectID)
+	config, _, err := c.BGPConfig.Get(projectID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

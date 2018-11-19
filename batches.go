@@ -8,7 +8,7 @@ const batchBasePath = "/batches"
 
 // BatchService interface defines available batch methods
 type BatchService interface {
-	Get(batchID string, listOpt *ListOptions) (*Batch, *Response, error)
+	Get(batchID string, getOpt *GetOptions) (*Batch, *Response, error)
 	List(ProjectID string, listOpt *ListOptions) ([]Batch, *Response, error)
 	Create(projectID string, batches *BatchCreateRequest) ([]Batch, *Response, error)
 	Delete(string, bool) (*Response, error)
@@ -48,11 +48,8 @@ type BatchServiceOp struct {
 }
 
 // Get returns batch details
-func (s *BatchServiceOp) Get(batchID string, listOpt *ListOptions) (*Batch, *Response, error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+func (s *BatchServiceOp) Get(batchID string, getOpt *GetOptions) (*Batch, *Response, error) {
+	params := createGetOptionsURL(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", batchBasePath, batchID, params)
 	batch := new(Batch)
 
@@ -66,10 +63,7 @@ func (s *BatchServiceOp) Get(batchID string, listOpt *ListOptions) (*Batch, *Res
 
 // List returns batches on a project
 func (s *BatchServiceOp) List(projectID string, listOpt *ListOptions) (batches []Batch, resp *Response, err error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+	params := createListOptionsURL(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, batchBasePath, params)
 	subset := new(batchesList)
 	resp, err = s.client.DoRequest("GET", path, nil, subset)

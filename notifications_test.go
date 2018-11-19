@@ -17,7 +17,7 @@ func TestAccListNotifications(t *testing.T) {
 		t.Fatal("Notifications are empty")
 	}
 
-	notification, _, err := c.Notifications.Get(notifications[0].ID)
+	notification, _, err := c.Notifications.Get(notifications[0].ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

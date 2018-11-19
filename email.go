@@ -12,7 +12,7 @@ type EmailRequest struct {
 
 // EmailService interface defines available email methods
 type EmailService interface {
-	Get(string) (*Email, *Response, error)
+	Get(string, *GetOptions) (*Email, *Response, error)
 	Create(*EmailRequest) (*Email, *Response, error)
 	Update(string, *EmailRequest) (*Email, *Response, error)
 	Delete(string) (*Response, error)
@@ -36,8 +36,9 @@ type EmailServiceOp struct {
 }
 
 // Get retrieves an email by id
-func (s *EmailServiceOp) Get(emailID string) (*Email, *Response, error) {
-	path := fmt.Sprintf("%s/%s", emailBasePath, emailID)
+func (s *EmailServiceOp) Get(emailID string, getOpt *GetOptions) (*Email, *Response, error) {
+	params := createGetOptionsURL(getOpt)
+	path := fmt.Sprintf("%s/%s?%s", emailBasePath, emailID, params)
 	email := new(Email)
 
 	resp, err := s.client.DoRequest("GET", path, nil, email)

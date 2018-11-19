@@ -24,6 +24,16 @@ func StreamToString(stream io.Reader) string {
 	return buf.String()
 }
 
+// contains tells whether a contains x.
+func contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}
+
 // stringifyValue was graciously cargoculted from the goprotubuf library
 func stringifyValue(w io.Writer, val reflect.Value) {
 	if val.Kind() == reflect.Ptr && val.IsNil() {

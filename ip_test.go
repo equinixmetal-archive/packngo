@@ -64,7 +64,7 @@ func TestAccIPReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sameRes, _, err := c.ProjectIPs.Get(res.ID)
+	sameRes, _, err := c.ProjectIPs.Get(res.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func TestAccIPReservation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, _, err = c.ProjectIPs.Get(res.ID)
+	_, _, err = c.ProjectIPs.Get(res.ID, nil)
 	if err == nil {
 		t.Fatalf("Reservation %s should be deleted at this point", res)
 	}

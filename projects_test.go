@@ -28,7 +28,7 @@ func TestAccProjectBasic(t *testing.T) {
 	if p.Name != rs {
 		t.Fatalf("Expected the name of the updated project to be %s, not %s", rs, p.Name)
 	}
-	gotProject, _, err := c.Projects.Get(p.ID)
+	gotProject, _, err := c.Projects.Get(p.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,11 +38,6 @@ func TestAccProjectBasic(t *testing.T) {
 
 	if gotProject.PaymentMethod.URL == "" {
 		t.Fatalf("Empty payment_method: %v", gotProject)
-	}
-
-	_, _, err = c.Projects.ListEvents(gotProject.ID, nil)
-	if err != nil {
-		t.Fatal(err)
 	}
 
 	_, err = c.Projects.Delete(p.ID)
@@ -79,7 +74,7 @@ func TestAccProjectExtra(t *testing.T) {
 	if p.Name != rs {
 		t.Fatalf("Expected the name of the updated project to be %s, not %s", rs, p.Name)
 	}
-	gotProject, _, err := c.Projects.GetExtra(p.ID, []string{"members"}, nil)
+	gotProject, _, err := c.Projects.Get(p.ID, &GetOptions{Includes: []string{"members"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,7 +190,7 @@ func TestAccListProjects(t *testing.T) {
 	}
 
 	listOpt := &ListOptions{
-		Includes: "members",
+		Includes: []string{"members"},
 	}
 	projs, _, err := c.Projects.List(listOpt)
 	if err != nil {
@@ -251,6 +246,52 @@ func TestAccProjectListPagination(t *testing.T) {
 	}
 	if len(projects) != 1 {
 		t.Fatalf("only 1 project should have been fetched: %v", err)
+	}
+
+}
+
+func TestAccProjectListEvents(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	// create volume to generate some events
+
+	sp := SnapshotPolicy{
+		SnapshotFrequency: "1day",
+		SnapshotCount:     3,
+	}
+
+	vcr := VolumeCreateRequest{
+		Size:             10,
+		BillingCycle:     "hourly",
+		PlanID:           "storage_1",
+		FacilityID:       testFacility(),
+		SnapshotPolicies: []*SnapshotPolicy{&sp},
+		Description:      "ahoj!",
+	}
+
+	v, _, err := c.Volumes.Create(&vcr, projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	v, err = waitVolumeActive(v.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = c.Volumes.Delete(v.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	es, _, err := c.Projects.ListEvents(projectID, &ListOptions{PerPage: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(es) < 2 {
+		t.Fatal("At least 2 events should be in project - volume add and del")
 	}
 
 }

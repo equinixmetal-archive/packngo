@@ -6,7 +6,7 @@ var bgpConfigBasePath = "/bgp-config"
 
 // BGPConfigService interface defines available BGP config methods
 type BGPConfigService interface {
-	Get(projectID string) (*BGPConfig, *Response, error)
+	Get(projectID string, getOpt *GetOptions) (*BGPConfig, *Response, error)
 	Create(string, CreateBGPConfigRequest) (*Response, error)
 	// Delete(configID string) (resp *Response, err error) TODO: Not in Packet API
 }
@@ -53,8 +53,10 @@ func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigReq
 }
 
 // Get function
-func (s *BGPConfigServiceOp) Get(projectID string) (bgpConfig *BGPConfig, resp *Response, err error) {
-	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, bgpConfigBasePath)
+func (s *BGPConfigServiceOp) Get(projectID string, getOpt *GetOptions) (bgpConfig *BGPConfig, resp *Response, err error) {
+	params := createGetOptionsURL(getOpt)
+
+	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, bgpConfigBasePath, params)
 
 	subset := new(BGPConfig)
 

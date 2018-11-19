@@ -8,7 +8,7 @@ const organizationBasePath = "/organizations"
 // OrganizationService interface defines available organization methods
 type OrganizationService interface {
 	List() ([]Organization, *Response, error)
-	Get(string) (*Organization, *Response, error)
+	Get(string, *GetOptions) (*Organization, *Response, error)
 	Create(*OrganizationCreateRequest) (*Organization, *Response, error)
 	Update(string, *OrganizationUpdateRequest) (*Organization, *Response, error)
 	Delete(string) (*Response, error)
@@ -90,8 +90,9 @@ func (s *OrganizationServiceOp) List() ([]Organization, *Response, error) {
 }
 
 // Get returns a organization by id
-func (s *OrganizationServiceOp) Get(organizationID string) (*Organization, *Response, error) {
-	path := fmt.Sprintf("%s/%s", organizationBasePath, organizationID)
+func (s *OrganizationServiceOp) Get(organizationID string, getOpt *GetOptions) (*Organization, *Response, error) {
+	params := createGetOptionsURL(getOpt)
+	path := fmt.Sprintf("%s/%s?%s", organizationBasePath, organizationID, params)
 	organization := new(Organization)
 
 	resp, err := s.client.DoRequest("GET", path, nil, organization)
@@ -151,5 +152,5 @@ func (s *OrganizationServiceOp) ListPaymentMethods(organizationID string) ([]Pay
 func (s *OrganizationServiceOp) ListEvents(organizationID string, listOpt *ListOptions) ([]Event, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", organizationBasePath, organizationID, eventBasePath)
 
-	return list(s.client, path, listOpt)
+	return listEvents(s.client, path, listOpt)
 }

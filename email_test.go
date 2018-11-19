@@ -25,7 +25,7 @@ func TestAccCreateEmail(t *testing.T) {
 	emailID := ret.ID
 	req.Address = updatedAddress
 
-	email, _, err := c.Emails.Get(emailID)
+	email, _, err := c.Emails.Get(emailID, nil)
 	if err != nil {
 		t.Fatal("Get failed", err)
 	}
