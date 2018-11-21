@@ -7,8 +7,8 @@ const organizationBasePath = "/organizations"
 
 // OrganizationService interface defines available organization methods
 type OrganizationService interface {
-	List() ([]Organization, *Response, error)
-	Get(string) (*Organization, *Response, error)
+	List(*ListOptions) ([]Organization, *Response, error)
+	Get(string, *GetOptions) (*Organization, *Response, error)
 	Create(*OrganizationCreateRequest) (*Organization, *Response, error)
 	Update(string, *OrganizationUpdateRequest) (*Organization, *Response, error)
 	Delete(string) (*Response, error)
@@ -18,6 +18,7 @@ type OrganizationService interface {
 
 type organizationsRoot struct {
 	Organizations []Organization `json:"organizations"`
+	Meta          meta           `json:"meta"`
 }
 
 // Organization represents a Packet organization
@@ -78,20 +79,37 @@ type OrganizationServiceOp struct {
 }
 
 // List returns the user's organizations
-func (s *OrganizationServiceOp) List() ([]Organization, *Response, error) {
+func (s *OrganizationServiceOp) List(listOpt *ListOptions) (orgs []Organization, resp *Response, err error) {
+	params := createListOptionsURL(listOpt)
 	root := new(organizationsRoot)
 
-	resp, err := s.client.DoRequest("GET", organizationBasePath, nil, root)
-	if err != nil {
-		return nil, resp, err
-	}
+	path := fmt.Sprintf("%s?%s", organizationBasePath, params)
 
-	return root.Organizations, resp, err
+	for {
+		resp, err = s.client.DoRequest("GET", path, nil, root)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		orgs = append(orgs, root.Organizations...)
+
+		if root.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
+			path = root.Meta.Next.Href
+			if params != "" {
+				path = fmt.Sprintf("%s&%s", path, params)
+			}
+			continue
+		}
+
+		return
+	}
+	return
 }
 
 // Get returns a organization by id
-func (s *OrganizationServiceOp) Get(organizationID string) (*Organization, *Response, error) {
-	path := fmt.Sprintf("%s/%s", organizationBasePath, organizationID)
+func (s *OrganizationServiceOp) Get(organizationID string, getOpt *GetOptions) (*Organization, *Response, error) {
+	params := createGetOptionsURL(getOpt)
+	path := fmt.Sprintf("%s/%s?%s", organizationBasePath, organizationID, params)
 	organization := new(Organization)
 
 	resp, err := s.client.DoRequest("GET", path, nil, organization)
@@ -151,5 +169,5 @@ func (s *OrganizationServiceOp) ListPaymentMethods(organizationID string) ([]Pay
 func (s *OrganizationServiceOp) ListEvents(organizationID string, listOpt *ListOptions) ([]Event, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", organizationBasePath, organizationID, eventBasePath)
 
-	return list(s.client, path, listOpt)
+	return listEvents(s.client, path, listOpt)
 }

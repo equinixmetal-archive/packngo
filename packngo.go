@@ -29,23 +29,65 @@ const (
 	headerRateReset     = "X-RateLimit-Reset"
 )
 
+type GetOptions struct {
+	Includes []string
+	Excludes []string
+}
+
 // ListOptions specifies optional global API parameters
 type ListOptions struct {
 	// for paginated result sets, page of results to retrieve
 	Page int `url:"page,omitempty"`
-
 	// for paginated result sets, the number of results to return per page
-	PerPage int `url:"per_page,omitempty"`
-
-	// specify which resources you want to return as collections instead of references
-	Includes string
+	PerPage  int `url:"per_page,omitempty"`
+	Includes []string
+	Excludes []string
 }
 
-func (l *ListOptions) createURL() (url string) {
-	if l.Includes != "" {
-		url += fmt.Sprintf("include=%s", l.Includes)
+func makeSureGetOptionsInclude(g *GetOptions, s string) *GetOptions {
+	if g == nil {
+		return &GetOptions{Includes: []string{s}}
 	}
+	if !contains(g.Includes, s) {
+		g.Includes = append(g.Includes, s)
+	}
+	return g
+}
 
+func makeSureListOptionsInclude(l *ListOptions, s string) *ListOptions {
+	if l == nil {
+		return &ListOptions{Includes: []string{s}}
+	}
+	if !contains(l.Includes, s) {
+		l.Includes = append(l.Includes, s)
+	}
+	return l
+}
+
+func createGetOptionsURL(g *GetOptions) (url string) {
+	if g == nil {
+		return ""
+	}
+	if len(g.Includes) != 0 {
+		url += fmt.Sprintf("include=%s", strings.Join(g.Includes, ","))
+	}
+	if len(g.Excludes) != 0 {
+		url += fmt.Sprintf("exclude=%s", strings.Join(g.Excludes, ","))
+	}
+	return
+
+}
+
+func createListOptionsURL(l *ListOptions) (url string) {
+	if l == nil {
+		return ""
+	}
+	if len(l.Includes) != 0 {
+		url += fmt.Sprintf("include=%s", strings.Join(l.Includes, ","))
+	}
+	if len(l.Excludes) != 0 {
+		url += fmt.Sprintf("exclude=%s", strings.Join(l.Excludes, ","))
+	}
 	if l.Page != 0 {
 		if url != "" {
 			url += "&"

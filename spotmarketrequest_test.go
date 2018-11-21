@@ -110,7 +110,7 @@ out:
 		case <-time.Tick(5 * time.Second):
 			smr, _, err = c.SpotMarketRequests.Get(
 				smr.ID,
-				&ListOptions{Includes: "devices"},
+				&GetOptions{Includes: []string{"devices"}},
 			)
 			if err != nil {
 				t.Fatal(err)

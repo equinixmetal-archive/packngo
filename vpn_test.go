@@ -28,7 +28,7 @@ func TestAccVPN(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, _, err = c.VPN.Get("ewr1")
+	_, _, err = c.VPN.Get("ewr1", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

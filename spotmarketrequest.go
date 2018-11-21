@@ -11,7 +11,7 @@ type SpotMarketRequestService interface {
 	List(string) ([]SpotMarketRequest, *Response, error)
 	Create(*SpotMarketRequestCreateRequest, string) (*SpotMarketRequest, *Response, error)
 	Delete(string, bool) (*Response, error)
-	Get(string, *ListOptions) (*SpotMarketRequest, *Response, error)
+	Get(string, *GetOptions) (*SpotMarketRequest, *Response, error)
 }
 
 type SpotMarketRequestCreateRequest struct {
@@ -86,11 +86,8 @@ func (s *SpotMarketRequestServiceOp) List(pID string) ([]SpotMarketRequest, *Res
 	return smrRoot.SMRs, resp, nil
 }
 
-func (s *SpotMarketRequestServiceOp) Get(id string, listOpt *ListOptions) (*SpotMarketRequest, *Response, error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+func (s *SpotMarketRequestServiceOp) Get(id string, getOpt *GetOptions) (*SpotMarketRequest, *Response, error) {
+	params := createGetOptionsURL(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", spotMarketRequestBasePath, id, params)
 	smr := new(SpotMarketRequest)
 

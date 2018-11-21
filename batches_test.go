@@ -47,7 +47,7 @@ func TestAccInstanceBatches(t *testing.T) {
 		t.Fatal("No batches have been created")
 	}
 	time.Sleep(5 * time.Second)
-	batch, _, err := c.Batches.Get(batchID, &ListOptions{Includes: "devices"})
+	batch, _, err := c.Batches.Get(batchID, &GetOptions{Includes: []string{"devices"}})
 
 	if err != nil {
 		t.Fatal(err)

@@ -12,7 +12,7 @@ func waitDeviceActive(id string, c *Client) (*Device, error) {
 	// 15 minutes = 180 * 5sec-retry
 	for i := 0; i < 180; i++ {
 		<-time.After(5 * time.Second)
-		d, _, err := c.Devices.Get(id)
+		d, _, err := c.Devices.Get(id, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -262,7 +262,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 		t.Error("Management flag for assignment resource must be False")
 	}
 
-	d, _, err = c.Devices.Get(d.ID)
+	d, _, err = c.Devices.Get(d.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -270,7 +270,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	// If the Quantity in the IPReservationRequest is >1, this test won't work.
 	// The assignment CIDR would then have to be extracted from the reserved
 	// block.
-	reservation, _, err = c.ProjectIPs.Get(reservation.ID)
+	reservation, _, err = c.ProjectIPs.Get(reservation.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -305,7 +305,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	}
 
 	// reload reservation, now without any assignment
-	reservation, _, err = c.ProjectIPs.Get(reservation.ID)
+	reservation, _, err = c.ProjectIPs.Get(reservation.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -316,7 +316,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	}
 
 	// reload device, now without the assigned floating IP
-	d, _, err = c.Devices.Get(d.ID)
+	d, _, err = c.Devices.Get(d.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -389,13 +389,13 @@ func TestAccDeviceAttachVolume(t *testing.T) {
 		t.Fatalf("wrong device href in the attachment: %s, should be %s", a.Device.Href, d.ID)
 	}
 
-	v, _, err = c.Volumes.GetExtra(v.ID,
-		[]string{"attachments.device"}, []string{})
+	v, _, err = c.Volumes.Get(v.ID,
+		&GetOptions{Includes: []string{"attachments.device"}})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	d, _, err = c.Devices.Get(d.ID)
+	d, _, err = c.Devices.Get(d.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -498,7 +498,7 @@ func TestAccDeviceCustomData(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	device, _, err := c.Devices.Get(dID)
+	device, _, err := c.Devices.Get(dID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -515,7 +515,7 @@ func TestAccDeviceCustomData(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	device, _, err = c.Devices.Get(dID)
+	device, _, err = c.Devices.Get(dID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -532,7 +532,7 @@ func TestAccDeviceCustomData(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	device, _, err = c.Devices.Get(dID)
+	device, _, err = c.Devices.Get(dID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -612,8 +612,7 @@ func TestAccDeviceSSHKeys(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	d, _, err = c.Devices.GetExtra(dID,
-		[]string{"ssh_keys"}, []string{})
+	d, _, err = c.Devices.Get(dID, &GetOptions{Includes: []string{"ssh_keys"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -666,8 +665,7 @@ func TestAccDeviceListedSSHKeys(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	d, _, err = c.Devices.GetExtra(dID,
-		[]string{"ssh_keys"}, []string{})
+	d, _, err = c.Devices.Get(dID, &GetOptions{Includes: []string{"ssh_keys"}})
 	if err != nil {
 		t.Fatal(err)
 	}

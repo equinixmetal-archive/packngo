@@ -10,12 +10,12 @@ const ipBasePath = "/ips"
 type DeviceIPService interface {
 	Assign(deviceID string, assignRequest *AddressStruct) (*IPAddressAssignment, *Response, error)
 	Unassign(assignmentID string) (*Response, error)
-	Get(assignmentID string) (*IPAddressAssignment, *Response, error)
+	Get(assignmentID string, getOpt *GetOptions) (*IPAddressAssignment, *Response, error)
 }
 
 // ProjectIPService handles reservation of IP address blocks for a project.
 type ProjectIPService interface {
-	Get(reservationID string) (*IPAddressReservation, *Response, error)
+	Get(reservationID string, getOpt *GetOptions) (*IPAddressReservation, *Response, error)
 	List(projectID string) ([]IPAddressReservation, *Response, error)
 	Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error)
 	Remove(ipReservationID string) (*Response, error)
@@ -119,8 +119,9 @@ func (i *DeviceIPServiceOp) Assign(deviceID string, assignRequest *AddressStruct
 }
 
 // Get returns assignment by ID.
-func (i *DeviceIPServiceOp) Get(assignmentID string) (*IPAddressAssignment, *Response, error) {
-	path := fmt.Sprintf("%s/%s", ipBasePath, assignmentID)
+func (i *DeviceIPServiceOp) Get(assignmentID string, getOpt *GetOptions) (*IPAddressAssignment, *Response, error) {
+	params := createGetOptionsURL(getOpt)
+	path := fmt.Sprintf("%s/%s?%s", ipBasePath, assignmentID, params)
 	ipa := new(IPAddressAssignment)
 
 	resp, err := i.client.DoRequest("GET", path, nil, ipa)
@@ -137,8 +138,9 @@ type ProjectIPServiceOp struct {
 }
 
 // Get returns reservation by ID.
-func (i *ProjectIPServiceOp) Get(reservationID string) (*IPAddressReservation, *Response, error) {
-	path := fmt.Sprintf("%s/%s", ipBasePath, reservationID)
+func (i *ProjectIPServiceOp) Get(reservationID string, getOpt *GetOptions) (*IPAddressReservation, *Response, error) {
+	params := createGetOptionsURL(getOpt)
+	path := fmt.Sprintf("%s/%s?%s", ipBasePath, reservationID, params)
 	ipr := new(IPAddressReservation)
 
 	resp, err := i.client.DoRequest("GET", path, nil, ipr)

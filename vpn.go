@@ -13,7 +13,7 @@ type VPNConfig struct {
 type VPNService interface {
 	Enable() (*Response, error)
 	Disable() (*Response, error)
-	Get(code string) (*VPNConfig, *Response, error)
+	Get(code string, getOpt *GetOptions) (*VPNConfig, *Response, error)
 }
 
 // VPNServiceOp implements VPNService
@@ -33,9 +33,13 @@ func (s *VPNServiceOp) Disable() (resp *Response, err error) {
 }
 
 // Get returns the client vpn config for the currently logged-in user.
-func (s *VPNServiceOp) Get(code string) (config *VPNConfig, resp *Response, err error) {
+func (s *VPNServiceOp) Get(code string, getOpt *GetOptions) (config *VPNConfig, resp *Response, err error) {
+	params := createGetOptionsURL(getOpt)
 	config = &VPNConfig{}
 	path := fmt.Sprintf("%s?code=%s", vpnBasePath, code)
+	if params != "" {
+		path += params
+	}
 
 	resp, err = s.client.DoRequest("GET", path, nil, config)
 	if err != nil {

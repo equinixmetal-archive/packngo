@@ -24,7 +24,7 @@ func TestAccBGPSession(t *testing.T) {
 	hn := randString8()
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     testFacility(),
+		Facility:     []string{testFacility()},
 		Plan:         "baremetal_0",
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -85,7 +85,7 @@ func TestAccBGPSession(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	session, _, err := c.BGPSessions.Get(sessionID)
+	session, _, err := c.BGPSessions.Get(sessionID, nil)
 	if session != nil {
 		t.Fatal("Session not deleted")
 	}

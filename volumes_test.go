@@ -9,7 +9,7 @@ import (
 func waitVolumeActive(id string, c *Client) (*Volume, error) {
 	// 15 minutes = 180 * 5sec-retry
 	for i := 0; i < 180; i++ {
-		c, _, err := c.Volumes.Get(id)
+		c, _, err := c.Volumes.Get(id, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -53,8 +53,8 @@ func TestAccVolumeBasic(t *testing.T) {
 	}
 	defer c.Volumes.Delete(v.ID)
 
-	v, _, err = c.Volumes.GetExtra(v.ID,
-		[]string{"snapshot_policies", "facility"}, []string{})
+	v, _, err = c.Volumes.Get(v.ID,
+		&GetOptions{Includes: []string{"snapshot_policies", "facility"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func TestAccVolumeUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	v, _, err = c.Volumes.Get(v.ID)
+	v, _, err = c.Volumes.Get(v.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func TestAccVolumeUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	v, _, err = c.Volumes.Get(v.ID)
+	v, _, err = c.Volumes.Get(v.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +156,7 @@ func TestAccVolumeUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	v, _, err = c.Volumes.Get(v.ID)
+	v, _, err = c.Volumes.Get(v.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,4 +238,24 @@ func TestAccVolumeLargeList(t *testing.T) {
 	if len(volumes) != perPage {
 		t.Fatalf("failed due to expecting %d volumes, but actually got %d", perPage, len(volumes))
 	}
+
+	// Last test get all volume, 5 per page and includes
+
+	listOpt2 := &ListOptions{
+		Includes: []string{"snapshot_policies", "facility"},
+		PerPage:  5,
+	}
+	volumes, _, err = c.Volumes.List(projectID, listOpt2)
+	if err != nil {
+		t.Fatalf("failed to get list of volumes: %v", err)
+	}
+	if len(volumes) != numOfVolumes {
+		t.Fatalf("failed due to expecting at %d volumes, but actually got %d", numOfVolumes, len(volumes))
+	}
+	for _, v := range volumes {
+		if v.SnapshotPolicies[0].SnapshotCount != 3 {
+			t.Fatalf("Wrong SpanshotCount, perhaps it's not included?")
+		}
+	}
+
 }

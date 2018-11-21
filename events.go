@@ -24,7 +24,7 @@ type eventsRoot struct {
 // EventService interface defines available event functions
 type EventService interface {
 	List(*ListOptions) ([]Event, *Response, error)
-	Get(string, *ListOptions) (*Event, *Response, error)
+	Get(string, *GetOptions) (*Event, *Response, error)
 }
 
 // EventServiceOp implements EventService
@@ -34,22 +34,47 @@ type EventServiceOp struct {
 
 // List returns all events
 func (s *EventServiceOp) List(listOpt *ListOptions) ([]Event, *Response, error) {
-	return list(s.client, eventBasePath, listOpt)
+	return listEvents(s.client, eventBasePath, listOpt)
 }
 
 // Get returns an event by ID
-func (s *EventServiceOp) Get(eventID string, listOpt *ListOptions) (*Event, *Response, error) {
+func (s *EventServiceOp) Get(eventID string, getOpt *GetOptions) (*Event, *Response, error) {
 	path := fmt.Sprintf("%s/%s", eventBasePath, eventID)
-	return get(s.client, path, listOpt)
+	return get(s.client, path, getOpt)
 }
 
 // list helper function for all event functions
-func list(client *Client, path string, listOpt *ListOptions) ([]Event, *Response, error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
+func listEvents(client *Client, path string, listOpt *ListOptions) (events []Event, resp *Response, err error) {
+	params := createListOptionsURL(listOpt)
+	path = fmt.Sprintf("%s?%s", path, params)
+
+	for {
+		subset := new(eventsRoot)
+
+		resp, err = client.DoRequest("GET", path, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		events = append(events, subset.Events...)
+
+		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
+			path = subset.Meta.Next.Href
+			if params != "" {
+				path = fmt.Sprintf("%s&%s", path, params)
+			}
+			continue
+		}
+
+		return
 	}
 
+}
+
+// list helper function for all event functions
+/*
+func listEvents(client *Client, path string, listOpt *ListOptions) ([]Event, *Response, error) {
+	params := createListOptionsURL(listOpt)
 	root := new(eventsRoot)
 
 	path = fmt.Sprintf("%s?%s", path, params)
@@ -61,12 +86,10 @@ func list(client *Client, path string, listOpt *ListOptions) ([]Event, *Response
 
 	return root.Events, resp, err
 }
+*/
 
-func get(client *Client, path string, listOpt *ListOptions) (*Event, *Response, error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+func get(client *Client, path string, getOpt *GetOptions) (*Event, *Response, error) {
+	params := createGetOptionsURL(getOpt)
 
 	event := new(Event)
 

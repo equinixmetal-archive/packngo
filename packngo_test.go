@@ -90,7 +90,7 @@ func projectTeardown(c *Client) {
 }
 
 func organizationTeardown(c *Client) {
-	ps, _, err := c.Organizations.List()
+	ps, _, err := c.Organizations.List(nil)
 	if err != nil {
 		panic(fmt.Errorf("while teardown: %s", err))
 	}

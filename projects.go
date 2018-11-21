@@ -2,7 +2,6 @@ package packngo
 
 import (
 	"fmt"
-	"strings"
 )
 
 const projectBasePath = "/projects"
@@ -10,8 +9,7 @@ const projectBasePath = "/projects"
 // ProjectService interface defines available project methods
 type ProjectService interface {
 	List(listOpt *ListOptions) ([]Project, *Response, error)
-	Get(string) (*Project, *Response, error)
-	GetExtra(projectID string, includes, excludes []string) (*Project, *Response, error)
+	Get(string, *GetOptions) (*Project, *Response, error)
 	Create(*ProjectCreateRequest) (*Project, *Response, error)
 	Update(string, *ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
@@ -70,10 +68,7 @@ type ProjectServiceOp struct {
 
 // List returns the user's projects
 func (s *ProjectServiceOp) List(listOpt *ListOptions) (projects []Project, resp *Response, err error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+	params := createListOptionsURL(listOpt)
 	root := new(projectsRoot)
 
 	path := fmt.Sprintf("%s?%s", projectBasePath, params)
@@ -98,34 +93,15 @@ func (s *ProjectServiceOp) List(listOpt *ListOptions) (projects []Project, resp 
 	}
 }
 
-// GetExtra returns a project by id with extra information
-func (s *ProjectServiceOp) GetExtra(projectID string, includes, excludes []string) (*Project, *Response, error) {
-	path := fmt.Sprintf("%s/%s", projectBasePath, projectID)
-	if includes != nil {
-		path += fmt.Sprintf("?include=%s", strings.Join(includes, ","))
-	} else if excludes != nil {
-		path += fmt.Sprintf("?exclude=%s", strings.Join(excludes, ","))
-	}
-
-	project := new(Project)
-	resp, err := s.client.DoRequest("GET", path, nil, project)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return project, resp, err
-}
-
 // Get returns a project by id
-func (s *ProjectServiceOp) Get(projectID string) (*Project, *Response, error) {
-	path := fmt.Sprintf("%s/%s", projectBasePath, projectID)
+func (s *ProjectServiceOp) Get(projectID string, getOpt *GetOptions) (*Project, *Response, error) {
+	params := createGetOptionsURL(getOpt)
+	path := fmt.Sprintf("%s/%s?%s", projectBasePath, projectID, params)
 	project := new(Project)
-
 	resp, err := s.client.DoRequest("GET", path, nil, project)
 	if err != nil {
 		return nil, resp, err
 	}
-
 	return project, resp, err
 }
 
@@ -163,10 +139,7 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 
 // ListBGPSessions returns all BGP Sessions associated with the project
 func (s *ProjectServiceOp) ListBGPSessions(projectID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+	params := createListOptionsURL(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, bgpSessionBasePath, params)
 
 	for {
@@ -195,5 +168,5 @@ func (s *ProjectServiceOp) ListBGPSessions(projectID string, listOpt *ListOption
 func (s *ProjectServiceOp) ListEvents(projectID string, listOpt *ListOptions) ([]Event, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, eventBasePath)
 
-	return list(s.client, path, listOpt)
+	return listEvents(s.client, path, listOpt)
 }

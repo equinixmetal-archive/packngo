@@ -6,7 +6,7 @@ const hardwareReservationBasePath = "/hardware-reservations"
 
 // HardwareReservationService interface defines available hardware reservation functions
 type HardwareReservationService interface {
-	Get(hardwareReservationID string, listOpt *ListOptions) (*HardwareReservation, *Response, error)
+	Get(hardwareReservationID string, getOpt *GetOptions) (*HardwareReservation, *Response, error)
 	List(projectID string, listOpt *ListOptions) ([]HardwareReservation, *Response, error)
 	Move(string, string) (*HardwareReservation, *Response, error)
 }
@@ -36,10 +36,7 @@ type hardwareReservationRoot struct {
 // List returns all hardware reservations for a given project
 func (s *HardwareReservationServiceOp) List(projectID string, listOpt *ListOptions) (reservations []HardwareReservation, resp *Response, err error) {
 	root := new(hardwareReservationRoot)
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+	params := createListOptionsURL(listOpt)
 
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, hardwareReservationBasePath, params)
 
@@ -66,11 +63,8 @@ func (s *HardwareReservationServiceOp) List(projectID string, listOpt *ListOptio
 }
 
 // Get returns a single hardware reservation
-func (s *HardwareReservationServiceOp) Get(hardwareReservationdID string, listOpt *ListOptions) (*HardwareReservation, *Response, error) {
-	var params string
-	if listOpt != nil {
-		params = listOpt.createURL()
-	}
+func (s *HardwareReservationServiceOp) Get(hardwareReservationdID string, getOpt *GetOptions) (*HardwareReservation, *Response, error) {
+	params := createGetOptionsURL(getOpt)
 
 	hardwareReservation := new(HardwareReservation)
 
