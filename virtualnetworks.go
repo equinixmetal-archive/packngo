@@ -8,18 +8,19 @@ const virtualNetworkBasePath = "/virtual-networks"
 
 // DevicePortService handles operations on a port which belongs to a particular device
 type ProjectVirtualNetworkService interface {
-	List(projectID string) (*VirtualNetworkListResponse, *Response, error)
+	List(projectID string, listOpt *ListOptions) (*VirtualNetworkListResponse, *Response, error)
 	Create(*VirtualNetworkCreateRequest) (*VirtualNetwork, *Response, error)
 	Delete(virtualNetworkID string) (*Response, error)
 }
 
 type VirtualNetwork struct {
-	ID           string `json:"id"`
-	Description  string `json:"description,omitempty"`
-	VXLAN        int    `json:"vxlan,omitempty"`
-	FacilityCode string `json:"facility_code,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
-	Href         string `json:"href"`
+	ID           string  `json:"id"`
+	Description  string  `json:"description,omitempty"`
+	VXLAN        int     `json:"vxlan,omitempty"`
+	FacilityCode string  `json:"facility_code,omitempty"`
+	CreatedAt    string  `json:"created_at,omitempty"`
+	Href         string  `json:"href"`
+	Project      Project `json:"assigned_to"`
 }
 
 type ProjectVirtualNetworkServiceOp struct {
@@ -30,8 +31,10 @@ type VirtualNetworkListResponse struct {
 	VirtualNetworks []VirtualNetwork `json:"virtual_networks"`
 }
 
-func (i *ProjectVirtualNetworkServiceOp) List(projectID string) (*VirtualNetworkListResponse, *Response, error) {
-	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, virtualNetworkBasePath)
+func (i *ProjectVirtualNetworkServiceOp) List(projectID string, listOpt *ListOptions) (*VirtualNetworkListResponse, *Response, error) {
+
+	params := createListOptionsURL(listOpt)
+	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, virtualNetworkBasePath, params)
 	output := new(VirtualNetworkListResponse)
 
 	resp, err := i.client.DoRequest("GET", path, nil, output)
@@ -46,12 +49,6 @@ type VirtualNetworkCreateRequest struct {
 	ProjectID   string `json:"project_id"`
 	Description string `json:"description"`
 	Facility    string `json:"facility"`
-	VXLAN       int    `json:"vxlan"`
-	VLAN        int    `json:"vlan"`
-}
-
-type VirtualNetworkCreateResponse struct {
-	VirtualNetwork VirtualNetwork `json:"virtual_networks"`
 }
 
 func (i *ProjectVirtualNetworkServiceOp) Create(input *VirtualNetworkCreateRequest) (*VirtualNetwork, *Response, error) {

@@ -10,17 +10,13 @@ func TestAccVirtualNetworks(t *testing.T) {
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 
-	l, _, err := c.ProjectVirtualNetworks.List(projectID)
+	l, _, err := c.ProjectVirtualNetworks.List(projectID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(l.VirtualNetworks) != 0 {
 		t.Fatal("Newly created project should not have any vlans")
 
-	}
-	l, _, err = c.ProjectVirtualNetworks.List(projectID)
-	if err != nil {
-		t.Fatal(err)
 	}
 
 	testDesc := "test_desc_" + randString8()
@@ -40,7 +36,8 @@ func TestAccVirtualNetworks(t *testing.T) {
 		t.Fatal("Wrong description string in created VLAN")
 	}
 
-	l, _, err = c.ProjectVirtualNetworks.List(projectID)
+	l, _, err = c.ProjectVirtualNetworks.List(projectID,
+		&ListOptions{Includes: []string{"assigned_to"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,12 +46,17 @@ func TestAccVirtualNetworks(t *testing.T) {
 		t.Fatal("At this point, there should be exactly 1 VLAN in the project")
 	}
 
+	if l.VirtualNetworks[0].Project.ID != projectID {
+		t.Fatalf("VLAN's project ID should be %s, was %s", projectID,
+			l.VirtualNetworks[0].Project.ID)
+	}
+
 	_, err = c.ProjectVirtualNetworks.Delete(l.VirtualNetworks[0].ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	l, _, err = c.ProjectVirtualNetworks.List(projectID)
+	l, _, err = c.ProjectVirtualNetworks.List(projectID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
