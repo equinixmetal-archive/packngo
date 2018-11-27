@@ -7,7 +7,8 @@ import (
 func TestAccBGPConfig(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c, projectID, _ := setupWithProject(t)
+	c, projectID, projectDestroy := setupWithProject(t)
+	defer projectDestroy()
 
 	configRequest := CreateBGPConfigRequest{
 		DeploymentType: "local",
@@ -37,5 +38,4 @@ func TestAccBGPConfig(t *testing.T) {
 	// if err != nil {
 	// 	t.Fatal(err)
 	// }
-	projectTeardown(c)
 }

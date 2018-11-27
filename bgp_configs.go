@@ -26,18 +26,18 @@ type CreateBGPConfigRequest struct {
 
 // BGPConfig represents a Packet BGP Config
 type BGPConfig struct {
-	ID             string     `json:"id,omitempty"`
-	Status         string     `json:"status,omitempty"`
-	DeploymentType string     `json:"deployment_type,omitempty"`
-	Asn            int        `json:"asn,omitempty"`
-	RouteObject    string     `json:"route_object,omitempty"`
-	Md5            string     `json:"md5,omitempty"`
-	MaxPrefix      int        `json:"max_prefix,omitempty"`
-	Project        Project    `json:"project,omitempty"`
-	CreatedAt      Timestamp  `json:"created_at,omitempty"`
-	RequestedAt    Timestamp  `json:"requested_at,omitempty"`
-	Session        BGPSession `json:"session,omitempty"`
-	Href           string     `json:"href,omitempty"`
+	ID             string       `json:"id,omitempty"`
+	Status         string       `json:"status,omitempty"`
+	DeploymentType string       `json:"deployment_type,omitempty"`
+	Asn            int          `json:"asn,omitempty"`
+	RouteObject    string       `json:"route_object,omitempty"`
+	Md5            string       `json:"md5,omitempty"`
+	MaxPrefix      int          `json:"max_prefix,omitempty"`
+	Project        Project      `json:"project,omitempty"`
+	CreatedAt      Timestamp    `json:"created_at,omitempty"`
+	RequestedAt    Timestamp    `json:"requested_at,omitempty"`
+	Sessions       []BGPSession `json:"sessions,omitempty"`
+	Href           string       `json:"href,omitempty"`
 }
 
 // Create function

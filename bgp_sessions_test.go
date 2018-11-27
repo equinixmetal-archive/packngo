@@ -28,7 +28,7 @@ func TestAccBGPSession(t *testing.T) {
 		Plan:         "baremetal_0",
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
-		OS:           "coreos_stable",
+		OS:           "ubuntu_18_04",
 	}
 
 	d, _, err := c.Devices.Create(&cr)
@@ -60,11 +60,21 @@ func TestAccBGPSession(t *testing.T) {
 			break
 		}
 	}
-
 	if check == nil {
 		t.Fatal("BGP Session not returned.")
 	}
 
+	cs, _, err := c.BGPConfig.Get(projectID,
+		&GetOptions{Includes: []string{"sessions"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(cs.Sessions) != 1 {
+		t.Fatal("only one Session should be listed in project BGP conf")
+	}
+	if cs.Sessions[0].ID != sessionID {
+		t.Fatal("BGP Session ID mismatch")
+	}
 	sessions, _, err = c.Projects.ListBGPSessions(projectID, nil)
 	if err != nil {
 		t.Fatal(err)
