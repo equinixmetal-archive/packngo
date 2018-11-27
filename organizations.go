@@ -100,10 +100,8 @@ func (s *OrganizationServiceOp) List(listOpt *ListOptions) (orgs []Organization,
 			}
 			continue
 		}
-
 		return
 	}
-	return
 }
 
 // Get returns a organization by id
