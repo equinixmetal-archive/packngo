@@ -7,7 +7,13 @@ import (
 	"reflect"
 )
 
-var timestampType = reflect.TypeOf(Timestamp{})
+var (
+	timestampType = reflect.TypeOf(Timestamp{})
+	Facilities    = []string{
+		"yyz1", "nrt1", "atl1", "mrs1", "hkg1", "ams1",
+		"ewr1", "sin1", "dfw1", "lax1", "syd1", "sjc1",
+		"ord1", "iad1", "fra1", "sea1"}
+)
 
 // Stringify creates a string representation of the provided message
 func Stringify(message interface{}) string {
