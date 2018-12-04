@@ -13,13 +13,15 @@ type planRoot struct {
 
 // Plan represents a Packet service plan
 type Plan struct {
-	ID          string   `json:"id"`
-	Slug        string   `json:"slug,omitempty"`
-	Name        string   `json:"name,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Line        string   `json:"line,omitempty"`
-	Specs       *Specs   `json:"specs,omitempty"`
-	Pricing     *Pricing `json:"pricing,omitempty"`
+	ID              string   `json:"id"`
+	Slug            string   `json:"slug,omitempty"`
+	Name            string   `json:"name,omitempty"`
+	Description     string   `json:"description,omitempty"`
+	Line            string   `json:"line,omitempty"`
+	Specs           *Specs   `json:"specs,omitempty"`
+	Pricing         *Pricing `json:"pricing"`
+	DeploymentTypes []string `json:"deployment_types"`
+	Class           string   `json:"class"`
 }
 
 func (p Plan) String() string {
@@ -91,8 +93,8 @@ func (f Features) String() string {
 
 // Pricing - the pricing options on a plan
 type Pricing struct {
-	Hourly  float32 `json:"hourly,omitempty"`
-	Monthly float32 `json:"monthly,omitempty"`
+	Hour  float32 `json:"hour,omitempty"`
+	Month float32 `json:"month,omitempty"`
 }
 
 func (p Pricing) String() string {
