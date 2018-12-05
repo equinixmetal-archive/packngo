@@ -1,16 +1,14 @@
 package packngo
 
 import (
-	"regexp"
+	"fmt"
 )
 
 const planBasePath = "/plans"
 
-var facilitiesRegex = regexp.MustCompile(`\/facilities\/([a-z0-9\-]+)$`)
-
 // PlanService interface defines available plan methods
 type PlanService interface {
-	List() ([]Plan, *Response, error)
+	List(*ListOptions) ([]Plan, *Response, error)
 }
 
 type planRoot struct {
@@ -19,16 +17,16 @@ type planRoot struct {
 
 // Plan represents a Packet service plan
 type Plan struct {
-	ID              string              `json:"id"`
-	Slug            string              `json:"slug,omitempty"`
-	Name            string              `json:"name,omitempty"`
-	Description     string              `json:"description,omitempty"`
-	Line            string              `json:"line,omitempty"`
-	Specs           *Specs              `json:"specs,omitempty"`
-	Pricing         *Pricing            `json:"pricing,omitempty"`
-	DeploymentTypes []string            `json:"deployment_types"`
-	Class           string              `json:"class"`
-	AvailableIn     AvailableFacilities `json:"available_in"`
+	ID              string     `json:"id"`
+	Slug            string     `json:"slug,omitempty"`
+	Name            string     `json:"name,omitempty"`
+	Description     string     `json:"description,omitempty"`
+	Line            string     `json:"line,omitempty"`
+	Specs           *Specs     `json:"specs,omitempty"`
+	Pricing         *Pricing   `json:"pricing,omitempty"`
+	DeploymentTypes []string   `json:"deployment_types"`
+	Class           string     `json:"class"`
+	AvailableIn     []Facility `json:"available_in"`
 }
 
 func (p Plan) String() string {
@@ -108,35 +106,18 @@ func (p Pricing) String() string {
 	return Stringify(p)
 }
 
-// Available facilities - the facilities a plan can exist in
-type AvailableFacilities []Reference
-
-type Reference struct {
-	Href string `json:"href"`
-}
-
-func (af AvailableFacilities) Ids() (ids []string) {
-	for _, v := range af {
-		match := facilitiesRegex.FindStringSubmatch(v.Href)
-
-		if len(match) == 2 {
-			ids = append(ids, match[1])
-		}
-	}
-
-	return ids
-}
-
 // PlanServiceOp implements PlanService
 type PlanServiceOp struct {
 	client *Client
 }
 
 // List method returns all available plans
-func (s *PlanServiceOp) List() ([]Plan, *Response, error) {
+func (s *PlanServiceOp) List(listOpt *ListOptions) ([]Plan, *Response, error) {
 	root := new(planRoot)
+	params := createListOptionsURL(listOpt)
+	path := fmt.Sprintf("%s?%s", planBasePath, params)
 
-	resp, err := s.client.DoRequest("GET", planBasePath, nil, root)
+	resp, err := s.client.DoRequest("GET", path, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}
