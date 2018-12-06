@@ -20,8 +20,8 @@ func TestAccPlans(t *testing.T) {
 				avail[f.Code] = append(avail[f.Code], p.Slug)
 			}
 		}
-		if p.Pricing.Hour > 0.0 {
-			t.Fatalf("strange pricing for %+v", p)
+		if p.Pricing.Hour < 0.0 {
+			t.Fatalf("strange pricing for %s %s", p.Name, p.Slug)
 		}
 	}
 
