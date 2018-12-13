@@ -15,7 +15,7 @@ var (
 		"ord1", "iad1", "fra1", "sea1"}
 	FacilityFeatures = []string{
 		"baremetal", "layer_2", "backend_transfer", "storage", "global_ipv4"}
-	UtilizationLevels = []string{"unavailable", "limited", "normal"}
+	UtilizationLevels = []string{"unavailable", "critical", "limited", "normal"}
 )
 
 // Stringify creates a string representation of the provided message
