@@ -32,6 +32,14 @@ func TestAccVirtualNetworks(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	vlan, _, err = c.ProjectVirtualNetworks.Get(vlan.ID,
+		&GetOptions{Includes: []string{"assigned_to"}})
+
+	if vlan.Project.ID != projectID {
+		t.Fatalf("VLAN's project ID should be %s, was %s", projectID,
+			vlan.Project.ID)
+	}
+
 	if vlan.Description != testDesc {
 		t.Fatal("Wrong description string in created VLAN")
 	}
@@ -47,7 +55,7 @@ func TestAccVirtualNetworks(t *testing.T) {
 	}
 
 	if l.VirtualNetworks[0].Project.ID != projectID {
-		t.Fatalf("VLAN's project ID should be %s, was %s", projectID,
+		t.Fatalf("VLAN's project ID from list should be %s, was %s", projectID,
 			l.VirtualNetworks[0].Project.ID)
 	}
 

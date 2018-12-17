@@ -10,6 +10,7 @@ const virtualNetworkBasePath = "/virtual-networks"
 type ProjectVirtualNetworkService interface {
 	List(projectID string, listOpt *ListOptions) (*VirtualNetworkListResponse, *Response, error)
 	Create(*VirtualNetworkCreateRequest) (*VirtualNetwork, *Response, error)
+	Get(string, *GetOptions) (*VirtualNetwork, *Response, error)
 	Delete(virtualNetworkID string) (*Response, error)
 }
 
@@ -49,6 +50,19 @@ type VirtualNetworkCreateRequest struct {
 	ProjectID   string `json:"project_id"`
 	Description string `json:"description"`
 	Facility    string `json:"facility"`
+}
+
+func (i *ProjectVirtualNetworkServiceOp) Get(vlanID string, getOpt *GetOptions) (*VirtualNetwork, *Response, error) {
+	params := createGetOptionsURL(getOpt)
+	path := fmt.Sprintf("%s/%s?%s", virtualNetworkBasePath, vlanID, params)
+	vlan := new(VirtualNetwork)
+
+	resp, err := i.client.DoRequest("GET", path, nil, vlan)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return vlan, resp, err
 }
 
 func (i *ProjectVirtualNetworkServiceOp) Create(input *VirtualNetworkCreateRequest) (*VirtualNetwork, *Response, error) {
