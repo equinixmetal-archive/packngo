@@ -187,7 +187,7 @@ func (i *DevicePortServiceOp) DeviceNetworkType(deviceID string) (NetworkType, e
 			}
 			return NetworkL2Bonded, nil
 		}
-        return NetworkHybrid, nil
+		return NetworkHybrid, nil
 	}
 	return NetworkL2Individual, nil
 }
