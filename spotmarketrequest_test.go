@@ -50,12 +50,17 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 		t.Fatal("Strange project ID in SpotMarketReuqest:", smr.Project.ID)
 	}
 
-	smrs, _, err := c.SpotMarketRequests.List(projectID)
+	smrs, _, err := c.SpotMarketRequests.List(projectID,
+		&ListOptions{Includes: []string{"devices,project,plan"}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(smrs) != 1 {
 		t.Fatal("there should be only one SpotMarketRequest")
+	}
+
+	if smrs[0].Plan.Slug != "t1.small.x86" {
+		t.Fatal("Plan should be reported as t1.small.x86 (aka baremetal_0).")
 	}
 
 	smr2, _, err := c.SpotMarketRequests.Get(smr.ID, nil)

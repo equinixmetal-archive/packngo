@@ -8,7 +8,7 @@ import (
 const spotMarketRequestBasePath = "/spot-market-requests"
 
 type SpotMarketRequestService interface {
-	List(string) ([]SpotMarketRequest, *Response, error)
+	List(string, *ListOptions) ([]SpotMarketRequest, *Response, error)
 	Create(*SpotMarketRequestCreateRequest, string) (*SpotMarketRequest, *Response, error)
 	Delete(string, bool) (*Response, error)
 	Get(string, *GetOptions) (*SpotMarketRequest, *Response, error)
@@ -31,6 +31,7 @@ type SpotMarketRequest struct {
 	Facilities []Facility `json:"facilities"`
 	Project    Project    `json:"project"`
 	Href       string     `json:"href"`
+	Plan       Plan       `json:"plan"`
 }
 
 type SpotMarketRequestInstanceParameters struct {
@@ -61,7 +62,7 @@ func roundPlus(f float64, places int) float64 {
 }
 
 func (s *SpotMarketRequestServiceOp) Create(cr *SpotMarketRequestCreateRequest, pID string) (*SpotMarketRequest, *Response, error) {
-	path := fmt.Sprintf("%s/%s%s?include=devices,project", projectBasePath, pID, spotMarketRequestBasePath)
+	path := fmt.Sprintf("%s/%s%s?include=devices,project,plan", projectBasePath, pID, spotMarketRequestBasePath)
 	cr.MaxBidPrice = roundPlus(cr.MaxBidPrice, 2)
 	smr := new(SpotMarketRequest)
 
@@ -73,17 +74,21 @@ func (s *SpotMarketRequestServiceOp) Create(cr *SpotMarketRequestCreateRequest, 
 	return smr, resp, err
 }
 
-func (s *SpotMarketRequestServiceOp) List(pID string) ([]SpotMarketRequest, *Response, error) {
-	smrRoot := struct {
+func (s *SpotMarketRequestServiceOp) List(pID string, listOpt *ListOptions) ([]SpotMarketRequest, *Response, error) {
+	type smrRoot struct {
 		SMRs []SpotMarketRequest `json:"spot_market_requests"`
-	}{}
-
-	path := fmt.Sprintf("%s/%s%s?include=devices,project", projectBasePath, pID, spotMarketRequestBasePath)
-	resp, err := s.client.DoRequest("GET", path, nil, &smrRoot)
-	if err != nil {
-		return nil, resp, err
 	}
-	return smrRoot.SMRs, resp, nil
+
+	params := createListOptionsURL(listOpt)
+	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, pID, spotMarketRequestBasePath, params)
+	output := new(smrRoot)
+
+	resp, err := s.client.DoRequest("GET", path, nil, output)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return output.SMRs, resp, nil
 }
 
 func (s *SpotMarketRequestServiceOp) Get(id string, getOpt *GetOptions) (*SpotMarketRequest, *Response, error) {
