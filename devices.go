@@ -25,6 +25,7 @@ type DeviceService interface {
 	Update(string, *DeviceUpdateRequest) (*Device, *Response, error)
 	Delete(string, bool) (*Response, error)
 	Reboot(string) (*Response, error)
+	Reinstall(string, *DeviceReinstallFields) (*Response, error)
 	PowerOff(string) (*Response, error)
 	PowerOn(string) (*Response, error)
 	Lock(string) (*Response, error)
@@ -436,6 +437,15 @@ type DeviceActionRequest struct {
 type DeviceDeleteRequest struct {
 	Force bool `json:"force_delete"`
 }
+type DeviceReinstallFields struct {
+	PreserveData    bool `json:"preserve_data,omitempty"`
+	DeprovisionFast bool `json:"deprovision_fast,omitempty"`
+}
+
+type DeviceReinstallRequest struct {
+	DeviceActionRequest
+	*DeviceReinstallFields
+}
 
 func (d DeviceActionRequest) String() string {
 	return Stringify(d)
@@ -534,6 +544,28 @@ func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
 	action := &DeviceActionRequest{Type: "reboot"}
 
 	return s.client.DoRequest("POST", apiPath, action, nil)
+}
+
+// Reinstall reinstalls a device
+func (s *DeviceServiceOp) Reinstall(deviceID string, fields *DeviceReinstallFields) (*Response, error) {
+	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
+	/*
+		preserveData := false
+		deprovisionFast := false
+		if fields != nil {
+			preserveData = fields.PreserveData
+			deprovisionFast = fields.DeprovisionFast
+		}
+		action := &DeviceReinstallRequest{
+			DeviceActionRequest{Type: "reinstall"},
+			DeviceReinstallFields{
+				PreserveData:    preserveData,
+				DeprovisionFast: deprovisionFast},
+		}
+	*/
+	action := &DeviceReinstallRequest{DeviceActionRequest{Type: "reinstall"}, fields}
+
+	return s.client.DoRequest("POST", path, action, nil)
 }
 
 // PowerOff powers on a device
