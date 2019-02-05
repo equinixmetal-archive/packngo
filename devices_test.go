@@ -11,7 +11,7 @@ import (
 func waitDeviceActive(id string, c *Client) (*Device, error) {
 	// 15 minutes = 180 * 5sec-retry
 	for i := 0; i < 180; i++ {
-		<-time.After(5 * time.Second)
+		<-time.After(15 * time.Second)
 		d, _, err := c.Devices.Get(id, nil)
 		if err != nil {
 			return nil, err
@@ -84,6 +84,48 @@ func TestAccDeviceUpdate(t *testing.T) {
 		if !ipa.Management {
 			t.Fatalf("management flag for all the IP addresses in a new device should be True: was %s", ipa)
 		}
+	}
+}
+
+func TestAccDeviceReinstall(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+	fac := testFacility()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     []string{fac},
+		Plan:         "baremetal_0",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+
+	dID := d.ID
+
+	d, err = waitDeviceActive(dID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rf := DeviceReinstallFields{DeprovisionFast: true}
+
+	_, err = c.Devices.Reinstall(dID, &rf)
+
+	d, err = waitDeviceActive(dID, c)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
