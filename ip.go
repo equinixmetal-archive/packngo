@@ -37,6 +37,7 @@ type ipAddressCommon struct {
 	Management    bool   `json:"management"`
 	Manageable    bool   `json:"manageable"`
 	Project       Href   `json:"project"`
+	Global        *bool  `json:"global_ip"`
 }
 
 // IPAddressReservation is created when user sends IP reservation request for a project (considering it's within quota).

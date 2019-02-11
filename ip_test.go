@@ -64,6 +64,11 @@ func TestAccPublicIPReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	globalPtr := ipList[0].Global
+	if *globalPtr != false {
+		t.Fatalf("The reserved IP should not be global")
+	}
+
 	sameRes, _, err := c.ProjectIPs.Get(res.ID, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -147,6 +152,11 @@ func TestAccGlobalIPReservation(t *testing.T) {
 	}
 	if len(ipList) != 1 {
 		t.Fatalf("There should be only one reservation, was: %s", ipList)
+	}
+
+	globalPtr := ipList[0].Global
+	if *globalPtr != true {
+		t.Fatalf("The reserved IP should be global")
 	}
 
 	sameRes, _, err := c.ProjectIPs.Get(res.ID, nil)
