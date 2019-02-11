@@ -136,16 +136,17 @@ func TestAccGlobalIPReservation(t *testing.T) {
 	if res.Management {
 		t.Fatal("Management flag of new reservation block must be False")
 	}
+
 	if res.Facility != nil {
 		t.Fatalf("Facility of new reservation should be nil")
 	}
 
 	ipList, _, err = c.ProjectIPs.List(projectID)
-	if len(ipList) != 1 {
-		t.Fatalf("There should be only one reservation, was: %s", ipList)
-	}
 	if err != nil {
 		t.Fatal(err)
+	}
+	if len(ipList) != 1 {
+		t.Fatalf("There should be only one reservation, was: %s", ipList)
 	}
 
 	sameRes, _, err := c.ProjectIPs.Get(res.ID, nil)
@@ -157,8 +158,7 @@ func TestAccGlobalIPReservation(t *testing.T) {
 			res, sameRes)
 	}
 
-	availableAddresses, _, err := c.ProjectIPs.AvailableAddresses(
-		res.ID, &AvailableRequest{CIDR: 32})
+	availableAddresses, _, err := c.ProjectIPs.AvailableAddresses(res.ID, &AvailableRequest{CIDR: 32})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -284,14 +284,12 @@ func TestAccDeviceAssignGlobalIP(t *testing.T) {
 
 	}
 
-	func() {
-		for _, ipa := range d.Network {
-			if ipa.Href == assignment.Href {
-				return
-			}
+	for _, ipa := range d.Network {
+		if ipa.Href == assignment.Href {
+			return
 		}
-		t.Fatalf("assignment %s should be listed in device %s", assignment, d)
-	}()
+	}
+	t.Fatalf("assignment %s should be listed in device %s", assignment, d)
 
 	if assignment.AssignedTo.Href != d.Href {
 		t.Fatalf("device %s should be listed in assignment %s",
@@ -404,14 +402,12 @@ func TestAccDeviceAssignIP(t *testing.T) {
 
 	}
 
-	func() {
-		for _, ipa := range d.Network {
-			if ipa.Href == assignment.Href {
-				return
-			}
+	for _, ipa := range d.Network {
+		if ipa.Href == assignment.Href {
+			return
 		}
-		t.Fatalf("assignment %s should be listed in device %s", assignment, d)
-	}()
+	}
+	t.Fatalf("assignment %s should be listed in device %s", assignment, d)
 
 	if assignment.AssignedTo.Href != d.Href {
 		t.Fatalf("device %s should be listed in assignment %s",
