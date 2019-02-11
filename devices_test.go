@@ -209,7 +209,7 @@ func TestAccDevicePXE(t *testing.T) {
 	}
 }
 
-func TestAccDeviceAssignIP(t *testing.T) {
+func TestAccDeviceAssignGlobalIP(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 
@@ -240,10 +240,9 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	}
 
 	req := IPReservationRequest{
-		Type:     "public_ipv4",
+		Type:     "global_ipv4",
 		Quantity: 1,
 		Comments: "packngo test",
-		Facility: fac,
 	}
 
 	reservation, _, err := c.ProjectIPs.Request(projectID, &req)
@@ -285,14 +284,130 @@ func TestAccDeviceAssignIP(t *testing.T) {
 
 	}
 
-	func() {
-		for _, ipa := range d.Network {
-			if ipa.Href == assignment.Href {
-				return
-			}
+	for _, ipa := range d.Network {
+		if ipa.Href == assignment.Href {
+			return
 		}
-		t.Fatalf("assignment %s should be listed in device %s", assignment, d)
-	}()
+	}
+	t.Fatalf("assignment %s should be listed in device %s", assignment, d)
+
+	if assignment.AssignedTo.Href != d.Href {
+		t.Fatalf("device %s should be listed in assignment %s",
+			d, assignment)
+	}
+
+	_, err = c.DeviceIPs.Unassign(assignment.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// reload reservation, now without any assignment
+	reservation, _, err = c.ProjectIPs.Get(reservation.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(reservation.Assignments) != 0 {
+		t.Fatalf("reservation %s shoud be without assignments. Was %v",
+			reservation, reservation.Assignments)
+	}
+
+	// reload device, now without the assigned floating IP
+	d, _, err = c.Devices.Get(d.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, ipa := range d.Network {
+		if ipa.Href == assignment.Href {
+			t.Fatalf("assignment %s shoud be not listed in device %s anymore",
+				assignment, d)
+		}
+	}
+}
+
+func TestAccDeviceAssignIP(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+	hn := randString8()
+
+	fac := testFacility()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     []string{fac},
+		Plan:         "baremetal_0",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+		OS:           "ubuntu_16_04",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+
+	d, err = waitDeviceActive(d.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req := IPReservationRequest{
+		Type:     "public_ipv4",
+		Quantity: 1,
+		Comments: "packngo test",
+		Facility: &fac,
+	}
+
+	reservation, _, err := c.ProjectIPs.Request(projectID, &req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	af := AddressStruct{Address: fmt.Sprintf("%s/%d", reservation.Address, reservation.CIDR)}
+
+	assignment, _, err := c.DeviceIPs.Assign(d.ID, &af)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if assignment.Management {
+		t.Error("Management flag for assignment resource must be False")
+	}
+
+	d, _, err = c.Devices.Get(d.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// If the Quantity in the IPReservationRequest is >1, this test won't work.
+	// The assignment CIDR would then have to be extracted from the reserved
+	// block.
+	reservation, _, err = c.ProjectIPs.Get(reservation.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(reservation.Assignments) != 1 {
+		t.Fatalf("reservation %s should have exactly 1 assignment", reservation)
+	}
+
+	if reservation.Assignments[0].Href != assignment.Href {
+		t.Fatalf("assignment %s should be listed in reservation resource %s",
+			assignment.Href, reservation)
+
+	}
+
+	for _, ipa := range d.Network {
+		if ipa.Href == assignment.Href {
+			return
+		}
+	}
+	t.Fatalf("assignment %s should be listed in device %s", assignment, d)
 
 	if assignment.AssignedTo.Href != d.Href {
 		t.Fatalf("device %s should be listed in assignment %s",
