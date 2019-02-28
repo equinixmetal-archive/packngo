@@ -65,7 +65,7 @@ func TestAccPort1E(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkHybrid {
+	if nType != "hybrid" {
 		t.Fatal("New 1E device should be in Hybrid Network Type")
 	}
 
@@ -116,9 +116,9 @@ func TestAccPort1E(t *testing.T) {
 	}
 }
 
-func TestAccPortL2HybridL3ConvertType2A(t *testing.T) {
+func TestAccPortL2HybridL3ConvertTypeC1LA(t *testing.T) {
 	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 30m -run=TestAccPortL2HybridL3ConvertType2A
-	testL2HybridL3Convert(t, "baremetal_2a")
+	testL2HybridL3Convert(t, "c1.large.arm")
 }
 
 func TestAccPortL2HybridL3ConvertType2(t *testing.T) {
@@ -190,7 +190,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkL3 {
+	if nType != "layer3" {
 		t.Fatalf("New %s device should be in network type L3", plan)
 	}
 
@@ -215,7 +215,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkHybrid {
+	if nType != "hybrid" {
 		t.Fatal("the device should now be in network type L2 Bonded")
 	}
 
@@ -269,7 +269,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkL3 {
+	if nType != "layer3" {
 		t.Fatal("the device should now be back in network type L3")
 	}
 
@@ -351,7 +351,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkL3 {
+	if nType != "layer3" {
 		t.Fatalf("New %s device should be in network type L3", plan)
 	}
 
@@ -365,7 +365,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkL2Bonded {
+	if nType != "layer2-bonded" {
 		t.Fatal("the device should now be in network type L2 Bonded")
 	}
 
@@ -424,7 +424,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkL3 {
+	if nType != "layer3" {
 		t.Fatal("the device now should be back in network type L3")
 	}
 

@@ -6,16 +6,6 @@ import (
 
 const portBasePath = "/ports"
 
-type NetworkType int
-
-const (
-	NetworkL3 NetworkType = iota
-	NetworkHybrid
-	NetworkL2Bonded
-	NetworkL2Individual
-	NetworkUnknown
-)
-
 // DevicePortService handles operations on a port which belongs to a particular device
 type DevicePortService interface {
 	Assign(*PortAssignRequest) (*Port, *Response, error)
@@ -26,7 +16,7 @@ type DevicePortService interface {
 	PortToLayerThree(string) (*Port, *Response, error)
 	DeviceToLayerTwo(string) (*Device, error)
 	DeviceToLayerThree(string) (*Device, error)
-	DeviceNetworkType(string) (NetworkType, error)
+	DeviceNetworkType(string) (string, error)
 	GetBondPort(string) (*Port, error)
 	GetPortByName(string, string) (*Port, error)
 }
@@ -41,6 +31,7 @@ type Port struct {
 	Type                    string           `json:"type"`
 	Name                    string           `json:"name"`
 	Data                    PortData         `json:"data"`
+	NetworkType             string           `json:"network_type,omitempty"`
 	AttachedVirtualNetworks []VirtualNetwork `json:"virtual_networks"`
 }
 
@@ -163,33 +154,15 @@ func (i *DevicePortServiceOp) PortToLayerThree(portID string) (*Port, *Response,
 	return port, resp, err
 }
 
-func (i *DevicePortServiceOp) DeviceNetworkType(deviceID string) (NetworkType, error) {
-	d, _, err := i.client.Devices.Get(deviceID, nil)
+func (i *DevicePortServiceOp) DeviceNetworkType(deviceID string) (string, error) {
+	bond0, err := i.client.DevicePorts.GetBondPort(deviceID)
 	if err != nil {
-		return NetworkUnknown, err
+		return "", err
 	}
-	if d.Plan.Slug == "baremetal_0" || d.Plan.Slug == "baremetal_1" {
-		return NetworkL3, nil
+	if bond0.NetworkType == "" {
+		return "", fmt.Errorf("Unspecified network_type in bond port")
 	}
-	if d.Plan.Slug == "baremetal_1e" {
-		return NetworkHybrid, nil
-	}
-	if len(d.NetworkPorts) < 1 {
-		// really?
-		return NetworkL2Individual, nil
-	}
-	if d.NetworkPorts[0].Data.Bonded {
-		if d.NetworkPorts[2].Data.Bonded {
-			for _, ip := range d.Network {
-				if ip.Management {
-					return NetworkL3, nil
-				}
-			}
-			return NetworkL2Bonded, nil
-		}
-		return NetworkHybrid, nil
-	}
-	return NetworkL2Individual, nil
+	return bond0.NetworkType, nil
 }
 
 func (i *DevicePortServiceOp) DeviceToLayerThree(deviceID string) (*Device, error) {
