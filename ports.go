@@ -65,7 +65,7 @@ type DisbondRequest struct {
 }
 
 func (i *DevicePortServiceOp) GetBondPort(deviceID string) (*Port, error) {
-	device, _, err := i.client.Devices.Get(deviceID, nil)
+	device, _, err := i.client.Devices.Get(deviceID, &GetOptions{Excludes: []string{"project_lite"}})
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (i *DevicePortServiceOp) GetBondPort(deviceID string) (*Port, error) {
 }
 
 func (i *DevicePortServiceOp) GetPortByName(deviceID, name string) (*Port, error) {
-	device, _, err := i.client.Devices.Get(deviceID, nil)
+	device, _, err := i.client.Devices.Get(deviceID, &GetOptions{Excludes: []string{"project_lite"}})
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +177,6 @@ func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, nType string)
 	if err != nil {
 		return nil, err
 	}
-	newType := ""
 	if nType == "layer3" {
 		if curType == "layer2-individual" || curType == "layer2-bonded" {
 			bond0, _, err = i.client.DevicePorts.PortToLayerThree(bond0.ID)
@@ -190,7 +189,6 @@ func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, nType string)
 		if err != nil {
 			return nil, err
 		}
-		newType = bond0.NetworkType
 	}
 	if nType == "hybrid" {
 		if curType == "layer2-individual" || curType == "layer2-bonded" {
@@ -209,7 +207,6 @@ func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, nType string)
 		if err != nil {
 			return nil, err
 		}
-		newType = bond0.NetworkType
 	}
 	if nType == "layer2-individual" {
 		if curType == "hybrid" || curType == "layer3" {
@@ -223,7 +220,6 @@ func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, nType string)
 		if err != nil {
 			return nil, err
 		}
-		newType = bond0.NetworkType
 	}
 	if nType == "layer2-bonded" {
 		if curType == "hybrid" || curType == "layer3" {
@@ -233,11 +229,14 @@ func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, nType string)
 			}
 		}
 		bond0, _, err = i.client.DevicePorts.Bond(
-			&BondRequest{PortID: bond0.ID, BulkEnable: true})
+			&BondRequest{PortID: bond0.ID, BulkEnable: false})
 		if err != nil {
 			return nil, err
 		}
-		newType = bond0.NetworkType
+	}
+	newType, err := i.client.DevicePorts.DeviceNetworkType(deviceID)
+	if err != nil {
+		return nil, err
 	}
 
 	if newType != nType {
@@ -246,7 +245,7 @@ func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, nType string)
 			deviceID, curType, nType, newType)
 
 	}
-	d, _, err := i.client.Devices.Get(deviceID, nil)
+	d, _, err := i.client.Devices.Get(deviceID, &GetOptions{Excludes: []string{"project_lite"}})
 
 	return d, err
 }
@@ -262,7 +261,7 @@ func (i *DevicePortServiceOp) DeviceToLayerThree(deviceID string) (*Device, erro
 	if err != nil {
 		return nil, err
 	}
-	d, _, err := i.client.Devices.Get(deviceID, nil)
+	d, _, err := i.client.Devices.Get(deviceID, &GetOptions{Excludes: []string{"project_lite"}})
 	return d, err
 }
 
@@ -277,7 +276,7 @@ func (i *DevicePortServiceOp) DeviceToLayerTwo(deviceID string) (*Device, error)
 	if err != nil {
 		return nil, err
 	}
-	d, _, err := i.client.Devices.Get(deviceID, nil)
+	d, _, err := i.client.Devices.Get(deviceID, &GetOptions{Excludes: []string{"project_lite"}})
 	return d, err
 
 }

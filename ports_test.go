@@ -355,7 +355,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatalf("New %s device should be in network type L3", plan)
 	}
 
-	d, err = c.DevicePorts.DeviceToLayerTwo(d.ID)
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "layer2-bonded")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -414,7 +414,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal("No vlans should be attached to the port at this time")
 	}
 
-	d, err = c.DevicePorts.DeviceToLayerThree(d.ID)
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "layer3")
 	if err != nil {
 		t.Fatal(err)
 	}
