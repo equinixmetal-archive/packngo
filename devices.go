@@ -156,7 +156,7 @@ func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices 
 
 // Get returns a device by id
 func (s *DeviceServiceOp) Get(deviceID string, getOpt *GetOptions) (*Device, *Response, error) {
-	//getOpt = makeSureGetOptionsInclude(getOpt, "facility")
+	getOpt = makeSureGetOptionsInclude(getOpt, "facility")
 	params := createGetOptionsURL(getOpt)
 
 	path := fmt.Sprintf("%s/%s?%s", deviceBasePath, deviceID, params)
