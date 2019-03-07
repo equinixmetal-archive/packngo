@@ -4,6 +4,7 @@ import (
 	"log"
 	"path"
 	"testing"
+	"time"
 )
 
 // run this test as
@@ -65,7 +66,7 @@ func TestAccPort1E(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkHybrid {
+	if nType != "hybrid" {
 		t.Fatal("New 1E device should be in Hybrid Network Type")
 	}
 
@@ -116,9 +117,9 @@ func TestAccPort1E(t *testing.T) {
 	}
 }
 
-func TestAccPortL2HybridL3ConvertType2A(t *testing.T) {
+func TestAccPortL2HybridL3ConvertTypeC1LA(t *testing.T) {
 	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 30m -run=TestAccPortL2HybridL3ConvertType2A
-	testL2HybridL3Convert(t, "baremetal_2a")
+	testL2HybridL3Convert(t, "c1.large.arm")
 }
 
 func TestAccPortL2HybridL3ConvertType2(t *testing.T) {
@@ -190,7 +191,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkL3 {
+	if nType != "layer3" {
 		t.Fatalf("New %s device should be in network type L3", plan)
 	}
 
@@ -215,7 +216,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkHybrid {
+	if nType != "hybrid" {
 		t.Fatal("the device should now be in network type L2 Bonded")
 	}
 
@@ -269,7 +270,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkL3 {
+	if nType != "layer3" {
 		t.Fatal("the device should now be back in network type L3")
 	}
 
@@ -351,11 +352,11 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkL3 {
+	if nType != "layer3" {
 		t.Fatalf("New %s device should be in network type L3", plan)
 	}
 
-	d, err = c.DevicePorts.DeviceToLayerTwo(d.ID)
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "layer2-bonded")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -365,7 +366,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkL2Bonded {
+	if nType != "layer2-bonded" {
 		t.Fatal("the device should now be in network type L2 Bonded")
 	}
 
@@ -414,7 +415,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal("No vlans should be attached to the port at this time")
 	}
 
-	d, err = c.DevicePorts.DeviceToLayerThree(d.ID)
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "layer3")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -424,8 +425,75 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != NetworkL3 {
+	if nType != "layer3" {
 		t.Fatal("the device now should be back in network type L3")
 	}
 
+}
+
+func deviceToNetworkType(t *testing.T, c *Client, deviceID, targetNetworkType string) {
+	oldt, err := c.DevicePorts.DeviceNetworkType(deviceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Println("Converting", oldt, "=>", targetNetworkType, "...")
+	_, err = c.DevicePorts.DeviceToNetworkType(deviceID, targetNetworkType)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Println(oldt, "=>", targetNetworkType, "OK")
+	time.Sleep(15 * time.Second)
+}
+
+func TestAccPortNetworkStateTransitions(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	fac := testFacility()
+
+	cr := DeviceCreateRequest{
+		Hostname:     "networktypetest",
+		Facility:     []string{fac},
+		Plan:         "baremetal_2",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+	deviceID := d.ID
+
+	d, err = waitDeviceActive(deviceID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nt, err := c.DevicePorts.DeviceNetworkType(deviceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if nt != "layer2-bonded" {
+		deviceToNetworkType(t, c, deviceID, "layer2-bonded")
+	}
+
+	deviceToNetworkType(t, c, deviceID, "layer2-individual")
+	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, "hybrid")
+
+	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
+	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
+
+	deviceToNetworkType(t, c, deviceID, "hybrid")
+	deviceToNetworkType(t, c, deviceID, "layer2-individual")
+	deviceToNetworkType(t, c, deviceID, "hybrid")
+
+	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, "layer2-individual")
+	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
 }

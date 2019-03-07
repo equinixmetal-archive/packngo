@@ -72,6 +72,9 @@ func createGetOptionsURL(g *GetOptions) (url string) {
 		url += fmt.Sprintf("include=%s", strings.Join(g.Includes, ","))
 	}
 	if len(g.Excludes) != 0 {
+		if url != "" {
+			url += "&"
+		}
 		url += fmt.Sprintf("exclude=%s", strings.Join(g.Excludes, ","))
 	}
 	return
@@ -86,6 +89,9 @@ func createListOptionsURL(l *ListOptions) (url string) {
 		url += fmt.Sprintf("include=%s", strings.Join(l.Includes, ","))
 	}
 	if len(l.Excludes) != 0 {
+		if url != "" {
+			url += "&"
+		}
 		url += fmt.Sprintf("exclude=%s", strings.Join(l.Excludes, ","))
 	}
 	if l.Page != 0 {
