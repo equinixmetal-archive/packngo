@@ -431,17 +431,17 @@ func testL2L3Convert(t *testing.T, plan string) {
 
 }
 
-func dev2nt(t *testing.T, c *Client, did, nt string) {
-	oldt, err := c.DevicePorts.DeviceNetworkType(did)
+func deviceToNetworkType(t *testing.T, c *Client, deviceID, targetNetworkType string) {
+	oldt, err := c.DevicePorts.DeviceNetworkType(deviceID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Println(oldt, "=>", nt, "doing ...")
-	_, err = c.DevicePorts.DeviceToNetworkType(did, nt)
+	log.Println("Converting", oldt, "=>", targetNetworkType, "...")
+	_, err = c.DevicePorts.DeviceToNetworkType(deviceID, targetNetworkType)
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Println(oldt, "=>", nt, "OK")
+	log.Println(oldt, "=>", targetNetworkType, "OK")
 	time.Sleep(15 * time.Second)
 }
 
@@ -466,34 +466,34 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer deleteDevice(t, c, d.ID)
-	did := d.ID
+	deviceID := d.ID
 
-	d, err = waitDeviceActive(did, c)
+	d, err = waitDeviceActive(deviceID, c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	nt, err := c.DevicePorts.DeviceNetworkType(did)
+	nt, err := c.DevicePorts.DeviceNetworkType(deviceID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if nt != "layer2-bonded" {
-		dev2nt(t, c, did, "layer2-bonded")
+		deviceToNetworkType(t, c, deviceID, "layer2-bonded")
 	}
 
-	dev2nt(t, c, did, "layer2-individual")
-	dev2nt(t, c, did, "layer3")
-	dev2nt(t, c, did, "hybrid")
+	deviceToNetworkType(t, c, deviceID, "layer2-individual")
+	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, "hybrid")
 
-	dev2nt(t, c, did, "layer2-bonded")
-	dev2nt(t, c, did, "layer3")
-	dev2nt(t, c, did, "layer2-bonded")
+	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
+	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
 
-	dev2nt(t, c, did, "hybrid")
-	dev2nt(t, c, did, "layer2-individual")
-	dev2nt(t, c, did, "hybrid")
+	deviceToNetworkType(t, c, deviceID, "hybrid")
+	deviceToNetworkType(t, c, deviceID, "layer2-individual")
+	deviceToNetworkType(t, c, deviceID, "hybrid")
 
-	dev2nt(t, c, did, "layer3")
-	dev2nt(t, c, did, "layer2-individual")
-	dev2nt(t, c, did, "layer2-bonded")
+	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, "layer2-individual")
+	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
 }
