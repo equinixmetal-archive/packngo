@@ -123,6 +123,10 @@ func TestAccDeviceBasic(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if len(d.NetworkType) == 0 {
+		t.Fatal("NetworkType of a device can't be found")
+	}
+
 	if len(d.RootPassword) == 0 {
 		t.Fatal("root_password is empty or non-existent")
 	}

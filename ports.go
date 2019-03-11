@@ -156,53 +156,53 @@ func (i *DevicePortServiceOp) PortToLayerThree(portID string) (*Port, *Response,
 }
 
 func (i *DevicePortServiceOp) DeviceNetworkType(deviceID string) (string, error) {
-	bond0, err := i.client.DevicePorts.GetBondPort(deviceID)
+	d, _, err := i.client.Devices.Get(deviceID, nil)
 	if err != nil {
 		return "", err
 	}
-	if bond0.NetworkType == "" {
-		return "", fmt.Errorf("Unspecified network_type in bond port")
-	}
-	return bond0.NetworkType, nil
+	return d.NetworkType, nil
 }
 
 func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, nType string) (*Device, error) {
 
-	curType, err := i.client.DevicePorts.DeviceNetworkType(deviceID)
+	d, _, err := i.client.Devices.Get(deviceID, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	curType := d.NetworkType
+
 	if curType == nType {
 		return nil, fmt.Errorf("Device already is in state %s", nType)
 	}
-	// hopefull all the VLANs are unassigned at this point
-	bond0, err := i.client.DevicePorts.GetBondPort(deviceID)
-	if err != nil {
-		return nil, err
+	bond0ID := ""
+	eth1ID := ""
+	for _, port := range d.NetworkPorts {
+		if port.Name == "bond0" {
+			bond0ID = port.ID
+		}
+		if port.Name == "eth1" {
+			eth1ID = port.ID
+		}
 	}
+
 	if nType == "layer3" {
 		if curType == "layer2-individual" || curType == "layer2-bonded" {
 			if curType == "layer2-individual" {
-				bond0, _, err = i.client.DevicePorts.Bond(
-					&BondRequest{PortID: bond0.ID, BulkEnable: false})
+				_, _, err := i.client.DevicePorts.Bond(
+					&BondRequest{PortID: bond0ID, BulkEnable: false})
 				if err != nil {
 					return nil, err
 				}
 
 			}
-			curType, err := i.client.DevicePorts.DeviceNetworkType(deviceID)
+			_, _, err := i.client.DevicePorts.PortToLayerThree(bond0ID)
 			if err != nil {
 				return nil, err
 			}
-			if curType != "layer3" {
-				bond0, _, err = i.client.DevicePorts.PortToLayerThree(bond0.ID)
-				if err != nil {
-					return nil, err
-				}
-			}
 		}
-		bond0, _, err = i.client.DevicePorts.Bond(
-			&BondRequest{PortID: bond0.ID, BulkEnable: true})
+		_, _, err = i.client.DevicePorts.Bond(
+			&BondRequest{PortID: bond0ID, BulkEnable: true})
 		if err != nil {
 			return nil, err
 		}
@@ -210,68 +210,62 @@ func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, nType string)
 	if nType == "hybrid" {
 		if curType == "layer2-individual" || curType == "layer2-bonded" {
 			if curType == "layer2-individual" {
-				bond0, _, err = i.client.DevicePorts.Bond(
-					&BondRequest{PortID: bond0.ID, BulkEnable: false})
+				_, _, err = i.client.DevicePorts.Bond(
+					&BondRequest{PortID: bond0ID, BulkEnable: false})
 				if err != nil {
 					return nil, err
 				}
-
 			}
-			bond0, _, err = i.client.DevicePorts.PortToLayerThree(bond0.ID)
+			_, _, err = i.client.DevicePorts.PortToLayerThree(bond0ID)
 			if err != nil {
 				return nil, err
 			}
 		}
-		eth1, err := i.client.DevicePorts.GetPortByName(deviceID, "eth1")
-		if err != nil {
-			return nil, err
-		}
-
-		bond0, _, err = i.client.DevicePorts.Disbond(
-			&DisbondRequest{PortID: eth1.ID, BulkDisable: false})
+		_, _, err := i.client.DevicePorts.Disbond(
+			&DisbondRequest{PortID: eth1ID, BulkDisable: false})
 		if err != nil {
 			return nil, err
 		}
 	}
 	if nType == "layer2-individual" {
 		if curType == "hybrid" || curType == "layer3" {
-			bond0, _, err = i.client.DevicePorts.PortToLayerTwo(bond0.ID)
+			_, _, err = i.client.DevicePorts.PortToLayerTwo(bond0ID)
 			if err != nil {
 				return nil, err
 			}
+
 		}
-		bond0, _, err = i.client.DevicePorts.Disbond(
-			&DisbondRequest{PortID: bond0.ID, BulkDisable: true})
+		_, _, err = i.client.DevicePorts.Disbond(
+			&DisbondRequest{PortID: bond0ID, BulkDisable: true})
 		if err != nil {
 			return nil, err
 		}
 	}
 	if nType == "layer2-bonded" {
 		if curType == "hybrid" || curType == "layer3" {
-			bond0, _, err = i.client.DevicePorts.PortToLayerTwo(bond0.ID)
+			_, _, err = i.client.DevicePorts.PortToLayerTwo(bond0ID)
 			if err != nil {
 				return nil, err
 			}
 		}
-		bond0, _, err = i.client.DevicePorts.Bond(
-			&BondRequest{PortID: bond0.ID, BulkEnable: false})
+		_, _, err = i.client.DevicePorts.Bond(
+			&BondRequest{PortID: bond0ID, BulkEnable: false})
 		if err != nil {
 			return nil, err
 		}
 	}
-	newType, err := i.client.DevicePorts.DeviceNetworkType(deviceID)
+
+	d, _, err = i.client.Devices.Get(deviceID, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if newType != nType {
+	if d.NetworkType != nType {
 		return nil, fmt.Errorf(
 			"Failed to convert device %s from %s to %s. New type was %s",
-			deviceID, curType, nType, newType)
+			deviceID, curType, nType, d.NetworkType)
 
 	}
-	d, _, err := i.client.Devices.Get(deviceID, nil)
-
 	return d, err
 }
 

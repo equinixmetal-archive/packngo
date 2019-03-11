@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -27,8 +28,8 @@ type devicesRoot struct {
 	Meta    meta     `json:"meta"`
 }
 
-// Device represents a Packet device
-type Device struct {
+// DeviceRaw represents a Packet device from API
+type DeviceRaw struct {
 	ID                  string                 `json:"id"`
 	Href                string                 `json:"href,omitempty"`
 	Hostname            string                 `json:"hostname,omitempty"`
@@ -60,8 +61,40 @@ type Device struct {
 	SSHKeys             []SSHKey               `json:"ssh_keys,omitempty"`
 }
 
+type Device struct {
+	DeviceRaw
+	NetworkType string
+}
+
+func (d *Device) UnmarshalJSON(b []byte) error {
+	dJSON := DeviceRaw{}
+	if err := json.Unmarshal(b, &dJSON); err != nil {
+		return err
+	}
+	networkType, err := dJSON.GetNetworkType()
+	if err != nil {
+		return err
+	}
+	d.DeviceRaw = dJSON
+	d.NetworkType = networkType
+	return nil
+
+}
+
 func (d Device) String() string {
 	return Stringify(d)
+}
+
+func (d DeviceRaw) GetNetworkType() (string, error) {
+	if len(d.NetworkPorts) == 0 {
+		return "", fmt.Errorf("Device has no network ports listed")
+	}
+	for _, p := range d.NetworkPorts {
+		if p.Name == "bond0" {
+			return p.NetworkType, nil
+		}
+	}
+	return "", fmt.Errorf("Bound port not found")
 }
 
 // DeviceCreateRequest type used to create a Packet device
@@ -177,7 +210,6 @@ func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *
 	if err != nil {
 		return nil, resp, err
 	}
-
 	return device, resp, err
 }
 
