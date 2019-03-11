@@ -71,6 +71,9 @@ func (d *Device) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &dJSON); err != nil {
 		return err
 	}
+	if dJSON.ID == "" {
+		return nil
+	}
 	networkType, err := dJSON.GetNetworkType()
 	if err != nil {
 		return err
