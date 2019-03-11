@@ -473,11 +473,7 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nt, err := c.DevicePorts.DeviceNetworkType(deviceID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if nt != "layer2-bonded" {
+	if d.NetworkType != "layer2-bonded" {
 		deviceToNetworkType(t, c, deviceID, "layer2-bonded")
 	}
 
