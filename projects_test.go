@@ -87,6 +87,17 @@ func TestAccProjectExtra(t *testing.T) {
 		}
 	}
 
+	aTrue := true
+	pur = ProjectUpdateRequest{BackendTransfer: &aTrue}
+	p, _, err = c.Projects.Update(p.ID, &pur)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !p.BackendTransfer {
+		t.Fatalf("Backend Transfer should have been enabled")
+
+	}
+
 	_, err = c.Projects.Delete(p.ID)
 	if err != nil {
 		t.Fatal(err)
