@@ -24,16 +24,17 @@ type projectsRoot struct {
 
 // Project represents a Packet project
 type Project struct {
-	ID            string        `json:"id"`
-	Name          string        `json:"name,omitempty"`
-	Organization  Organization  `json:"organization,omitempty"`
-	Created       string        `json:"created_at,omitempty"`
-	Updated       string        `json:"updated_at,omitempty"`
-	Users         []User        `json:"members,omitempty"`
-	Devices       []Device      `json:"devices,omitempty"`
-	SSHKeys       []SSHKey      `json:"ssh_keys,omitempty"`
-	URL           string        `json:"href,omitempty"`
-	PaymentMethod PaymentMethod `json:"payment_method,omitempty"`
+	ID              string        `json:"id"`
+	Name            string        `json:"name,omitempty"`
+	Organization    Organization  `json:"organization,omitempty"`
+	Created         string        `json:"created_at,omitempty"`
+	Updated         string        `json:"updated_at,omitempty"`
+	Users           []User        `json:"members,omitempty"`
+	Devices         []Device      `json:"devices,omitempty"`
+	SSHKeys         []SSHKey      `json:"ssh_keys,omitempty"`
+	URL             string        `json:"href,omitempty"`
+	PaymentMethod   PaymentMethod `json:"payment_method,omitempty"`
+	BackendTransfer bool          `json:"backend_transfer_enabled"`
 }
 
 func (p Project) String() string {
@@ -55,6 +56,7 @@ func (p ProjectCreateRequest) String() string {
 type ProjectUpdateRequest struct {
 	Name            *string `json:"name,omitempty"`
 	PaymentMethodID *string `json:"payment_method_id,omitempty"`
+	BackendTransfer *bool   `json:"backend_transfer_enabled,omitempty"`
 }
 
 func (p ProjectUpdateRequest) String() string {
