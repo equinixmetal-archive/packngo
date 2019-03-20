@@ -18,14 +18,19 @@ type HardwareReservationServiceOp struct {
 
 // HardwareReservation struct
 type HardwareReservation struct {
-	ID        string    `json:"id,omitempty"`
-	ShortID   string    `json:"short_id,omitempty"`
-	Facility  Facility  `json:"facility,omitempty"`
-	Plan      Plan      `json:"plan,omitempty"`
-	Href      string    `json:"href,omitempty"`
-	Project   Project   `json:"project,omitempty"`
-	Device    *Device   `json:"device,omitempty"`
-	CreatedAt Timestamp `json:"created_at,omitempty"`
+	ID            string    `json:"id,omitempty"`
+	ShortID       string    `json:"short_id,omitempty"`
+	Facility      Facility  `json:"facility,omitempty"`
+	Plan          Plan      `json:"plan,omitempty"`
+	Provisionable bool      `json:"provisionable,omitempty"`
+	Spare         bool      `json:"spare,omitempty"`
+	SwitchUUID    string    `json:"switch_uuid,omitempty"`
+	Intervals     int       `json:"intervals,omitempty"`
+	CurrentPeriod int       `json:"current_period,omitempty"`
+	Href          string    `json:"href,omitempty"`
+	Project       Project   `json:"project,omitempty"`
+	Device        *Device   `json:"device,omitempty"`
+	CreatedAt     Timestamp `json:"created_at,omitempty"`
 }
 
 type hardwareReservationRoot struct {
