@@ -3,17 +3,18 @@ package packngo
 import "fmt"
 
 const (
-	connectBasePath = "/packet-connect/connections"
+	connectBasePath = "/cloud-connect/connections"
+	AzureProviderID = "ed5de8e0-77a9-4d3b-9de0-65281d3aa831"
 )
 
 type ConnectService interface {
 	List(string, *ListOptions) ([]Connect, *Response, error)
-	Get(string, *GetOptions) (*Connect, *Response, error)
-	Delete(string) (*Response, error)
+	Get(string, string, *GetOptions) (*Connect, *Response, error)
+	Delete(string, string) (*Response, error)
 	Create(*ConnectCreateRequest) (*Connect, *Response, error)
 	//Update(string, *VolumeUpdateRequest) (*Volume, *Response, error)
 	//Provision(string) (*Response, error)
-	//Deprovision(string) (*Response, error)
+	Deprovision(string, string) (*Connect, *Response, error)
 }
 
 type ConnectCreateRequest struct {
@@ -83,6 +84,19 @@ func (c *ConnectServiceOp) List(projectID string, listOpt *ListOptions) (connect
 	}
 }
 
+func (c *ConnectServiceOp) Deprovision(connectID, projectID string) (*Connect, *Response, error) {
+	params := fmt.Sprintf("project_id=%s&delete=true", projectID)
+	path := fmt.Sprintf("%s/%s/deprovision?%s", connectBasePath, connectID, params)
+	connect := new(Connect)
+
+	resp, err := c.client.DoRequest("POST", path, nil, connect)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return connect, resp, err
+}
+
 func (c *ConnectServiceOp) Create(createRequest *ConnectCreateRequest) (*Connect, *Response, error) {
 	url := fmt.Sprintf("%s", connectBasePath)
 	connect := new(Connect)
@@ -95,8 +109,14 @@ func (c *ConnectServiceOp) Create(createRequest *ConnectCreateRequest) (*Connect
 	return connect, resp, err
 }
 
-func (c *ConnectServiceOp) Get(connectID string, getOpt *GetOptions) (*Connect, *Response, error) {
+func (c *ConnectServiceOp) Get(connectID, projectID string, getOpt *GetOptions) (*Connect, *Response, error) {
 	params := createGetOptionsURL(getOpt)
+	project_param := fmt.Sprintf("project_id=%s", projectID)
+	if params == "" {
+		params = project_param
+	} else {
+		params = fmt.Sprintf("%s&%s", params, project_param)
+	}
 	path := fmt.Sprintf("%s/%s?%s", connectBasePath, connectID, params)
 	connect := new(Connect)
 
@@ -108,8 +128,9 @@ func (c *ConnectServiceOp) Get(connectID string, getOpt *GetOptions) (*Connect, 
 	return connect, resp, err
 }
 
-func (c *ConnectServiceOp) Delete(connectID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", connectBasePath, connectID)
+func (c *ConnectServiceOp) Delete(connectID, projectID string) (*Response, error) {
+	path := fmt.Sprintf("%s/%s?project_id=%s", connectBasePath, connectID,
+		projectID)
 
 	return c.client.DoRequest("DELETE", path, nil, nil)
 }
