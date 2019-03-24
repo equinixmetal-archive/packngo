@@ -90,9 +90,31 @@ func TestAccConnectBasic(t *testing.T) {
 		t.Fatalf("There should be only 1 Connect resource")
 	}
 
-	time.Sleep(30 * time.Second)
+	time.Sleep(65 * time.Second)
 
-	connect, _, err = c.Connects.Deprovision(connect.ID, projectID)
+	connect, _, err = c.Connects.Deprovision(connect.ID, projectID, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	connect, err = waitConnectStatus(connect.ID, projectID, "DEPROVISIONED", c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	time.Sleep(65 * time.Second)
+
+	connect, _, err = c.Connects.Provision(connect.ID, projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	connect, err = waitConnectStatus(connect.ID, projectID, "PROVISIONED", c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	time.Sleep(65 * time.Second)
+
+	connect, _, err = c.Connects.Deprovision(connect.ID, projectID, false)
 	if err != nil {
 		t.Fatal(err)
 	}
