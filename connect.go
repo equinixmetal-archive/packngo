@@ -12,9 +12,8 @@ type ConnectService interface {
 	Get(string, string, *GetOptions) (*Connect, *Response, error)
 	Delete(string, string) (*Response, error)
 	Create(*ConnectCreateRequest) (*Connect, *Response, error)
-	//Update(string, *VolumeUpdateRequest) (*Volume, *Response, error)
-	//Provision(string) (*Response, error)
-	Deprovision(string, string) (*Connect, *Response, error)
+	Provision(string, string) (*Connect, *Response, error)
+	Deprovision(string, string, bool) (*Connect, *Response, error)
 }
 
 type ConnectCreateRequest struct {
@@ -84,9 +83,22 @@ func (c *ConnectServiceOp) List(projectID string, listOpt *ListOptions) (connect
 	}
 }
 
-func (c *ConnectServiceOp) Deprovision(connectID, projectID string) (*Connect, *Response, error) {
-	params := fmt.Sprintf("project_id=%s&delete=true", projectID)
+func (c *ConnectServiceOp) Deprovision(connectID, projectID string, delete bool) (*Connect, *Response, error) {
+	params := fmt.Sprintf("project_id=%s&delete=%t", projectID, delete)
 	path := fmt.Sprintf("%s/%s/deprovision?%s", connectBasePath, connectID, params)
+	connect := new(Connect)
+
+	resp, err := c.client.DoRequest("POST", path, nil, connect)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return connect, resp, err
+}
+
+func (c *ConnectServiceOp) Provision(connectID, projectID string) (*Connect, *Response, error) {
+	params := fmt.Sprintf("project_id=%s", projectID)
+	path := fmt.Sprintf("%s/%s/provision?%s", connectBasePath, connectID, params)
 	connect := new(Connect)
 
 	resp, err := c.client.DoRequest("POST", path, nil, connect)
