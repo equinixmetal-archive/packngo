@@ -3,7 +3,7 @@ package packngo
 import "fmt"
 
 const (
-	connectBasePath = "/cloud-connect/connections"
+	connectBasePath = "/packet-connect/connections"
 	AzureProviderID = "ed5de8e0-77a9-4d3b-9de0-65281d3aa831"
 )
 
