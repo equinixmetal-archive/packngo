@@ -41,7 +41,12 @@ func TestAccBGPSession(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bgpSession, _, err := c.BGPSessions.Create(d.ID, CreateBGPSessionRequest{AddressFamily: "ipv4"})
+	aTrue := true
+
+	bgpSession, _, err := c.BGPSessions.Create(d.ID,
+		CreateBGPSessionRequest{
+			AddressFamily: "ipv4",
+			DefaultRoute:  &aTrue})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,6 +67,10 @@ func TestAccBGPSession(t *testing.T) {
 	}
 	if check == nil {
 		t.Fatal("BGP Session not returned.")
+	}
+
+	if !*(check.DefaultRoute) {
+		t.Fatal("BGP Session Default Route should have been set.")
 	}
 
 	cs, _, err := c.BGPConfig.Get(projectID,

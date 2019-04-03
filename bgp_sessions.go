@@ -29,11 +29,13 @@ type BGPSession struct {
 	AddressFamily string   `json:"address_family,omitempty"`
 	Device        Device   `json:"device,omitempty"`
 	Href          string   `json:"href,omitempty"`
+	DefaultRoute  *bool    `json:"default_route,omitempty"`
 }
 
 // CreateBGPSessionRequest struct
 type CreateBGPSessionRequest struct {
 	AddressFamily string `json:"address_family"`
+	DefaultRoute  *bool  `json:"default_route,omitempty"`
 }
 
 // Create function
