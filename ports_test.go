@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"fmt"
 	"log"
 	"path"
 	"testing"
@@ -492,4 +493,78 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 	deviceToNetworkType(t, c, deviceID, "layer3")
 	deviceToNetworkType(t, c, deviceID, "layer2-individual")
 	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
+}
+
+func TestAccPortNativeVlan(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, _ := setupWithProject(t)
+
+	fac := testFacility()
+
+	cr := DeviceCreateRequest{
+		Hostname:     "networktypetest",
+		Facility:     []string{fac},
+		Plan:         "baremetal_2",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deviceID := d.ID
+
+	d, err = waitDeviceActive(deviceID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	d, err = waitDeviceNetworkType(deviceID, "layer3", c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vncr := VirtualNetworkCreateRequest{
+		ProjectID: projectID,
+		Facility:  fac,
+	}
+
+	vlan, _, err := c.ProjectVirtualNetworks.Create(&vncr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	par := PortAssignRequest{
+		PortID:           eth1.ID,
+		VirtualNetworkID: vlan.ID}
+	p, _, err := c.DevicePorts.Assign(&par)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, _, err = c.DevicePorts.AssignNative(&par)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Println(p)
+}
+
+func waitDeviceNetworkType(id, networkType string, c *Client) (*Device, error) {
+	// 15 minutes = 180 * 5sec-retry
+	for i := 0; i < 180; i++ {
+		<-time.After(5 * time.Second)
+		d, _, err := c.Devices.Get(id, nil)
+		if err != nil {
+			return nil, err
+		}
+		if d.NetworkType == networkType {
+			return d, nil
+		}
+	}
+	return nil, fmt.Errorf("device %s is still not in network_type %s after timeout", id, networkType)
 }
