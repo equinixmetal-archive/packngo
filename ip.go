@@ -22,7 +22,7 @@ type ProjectIPService interface {
 	AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error)
 }
 
-type ipAddressCommon struct {
+type IpAddressCommon struct {
 	ID            string `json:"id"`
 	Address       string `json:"address"`
 	Gateway       string `json:"gateway"`
@@ -42,7 +42,7 @@ type ipAddressCommon struct {
 
 // IPAddressReservation is created when user sends IP reservation request for a project (considering it's within quota).
 type IPAddressReservation struct {
-	ipAddressCommon
+	IpAddressCommon
 	Assignments []Href    `json:"assignments"`
 	Facility    *Facility `json:"facility,omitempty"`
 	Available   string    `json:"available"`
@@ -62,7 +62,7 @@ type AvailableRequest struct {
 
 // IPAddressAssignment is created when an IP address from reservation block is assigned to a device.
 type IPAddressAssignment struct {
-	ipAddressCommon
+	IpAddressCommon
 	AssignedTo Href `json:"assigned_to"`
 }
 
