@@ -130,15 +130,24 @@ func TestAccDeviceBasic(t *testing.T) {
 	if len(d.RootPassword) == 0 {
 		t.Fatal("root_password is empty or non-existent")
 	}
+	networkInfo := d.GetNetworkInfo()
+
 	for _, ipa := range d.Network {
 		if !ipa.Management {
 			t.Fatalf("management flag for all the IP addresses in a new device should be True: was %s", ipa)
+		}
+		if ipa.Public && (ipa.AddressFamily == 4) {
+			if ipa.Address != networkInfo.PublicIPv4 {
+				t.Fatalf("strange public IPv4 from GetNetworkInfo, should be %s, is %s", ipa.Address, networkInfo.PublicIPv4)
+
+			}
 		}
 	}
 	dl, _, err := c.Devices.List(projectID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if len(dl) != 1 {
 		t.Fatalf("Device List should contain exactly one device, was: %v", dl)
 	}

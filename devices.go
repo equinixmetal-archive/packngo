@@ -82,6 +82,31 @@ func (d *Device) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+type NetworkInfo struct {
+	PublicIPv4  string
+	PublicIPv6  string
+	PrivateIPv4 string
+}
+
+func (d *Device) GetNetworkInfo() NetworkInfo {
+	ni := NetworkInfo{}
+	for _, ip := range d.Network {
+		// Initial device IPs are fixed and marked as "Management"
+		if ip.Management {
+			if ip.AddressFamily == 4 {
+				if ip.Public {
+					ni.PublicIPv4 = ip.Address
+				} else {
+					ni.PrivateIPv4 = ip.Address
+				}
+			} else {
+				ni.PublicIPv6 = ip.Address
+			}
+		}
+	}
+	return ni
+}
+
 func (d Device) String() string {
 	return Stringify(d)
 }
