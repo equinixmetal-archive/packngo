@@ -35,6 +35,7 @@ type Port struct {
 	Name                    string           `json:"name"`
 	Data                    PortData         `json:"data"`
 	NetworkType             string           `json:"network_type,omitempty"`
+	NativeVirtualNetwork    *VirtualNetwork  `json:"native_virtual_network"`
 	AttachedVirtualNetworks []VirtualNetwork `json:"virtual_networks"`
 }
 
@@ -95,7 +96,7 @@ func (i *DevicePortServiceOp) GetPortByName(deviceID, name string) (*Port, error
 }
 
 func (i *DevicePortServiceOp) Assign(par *PortAssignRequest) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/assing", portBasePath, par.PortID)
+	path := fmt.Sprintf("%s/%s/assign", portBasePath, par.PortID)
 	return i.portAction(path, par)
 }
 
