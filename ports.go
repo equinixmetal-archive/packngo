@@ -10,6 +10,8 @@ const portBasePath = "/ports"
 type DevicePortService interface {
 	Assign(*PortAssignRequest) (*Port, *Response, error)
 	Unassign(*PortAssignRequest) (*Port, *Response, error)
+	AssignNative(*PortAssignRequest) (*Port, *Response, error)
+	UnassignNative(string) (*Port, *Response, error)
 	Bond(*BondRequest) (*Port, *Response, error)
 	Disbond(*DisbondRequest) (*Port, *Response, error)
 	DeviceToNetworkType(string, string) (*Device, error)
@@ -33,6 +35,7 @@ type Port struct {
 	Name                    string           `json:"name"`
 	Data                    PortData         `json:"data"`
 	NetworkType             string           `json:"network_type,omitempty"`
+	NativeVirtualNetwork    *VirtualNetwork  `json:"native_virtual_network"`
 	AttachedVirtualNetworks []VirtualNetwork `json:"virtual_networks"`
 }
 
@@ -95,6 +98,23 @@ func (i *DevicePortServiceOp) GetPortByName(deviceID, name string) (*Port, error
 func (i *DevicePortServiceOp) Assign(par *PortAssignRequest) (*Port, *Response, error) {
 	path := fmt.Sprintf("%s/%s/assign", portBasePath, par.PortID)
 	return i.portAction(path, par)
+}
+
+func (i *DevicePortServiceOp) AssignNative(par *PortAssignRequest) (*Port, *Response, error) {
+	path := fmt.Sprintf("%s/%s/native-vlan", portBasePath, par.PortID)
+	return i.portAction(path, par)
+}
+
+func (i *DevicePortServiceOp) UnassignNative(portID string) (*Port, *Response, error) {
+	path := fmt.Sprintf("%s/%s/native-vlan", portBasePath, portID)
+	port := new(Port)
+
+	resp, err := i.client.DoRequest("DELETE", path, nil, port)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return port, resp, err
 }
 
 func (i *DevicePortServiceOp) Unassign(par *PortAssignRequest) (*Port, *Response, error) {

@@ -493,3 +493,100 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 	deviceToNetworkType(t, c, deviceID, "layer2-individual")
 	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
 }
+
+func TestAccPortNativeVlan(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	fac := testFacility()
+
+	cr := DeviceCreateRequest{
+		Hostname:     "networktypetest",
+		Facility:     []string{fac},
+		Plan:         "baremetal_2",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deviceID := d.ID
+
+	d, err = waitDeviceActive(deviceID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+
+	deviceToNetworkType(t, c, deviceID, "hybrid")
+
+	vncr := VirtualNetworkCreateRequest{
+		ProjectID: projectID,
+		Facility:  fac,
+	}
+
+	vlan1, _, err := c.ProjectVirtualNetworks.Create(&vncr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.ProjectVirtualNetworks.Delete(vlan1.ID)
+	vlan2, _, err := c.ProjectVirtualNetworks.Create(&vncr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.ProjectVirtualNetworks.Delete(vlan2.ID)
+
+	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if eth1.NativeVirtualNetwork != nil {
+		t.Fatal("Native virtual network on fresh device should be nil")
+	}
+	par1 := PortAssignRequest{
+		PortID:           eth1.ID,
+		VirtualNetworkID: vlan1.ID}
+	p, _, err := c.DevicePorts.Assign(&par1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	par2 := PortAssignRequest{
+		PortID:           eth1.ID,
+		VirtualNetworkID: vlan2.ID}
+	p, _, err = c.DevicePorts.Assign(&par2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, _, err = c.DevicePorts.AssignNative(&par1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	eth1, err = c.DevicePorts.GetPortByName(deviceID, "eth1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if eth1.NativeVirtualNetwork != nil {
+		if path.Base(eth1.NativeVirtualNetwork.Href) != vlan1.ID {
+			t.Fatal("Wrong native virtual network at the test device")
+		}
+	} else {
+		t.Fatal("No native virtual network at the test device")
+	}
+	p, _, err = c.DevicePorts.UnassignNative(eth1.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, _, err = c.DevicePorts.Unassign(&par2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, _, err = c.DevicePorts.Unassign(&par1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Println(p)
+}
