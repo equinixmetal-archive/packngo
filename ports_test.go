@@ -1,7 +1,6 @@
 package packngo
 
 import (
-	"fmt"
 	"log"
 	"path"
 	"testing"
@@ -590,19 +589,4 @@ func TestAccPortNativeVlan(t *testing.T) {
 		t.Fatal(err)
 	}
 	log.Println(p)
-}
-
-func waitDeviceNetworkType(id, networkType string, c *Client) (*Device, error) {
-	// 15 minutes = 180 * 5sec-retry
-	for i := 0; i < 180; i++ {
-		<-time.After(5 * time.Second)
-		d, _, err := c.Devices.Get(id, nil)
-		if err != nil {
-			return nil, err
-		}
-		if d.NetworkType == networkType {
-			return d, nil
-		}
-	}
-	return nil, fmt.Errorf("device %s is still not in network_type %s after timeout", id, networkType)
 }
