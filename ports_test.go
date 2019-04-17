@@ -498,7 +498,8 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 func TestAccPortNativeVlan(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
-	c, projectID, _ := setupWithProject(t)
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
 
 	fac := testFacility()
 
@@ -522,10 +523,6 @@ func TestAccPortNativeVlan(t *testing.T) {
 	}
 	defer deleteDevice(t, c, d.ID)
 
-	//d, err = waitDeviceNetworkType(deviceID, "layer3", c)
-	//if err != nil {
-	//	t.Fatal(err)
-	//}
 	deviceToNetworkType(t, c, deviceID, "hybrid")
 
 	vncr := VirtualNetworkCreateRequest{
