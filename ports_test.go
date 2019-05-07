@@ -456,7 +456,7 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     "networktypetest",
 		Facility:     []string{fac},
-		Plan:         "baremetal_2",
+		Plan:         "m1.xlarge.x86",
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
 		BillingCycle: "hourly",

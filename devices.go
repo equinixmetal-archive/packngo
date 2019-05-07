@@ -123,6 +123,11 @@ func (d DeviceRaw) GetNetworkType() (string, error) {
 	return "", fmt.Errorf("Bound port not found")
 }
 
+type IPAddressCreateRequest struct {
+	AddressFamily int  `json:"address_family"`
+	Public        bool `json:"public"`
+}
+
 // DeviceCreateRequest type used to create a Packet device
 type DeviceCreateRequest struct {
 	Hostname              string     `json:"hostname"`
@@ -151,8 +156,9 @@ type DeviceCreateRequest struct {
 	// is supplied, only the listed SSHKeys will go to the device.
 	// Any other Project SSHKeys and any User SSHKeys will not be present
 	// in the device.
-	ProjectSSHKeys []string          `json:"project_ssh_keys,omitempty"`
-	Features       map[string]string `json:"features,omitempty"`
+	ProjectSSHKeys []string                 `json:"project_ssh_keys,omitempty"`
+	Features       map[string]string        `json:"features,omitempty"`
+	IPAddresses    []IPAddressCreateRequest `json:"ip_addresses,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
