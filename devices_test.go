@@ -253,9 +253,9 @@ func TestAccDeviceAssignGlobalIP(t *testing.T) {
 	}
 
 	req := IPReservationRequest{
-		Type:     "global_ipv4",
-		Quantity: 1,
-		Comments: "packngo test",
+		Type:        "global_ipv4",
+		Quantity:    1,
+		Description: "packngo test",
 	}
 
 	reservation, _, err := c.ProjectIPs.Request(projectID, &req)
@@ -370,10 +370,10 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	}
 
 	req := IPReservationRequest{
-		Type:     "public_ipv4",
-		Quantity: 1,
-		Comments: "packngo test",
-		Facility: &fac,
+		Type:        "public_ipv4",
+		Quantity:    1,
+		Description: "packngo test",
+		Facility:    &fac,
 	}
 
 	reservation, _, err := c.ProjectIPs.Request(projectID, &req)
