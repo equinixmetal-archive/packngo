@@ -71,7 +71,7 @@ type IPAddressAssignment struct {
 type IPReservationRequest struct {
 	Type        string  `json:"type"`
 	Quantity    int     `json:"quantity"`
-	Description string  `json:"details"`
+	Description string  `json:"details,omitempty"`
 	Facility    *string `json:"facility,omitempty"`
 }
 

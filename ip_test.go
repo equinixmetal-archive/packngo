@@ -25,13 +25,10 @@ func TestAccPublicIPReservation(t *testing.T) {
 		t.Fatalf("There should be no reservations a new project, existing list: %s", ipList)
 	}
 
-	description := "packngo test"
-
 	req := IPReservationRequest{
-		Type:        "public_ipv4",
-		Quantity:    quantity,
-		Description: description,
-		Facility:    &testFac,
+		Type:     "public_ipv4",
+		Quantity: quantity,
+		Facility: &testFac,
 	}
 
 	res, _, err := c.ProjectIPs.Request(projectID, &req)
@@ -51,10 +48,6 @@ func TestAccPublicIPReservation(t *testing.T) {
 
 	if res.Management {
 		t.Fatal("Management flag of new reservation block must be False")
-	}
-
-	if (res.Description == nil) || (*(res.Description) != description) {
-		t.Fatalf("Description should be %s, was %v", description, res.Description)
 	}
 
 	if res.Facility.Code != testFac {
