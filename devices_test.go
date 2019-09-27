@@ -123,6 +123,10 @@ func TestAccDeviceBasic(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if len(d.ShortID) == 0 {
+		t.Fatal("Device should have shortID")
+	}
+
 	if len(d.NetworkType) == 0 {
 		t.Fatal("NetworkType of a device can't be found")
 	}
