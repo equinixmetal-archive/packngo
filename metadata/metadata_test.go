@@ -28,7 +28,7 @@ func Test_Deserialization(t *testing.T) {
 		w.Write(b)
 	})
 
-	device, err := getMetadataFromURL(baseURL)
+	device, err := GetMetadataFromURL(baseURL)
 	assert.Nil(t, err)
 	assert.NotNil(t, device)
 
