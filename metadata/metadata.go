@@ -12,10 +12,10 @@ import (
 const BaseURL = "https://metadata.packet.net"
 
 func GetMetadata() (*CurrentDevice, error) {
-	return getMetadataFromURL(BaseURL)
+	return GetMetadataFromURL(BaseURL)
 }
 
-func getMetadataFromURL(baseURL string) (*CurrentDevice, error) {
+func GetMetadataFromURL(baseURL string) (*CurrentDevice, error) {
 	res, err := http.Get(baseURL + "/metadata")
 	if err != nil {
 		return nil, err
@@ -44,10 +44,10 @@ func getMetadataFromURL(baseURL string) (*CurrentDevice, error) {
 }
 
 func GetUserData() ([]byte, error) {
-	return getUserDataFromURL(BaseURL)
+	return GetUserDataFromURL(BaseURL)
 }
 
-func getUserDataFromURL(baseURL string) ([]byte, error) {
+func GetUserDataFromURL(baseURL string) ([]byte, error) {
 	res, err := http.Get(baseURL + "/userdata")
 	if err != nil {
 		return nil, err
