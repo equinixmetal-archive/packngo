@@ -22,7 +22,7 @@ type ProjectIPService interface {
 	AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error)
 }
 
-type IpAddressCommon struct {
+type IpAddressCommon struct { //nolint:golint
 	ID            string `json:"id"`
 	Address       string `json:"address"`
 	Gateway       string `json:"gateway"`

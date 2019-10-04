@@ -25,7 +25,7 @@ func TestAccCheckCapacity(t *testing.T) {
 
 	for _, s := range cap.Servers {
 		if !s.Available {
-			t.Fatal(fmt.Errorf("Capacity of %d severs should have been available.", input.Servers[0].Quantity))
+			t.Fatal(fmt.Errorf("capacity of %d servers should have been available", input.Servers[0].Quantity))
 			break
 		}
 	}
@@ -50,7 +50,7 @@ func TestAccCheckCapacity(t *testing.T) {
 
 	for _, s := range cap.Servers {
 		if s.Available {
-			t.Fatal(fmt.Errorf("Capacity of %d severs should not have been available.", input.Servers[0].Quantity))
+			t.Fatal(fmt.Errorf("capacity of %d servers should not have been available", input.Servers[0].Quantity))
 			break
 		}
 	}
