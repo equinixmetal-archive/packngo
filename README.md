@@ -125,3 +125,21 @@ Committing
 ----------
 
 Before committing, it's a good idea to run `gofmt -w *.go`. ([gofmt](https://golang.org/cmd/gofmt/))
+
+## Building and Testing
+
+The [Makefile](./Makefile) contains the targets to build, lint and test:
+
+```sh
+make build
+make lint
+make test
+```
+
+These normally will be run in a docker image of golang. To run locally, just run with `BUILD=local`:
+
+```sh
+make build BUILD=local
+make lint BUILD=local
+make test BUILD=local
+```
