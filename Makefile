@@ -1,4 +1,4 @@
-IMG ?= golang:1.11
+IMG ?= golang:1.12
 
 # enable go modules, disabled CGO
 GOENV ?= GO111MODULE=on CGO_ENABLED=0
