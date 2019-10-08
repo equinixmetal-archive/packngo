@@ -53,11 +53,11 @@ type connectsRoot struct {
 func (c *ConnectServiceOp) List(projectID string, listOpt *ListOptions) (connects []Connect, resp *Response, err error) {
 	params := createListOptionsURL(listOpt)
 
-	project_param := fmt.Sprintf("project_id=%s", projectID)
+	projectParam := fmt.Sprintf("project_id=%s", projectID)
 	if params == "" {
-		params = project_param
+		params = projectParam
 	} else {
-		params = fmt.Sprintf("%s&%s", params, project_param)
+		params = fmt.Sprintf("%s&%s", params, projectParam)
 	}
 	path := fmt.Sprintf("%s/?%s", connectBasePath, params)
 
@@ -123,11 +123,11 @@ func (c *ConnectServiceOp) Create(createRequest *ConnectCreateRequest) (*Connect
 
 func (c *ConnectServiceOp) Get(connectID, projectID string, getOpt *GetOptions) (*Connect, *Response, error) {
 	params := createGetOptionsURL(getOpt)
-	project_param := fmt.Sprintf("project_id=%s", projectID)
+	projectParam := fmt.Sprintf("project_id=%s", projectID)
 	if params == "" {
-		params = project_param
+		params = projectParam
 	} else {
-		params = fmt.Sprintf("%s&%s", params, project_param)
+		params = fmt.Sprintf("%s&%s", params, projectParam)
 	}
 	path := fmt.Sprintf("%s/%s?%s", connectBasePath, connectID, params)
 	connect := new(Connect)
