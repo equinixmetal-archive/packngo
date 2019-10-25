@@ -338,6 +338,9 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retry
 		// implicitly. If the client wants to use http.DefaultClient, they can
 		// pass it in explicitly.
 		httpClient = retryablehttp.NewClient()
+		httpClient.RetryWaitMin = time.Second
+		httpClient.RetryWaitMax = 30 * time.Second
+		httpClient.RetryMax = 10
 	}
 
 	u, err := url.Parse(apiBaseURL)
