@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 const (
@@ -163,7 +165,7 @@ func (r *ErrorResponse) Error() string {
 
 // Client is the base API Client
 type Client struct {
-	client *http.Client
+	client *retryablehttp.Client
 	debug  bool
 
 	BaseURL *url.URL
@@ -205,7 +207,7 @@ type Client struct {
 }
 
 // NewRequest inits a new http request with the proper headers
-func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
+func (c *Client) NewRequest(method, path string, body interface{}) (*retryablehttp.Request, error) {
 	// relative path to append to the endpoint url, no leading slash please
 	rel, err := url.Parse(path)
 	if err != nil {
@@ -223,7 +225,7 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 		}
 	}
 
-	req, err := http.NewRequest(method, u.String(), buf)
+	req, err := retryablehttp.NewRequest(method, u.String(), buf)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +242,7 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 }
 
 // Do executes the http request
-func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
+func (c *Client) Do(req *retryablehttp.Request, v interface{}) (*Response, error) {
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
@@ -282,7 +284,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response, error) {
 	req, err := c.NewRequest(method, path, body)
 	if c.debug {
-		o, _ := httputil.DumpRequestOut(req, true)
+		o, _ := httputil.DumpRequestOut(req.Request, true)
 		log.Printf("\n=======[REQUEST]=============\n%s\n", string(o))
 	}
 	if err != nil {
@@ -299,7 +301,7 @@ func (c *Client) DoRequestWithHeader(method string, headers map[string]string, p
 	}
 
 	if c.debug {
-		o, _ := httputil.DumpRequestOut(req, true)
+		o, _ := httputil.DumpRequestOut(req.Request, true)
 		log.Printf("\n=======[REQUEST]=============\n%s\n", string(o))
 	}
 	if err != nil {
@@ -323,19 +325,22 @@ func NewClient() (*Client, error) {
 // N.B.: Packet's API certificate requires Go 1.5+ to successfully parse. If you are using
 // an older version of Go, pass in a custom http.Client with a custom TLS configuration
 // that sets "InsecureSkipVerify" to "true"
-func NewClientWithAuth(consumerToken string, apiKey string, httpClient *http.Client) *Client {
+func NewClientWithAuth(consumerToken string, apiKey string, httpClient *retryablehttp.Client) *Client {
 	client, _ := NewClientWithBaseURL(consumerToken, apiKey, httpClient, baseURL)
 	return client
 }
 
 // NewClientWithBaseURL returns a Client pointing to nonstandard API URL, e.g.
 // for mocking the remote API
-func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.Client, apiBaseURL string) (*Client, error) {
+func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retryablehttp.Client, apiBaseURL string) (*Client, error) {
 	if httpClient == nil {
 		// Don't fall back on http.DefaultClient as it's not nice to adjust state
 		// implicitly. If the client wants to use http.DefaultClient, they can
 		// pass it in explicitly.
-		httpClient = &http.Client{}
+		httpClient = retryablehttp.NewClient()
+		httpClient.RetryWaitMin = time.Second
+		httpClient.RetryWaitMax = 30 * time.Second
+		httpClient.RetryMax = 10
 	}
 
 	u, err := url.Parse(apiBaseURL)
