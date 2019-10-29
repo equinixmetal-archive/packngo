@@ -60,6 +60,7 @@ type DeviceRaw struct {
 	CustomData          map[string]interface{} `json:"customdata,omitempty"`
 	SSHKeys             []SSHKey               `json:"ssh_keys,omitempty"`
 	ShortID             string                 `json:"short_id,omitempty"`
+	SwitchUUID          string                 `json:"switch_uuid,omitempty"`
 }
 
 type Device struct {
