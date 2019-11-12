@@ -46,6 +46,10 @@ This lib is used by the official [terraform-provider-packet](https://github.com/
 
 You can also learn a lot from the `*_test.go` sources. Almost all out tests touch the Packet API, so you can see how auth, querying and POSTing works. For example [devices_test.go](devices_test.go).
 
+Packet Connect
+--------------
+Packet Connect has now been deprecated.
+
 
 Linked resources in Get\* and List\* functions
 ----------------------------------------------

@@ -50,7 +50,13 @@ type connectsRoot struct {
 	Meta     meta      `json:"meta"`
 }
 
+func PrintDeprecationWarning(){
+	fmt.Println("WARNING: Packet Connect has been deprecated!")
+}
+
 func (c *ConnectServiceOp) List(projectID string, listOpt *ListOptions) (connects []Connect, resp *Response, err error) {
+	PrintDeprecationWarning()
+
 	params := createListOptionsURL(listOpt)
 
 	projectParam := fmt.Sprintf("project_id=%s", projectID)
@@ -84,6 +90,8 @@ func (c *ConnectServiceOp) List(projectID string, listOpt *ListOptions) (connect
 }
 
 func (c *ConnectServiceOp) Deprovision(connectID, projectID string, delete bool) (*Connect, *Response, error) {
+	PrintDeprecationWarning()
+
 	params := fmt.Sprintf("project_id=%s&delete=%t", projectID, delete)
 	path := fmt.Sprintf("%s/%s/deprovision?%s", connectBasePath, connectID, params)
 	connect := new(Connect)
@@ -97,6 +105,8 @@ func (c *ConnectServiceOp) Deprovision(connectID, projectID string, delete bool)
 }
 
 func (c *ConnectServiceOp) Provision(connectID, projectID string) (*Connect, *Response, error) {
+	PrintDeprecationWarning()
+
 	params := fmt.Sprintf("project_id=%s", projectID)
 	path := fmt.Sprintf("%s/%s/provision?%s", connectBasePath, connectID, params)
 	connect := new(Connect)
@@ -110,6 +120,8 @@ func (c *ConnectServiceOp) Provision(connectID, projectID string) (*Connect, *Re
 }
 
 func (c *ConnectServiceOp) Create(createRequest *ConnectCreateRequest) (*Connect, *Response, error) {
+	PrintDeprecationWarning()
+
 	url := fmt.Sprintf("%s", connectBasePath)
 	connect := new(Connect)
 
@@ -122,6 +134,8 @@ func (c *ConnectServiceOp) Create(createRequest *ConnectCreateRequest) (*Connect
 }
 
 func (c *ConnectServiceOp) Get(connectID, projectID string, getOpt *GetOptions) (*Connect, *Response, error) {
+	PrintDeprecationWarning()
+
 	params := createGetOptionsURL(getOpt)
 	projectParam := fmt.Sprintf("project_id=%s", projectID)
 	if params == "" {
@@ -141,6 +155,8 @@ func (c *ConnectServiceOp) Get(connectID, projectID string, getOpt *GetOptions) 
 }
 
 func (c *ConnectServiceOp) Delete(connectID, projectID string) (*Response, error) {
+	PrintDeprecationWarning()
+
 	path := fmt.Sprintf("%s/%s?project_id=%s", connectBasePath, connectID,
 		projectID)
 
