@@ -54,6 +54,7 @@ func PrintDeprecationWarning(){
 	fmt.Println("WARNING: Packet Connect has been deprecated!")
 }
 
+// Deprecated: Packet Connect has been deprecated.
 func (c *ConnectServiceOp) List(projectID string, listOpt *ListOptions) (connects []Connect, resp *Response, err error) {
 	PrintDeprecationWarning()
 
@@ -89,6 +90,7 @@ func (c *ConnectServiceOp) List(projectID string, listOpt *ListOptions) (connect
 	}
 }
 
+// Deprecated: Packet Connect has been deprecated.
 func (c *ConnectServiceOp) Deprovision(connectID, projectID string, delete bool) (*Connect, *Response, error) {
 	PrintDeprecationWarning()
 
@@ -104,6 +106,7 @@ func (c *ConnectServiceOp) Deprovision(connectID, projectID string, delete bool)
 	return connect, resp, err
 }
 
+// Deprecated: Packet Connect has been deprecated.
 func (c *ConnectServiceOp) Provision(connectID, projectID string) (*Connect, *Response, error) {
 	PrintDeprecationWarning()
 
@@ -119,6 +122,7 @@ func (c *ConnectServiceOp) Provision(connectID, projectID string) (*Connect, *Re
 	return connect, resp, err
 }
 
+// Deprecated: Packet Connect has been deprecated.
 func (c *ConnectServiceOp) Create(createRequest *ConnectCreateRequest) (*Connect, *Response, error) {
 	PrintDeprecationWarning()
 
@@ -133,6 +137,7 @@ func (c *ConnectServiceOp) Create(createRequest *ConnectCreateRequest) (*Connect
 	return connect, resp, err
 }
 
+// Deprecated: Packet Connect has been deprecated.
 func (c *ConnectServiceOp) Get(connectID, projectID string, getOpt *GetOptions) (*Connect, *Response, error) {
 	PrintDeprecationWarning()
 
@@ -154,6 +159,7 @@ func (c *ConnectServiceOp) Get(connectID, projectID string, getOpt *GetOptions) 
 	return connect, resp, err
 }
 
+// Deprecated: Packet Connect has been deprecated.
 func (c *ConnectServiceOp) Delete(connectID, projectID string) (*Response, error) {
 	PrintDeprecationWarning()
 
