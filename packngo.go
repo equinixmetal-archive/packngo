@@ -2,6 +2,8 @@ package packngo
 
 import (
 	"bytes"
+	"context"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,6 +13,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -30,6 +33,8 @@ const (
 	headerRateRemaining = "X-RateLimit-Remaining"
 	headerRateReset     = "X-RateLimit-Reset"
 )
+
+var redirectsErrorRe = regexp.MustCompile(`stopped after \d+ redirects\z`)
 
 type GetOptions struct {
 	Includes []string
@@ -330,6 +335,40 @@ func NewClientWithAuth(consumerToken string, apiKey string, httpClient *retryabl
 	return client
 }
 
+func PacketRetryPolicy(ctx context.Context, resp *http.Response, err error) (bool, error) {
+	// do not retry on context.Canceled or context.DeadlineExceeded
+	if ctx.Err() != nil {
+		return false, ctx.Err()
+	}
+
+	if err != nil {
+		if v, ok := err.(*url.Error); ok {
+			// Don't retry if the error was due to too many redirects.
+			if redirectsErrorRe.MatchString(v.Error()) {
+				return false, nil
+			}
+
+			// Don't retry if the error was due to TLS cert verification failure.
+			if _, ok := v.Err.(x509.UnknownAuthorityError); ok {
+				return false, nil
+			}
+		}
+
+		// The error is likely recoverable so retry.
+		return true, nil
+	}
+
+	// Check the response code. We retry on 500-range responses to allow
+	// the server time to recover, as 500's are typically not permanent
+	// errors and may relate to outages on the server side. This will catch
+	// invalid response codes as well, like 0 and 999.
+	//if resp.StatusCode == 0 || (resp.StatusCode >= 500 && resp.StatusCode != 501) {
+	//	return true, nil
+	//}
+
+	return false, nil
+}
+
 // NewClientWithBaseURL returns a Client pointing to nonstandard API URL, e.g.
 // for mocking the remote API
 func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retryablehttp.Client, apiBaseURL string) (*Client, error) {
@@ -341,6 +380,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retry
 		httpClient.RetryWaitMin = time.Second
 		httpClient.RetryWaitMax = 30 * time.Second
 		httpClient.RetryMax = 10
+		httpClient.CheckRetry = PacketRetryPolicy
 	}
 
 	u, err := url.Parse(apiBaseURL)
