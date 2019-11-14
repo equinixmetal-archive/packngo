@@ -13,7 +13,7 @@ type DeviceService interface {
 	Get(DeviceID string, getOpt *GetOptions) (*Device, *Response, error)
 	Create(*DeviceCreateRequest) (*Device, *Response, error)
 	Update(string, *DeviceUpdateRequest) (*Device, *Response, error)
-	Delete(string) (*Response, error)
+	Delete(string, bool) (*Response, error)
 	Reboot(string) (*Response, error)
 	PowerOff(string) (*Response, error)
 	PowerOn(string) (*Response, error)
@@ -184,6 +184,10 @@ type DeviceActionRequest struct {
 	Type string `json:"type"`
 }
 
+type DeviceDeleteRequest struct {
+	Force bool `json:"force_delete"`
+}
+
 func (d DeviceActionRequest) String() string {
 	return Stringify(d)
 }
@@ -261,10 +265,11 @@ func (s *DeviceServiceOp) Update(deviceID string, updateRequest *DeviceUpdateReq
 }
 
 // Delete deletes a device
-func (s *DeviceServiceOp) Delete(deviceID string) (*Response, error) {
+func (s *DeviceServiceOp) Delete(deviceID string, force bool) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
+	req := &DeviceDeleteRequest{Force: force}
 
-	return s.client.DoRequest("DELETE", path, nil, nil)
+	return s.client.DoRequest("DELETE", path, req, nil)
 }
 
 // Reboot reboots on a device

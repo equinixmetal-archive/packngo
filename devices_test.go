@@ -24,7 +24,7 @@ func waitDeviceActive(id string, c *Client) (*Device, error) {
 }
 
 func deleteDevice(t *testing.T, c *Client, id string) {
-	_, err := c.Devices.Delete(id)
+	_, err := c.Devices.Delete(id, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +100,7 @@ func TestAccDeviceBasic(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "baremetal_0",
+		Plan:         "t1.small.x86",
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -461,6 +461,75 @@ func TestAccDeviceAssignIP(t *testing.T) {
 			t.Fatalf("assignment %s shoud be not listed in device %s anymore",
 				assignment, d)
 		}
+	}
+}
+
+func TestAccDeviceAttachVolumeForceDelete(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+	hn := randString8()
+	fac := testFacility()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     []string{fac},
+		Plan:         "baremetal_0",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+		OS:           "ubuntu_16_04",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	//defer deleteDevice(t, c, d.ID)
+
+	d, err = waitDeviceActive(d.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vcr := VolumeCreateRequest{
+		Size:         10,
+		BillingCycle: "hourly",
+		PlanID:       "storage_1",
+		FacilityID:   testFacility(),
+	}
+
+	v, _, err := c.Volumes.Create(&vcr, projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Volumes.Delete(v.ID)
+
+	v, err = waitVolumeActive(v.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, _, err = c.VolumeAttachments.Create(v.ID, d.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v, _, err = c.Volumes.Get(v.ID,
+		&GetOptions{Includes: []string{"attachments.device"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	d, _, err = c.Devices.Get(d.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+    _, err = c.Devices.Delete(d.ID, true)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 

@@ -112,5 +112,5 @@ func TestAccBGPSession(t *testing.T) {
 		t.Fatal("Session not deleted")
 	}
 
-	c.Devices.Delete(d.ID)
+	c.Devices.Delete(d.ID, false)
 }
