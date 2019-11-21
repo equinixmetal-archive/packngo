@@ -46,11 +46,6 @@ This lib is used by the official [terraform-provider-packet](https://github.com/
 
 You can also learn a lot from the `*_test.go` sources. Almost all out tests touch the Packet API, so you can see how auth, querying and POSTing works. For example [devices_test.go](devices_test.go).
 
-Packet Connect
---------------
-Packet Connect has now been deprecated.
-
-
 Linked resources in Get\* and List\* functions
 ----------------------------------------------
 Most of the Get and List functions have *GetOptions resp. *ListOptions paramters. If you supply them, you can specify which attributes of resources in the return set can be excluded or included. This is useful for linked resources, e.g members of a project, devices in a project. 

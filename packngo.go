@@ -208,7 +208,6 @@ type Client struct {
 	HardwareReservations   HardwareReservationService
 	Events                 EventService
 	Notifications          NotificationService
-	Connects               ConnectService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -416,7 +415,6 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retry
 	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
 	c.Events = &EventServiceOp{client: c}
 	c.Notifications = &NotificationServiceOp{client: c}
-	c.Connects = &ConnectServiceOp{client: c}
 
 	return c, nil
 }
