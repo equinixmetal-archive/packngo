@@ -1,5 +1,5 @@
 # packngo
-Packet Go Api Client
+A Golang client for the Packet API.
 
 ![](https://www.packet.net/media/images/xeiw-packettwitterprofilew.png)
 
