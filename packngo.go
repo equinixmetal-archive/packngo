@@ -288,8 +288,9 @@ func (c *Client) Do(req *retryablehttp.Request, v interface{}) (*Response, error
 func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response, error) {
 	req, err := c.NewRequest(method, path, body)
 	if c.debug {
-		o, _ := httputil.DumpRequestOut(req.Request, true)
-		log.Printf("\n=======[REQUEST]=============\n%s\n", string(o))
+		o, _ := httputil.DumpRequestOut(req.Request, false)
+		bbs, _ := req.BodyBytes()
+		log.Printf("\n=======[REQUEST]=============\n%s%s\n", string(o), string(bbs))
 	}
 	if err != nil {
 		return nil, err
@@ -305,8 +306,9 @@ func (c *Client) DoRequestWithHeader(method string, headers map[string]string, p
 	}
 
 	if c.debug {
-		o, _ := httputil.DumpRequestOut(req.Request, true)
-		log.Printf("\n=======[REQUEST]=============\n%s\n", string(o))
+		o, _ := httputil.DumpRequestOut(req.Request, false)
+		bbs, _ := req.BodyBytes()
+		log.Printf("\n=======[REQUEST]=============\n%s%s\n", string(o), string(bbs))
 	}
 	if err != nil {
 		return nil, err
