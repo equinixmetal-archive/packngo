@@ -283,14 +283,24 @@ func (c *Client) Do(req *retryablehttp.Request, v interface{}) (*Response, error
 	return &response, err
 }
 
+func dumpRequest(req *retryablehttp.Request) {
+	o, _ := httputil.DumpRequestOut(req.Request, false)
+	strReq := string(o)
+	reg, _ := regexp.Compile(`X-Auth-Token: (\w*)`)
+	reMatches := reg.FindStringSubmatch(strReq)
+	if len(reMatches) == 2 {
+		strReq = strings.Replace(strReq, reMatches[1], strings.Repeat("-", len(reMatches[1])), 1)
+	}
+	bbs, _ := req.BodyBytes()
+	log.Printf("\n=======[REQUEST]=============\n%s%s\n", strReq, string(bbs))
+}
+
 // DoRequest is a convenience method, it calls NewRequest followed by Do
 // v is the interface to unmarshal the response JSON into
 func (c *Client) DoRequest(method, path string, body, v interface{}) (*Response, error) {
 	req, err := c.NewRequest(method, path, body)
 	if c.debug {
-		o, _ := httputil.DumpRequestOut(req.Request, false)
-		bbs, _ := req.BodyBytes()
-		log.Printf("\n=======[REQUEST]=============\n%s%s\n", string(o), string(bbs))
+		dumpRequest(req)
 	}
 	if err != nil {
 		return nil, err
@@ -306,9 +316,7 @@ func (c *Client) DoRequestWithHeader(method string, headers map[string]string, p
 	}
 
 	if c.debug {
-		o, _ := httputil.DumpRequestOut(req.Request, false)
-		bbs, _ := req.BodyBytes()
-		log.Printf("\n=======[REQUEST]=============\n%s%s\n", string(o), string(bbs))
+		dumpRequest(req)
 	}
 	if err != nil {
 		return nil, err
