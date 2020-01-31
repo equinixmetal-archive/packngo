@@ -43,7 +43,7 @@ func TestAccAPIKeyListProject(t *testing.T) {
 	if len(keyList) != nKeys {
 		t.Fatalf("Listing should return %d keys, returned %d", nKeys, len(keyList))
 	}
-	for kID, _ := range keyIDs {
+	for kID := range keyIDs {
 		_, err := c.APIKeys.Delete(kID)
 
 		if err != nil {
@@ -78,7 +78,7 @@ func TestAccAPIKeyListUser(t *testing.T) {
 	if len(keyList) < nKeys {
 		t.Fatalf("Listing should return at least %d keys, returned %d", nKeys, len(keyList))
 	}
-	for kID, _ := range keyIDs {
+	for kID := range keyIDs {
 		_, err := c.APIKeys.Delete(kID)
 
 		if err != nil {

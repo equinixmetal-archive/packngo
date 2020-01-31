@@ -53,9 +53,9 @@ type APIKeyServiceOp struct {
 func (s *APIKeyServiceOp) list(url string, lopts *ListOptions) ([]APIKey, *Response, error) {
 	root := new(apiKeyRoot)
 	params := createListOptionsURL(lopts)
-	paramUrl := fmt.Sprintf("%s?%s", url, params)
+	paramURL := fmt.Sprintf("%s?%s", url, params)
 
-	resp, err := s.client.DoRequest("GET", paramUrl, nil, root)
+	resp, err := s.client.DoRequest("GET", paramURL, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}
