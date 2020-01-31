@@ -527,7 +527,7 @@ func TestAccDeviceAttachVolumeForceDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
-    _, err = c.Devices.Delete(d.ID, true)
+	_, err = c.Devices.Delete(d.ID, true)
 	if err != nil {
 		t.Fatal(err)
 	}
