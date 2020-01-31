@@ -76,7 +76,7 @@ func (s *APIKeyServiceOp) UserList(lopts *ListOptions) ([]APIKey, *Response, err
 
 // ProjectGet returns an api key by id
 func (s *APIKeyServiceOp) ProjectGet(projectID, apiKeyID string, getOpt *GetOptions) (*APIKey, error) {
-	var lopts *ListOptions = nil
+	var lopts *ListOptions
 	if getOpt != nil {
 		lopts = &ListOptions{Includes: getOpt.Includes, Excludes: getOpt.Excludes}
 	}
@@ -94,7 +94,7 @@ func (s *APIKeyServiceOp) ProjectGet(projectID, apiKeyID string, getOpt *GetOpti
 
 // UserGet returns a project api key by id
 func (s *APIKeyServiceOp) UserGet(apiKeyID string, getOpt *GetOptions) (*APIKey, error) {
-	var lopts *ListOptions = nil
+	var lopts *ListOptions
 	if getOpt != nil {
 		lopts = &ListOptions{Includes: getOpt.Includes, Excludes: getOpt.Excludes}
 	}
