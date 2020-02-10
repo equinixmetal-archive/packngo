@@ -23,21 +23,22 @@ type ProjectIPService interface {
 }
 
 type IpAddressCommon struct { //nolint:golint
-	ID            string `json:"id"`
-	Address       string `json:"address"`
-	Gateway       string `json:"gateway"`
-	Network       string `json:"network"`
-	AddressFamily int    `json:"address_family"`
-	Netmask       string `json:"netmask"`
-	Public        bool   `json:"public"`
-	CIDR          int    `json:"cidr"`
-	Created       string `json:"created_at,omitempty"`
-	Updated       string `json:"updated_at,omitempty"`
-	Href          string `json:"href"`
-	Management    bool   `json:"management"`
-	Manageable    bool   `json:"manageable"`
-	Project       Href   `json:"project"`
-	Global        *bool  `json:"global_ip"`
+	ID            string   `json:"id"`
+	Address       string   `json:"address"`
+	Gateway       string   `json:"gateway"`
+	Network       string   `json:"network"`
+	AddressFamily int      `json:"address_family"`
+	Netmask       string   `json:"netmask"`
+	Public        bool     `json:"public"`
+	CIDR          int      `json:"cidr"`
+	Created       string   `json:"created_at,omitempty"`
+	Updated       string   `json:"updated_at,omitempty"`
+	Href          string   `json:"href"`
+	Management    bool     `json:"management"`
+	Manageable    bool     `json:"manageable"`
+	Project       Href     `json:"project"`
+	Global        *bool    `json:"global_ip"`
+	Tags          []string `json:"tags,omitempty"`
 }
 
 // IPAddressReservation is created when user sends IP reservation request for a project (considering it's within quota).
@@ -69,10 +70,11 @@ type IPAddressAssignment struct {
 
 // IPReservationRequest represents the body of a reservation request.
 type IPReservationRequest struct {
-	Type        string  `json:"type"`
-	Quantity    int     `json:"quantity"`
-	Description string  `json:"details,omitempty"`
-	Facility    *string `json:"facility,omitempty"`
+	Type        string   `json:"type"`
+	Quantity    int      `json:"quantity"`
+	Description string   `json:"details,omitempty"`
+	Facility    *string  `json:"facility,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
 }
 
 // AddressStruct is a helper type for request/response with dict like {"address": ... }
