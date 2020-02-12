@@ -2,6 +2,7 @@ package packngo
 
 import (
 	"path"
+	"reflect"
 	"testing"
 )
 
@@ -25,10 +26,13 @@ func TestAccPublicIPReservation(t *testing.T) {
 		t.Fatalf("There should be no reservations a new project, existing list: %s", ipList)
 	}
 
+	customData := map[string]interface{}{"custom1": "data", "custom2": map[string]interface{}{"nested": "data"}}
+
 	req := IPReservationRequest{
-		Type:     "public_ipv4",
-		Quantity: quantity,
-		Facility: &testFac,
+		Type:       "public_ipv4",
+		Quantity:   quantity,
+		Facility:   &testFac,
+		CustomData: customData,
 	}
 
 	res, _, err := c.ProjectIPs.Request(projectID, &req)
@@ -54,6 +58,11 @@ func TestAccPublicIPReservation(t *testing.T) {
 		t.Fatalf(
 			"Facility of new reservation should be %s, was %s", testFac,
 			res.Facility.Code)
+	}
+
+	if !reflect.DeepEqual(customData, res.CustomData) {
+		t.Fatalf(
+			"CustomData of new reservation should be %+v, was %+v", customData, res.CustomData)
 	}
 
 	ipList, _, err = c.ProjectIPs.List(projectID)
