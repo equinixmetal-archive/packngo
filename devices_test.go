@@ -404,6 +404,22 @@ func TestAccDeviceAssignIP(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// check that the IP assignment is retrievable via the IP-by-device endpoint
+	assignments, _, err := c.DeviceIPs.List(d.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var matchedAssignment bool
+	for _, ip := range assignments {
+		if ip.String() == assignment.String() {
+			matchedAssignment = true
+			break
+		}
+	}
+	if !matchedAssignment {
+		t.Fatal("newly assigned IP not found")
+	}
+
 	// If the Quantity in the IPReservationRequest is >1, this test won't work.
 	// The assignment CIDR would then have to be extracted from the reserved
 	// block.
@@ -527,7 +543,7 @@ func TestAccDeviceAttachVolumeForceDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
-    _, err = c.Devices.Delete(d.ID, true)
+	_, err = c.Devices.Delete(d.ID, true)
 	if err != nil {
 		t.Fatal(err)
 	}

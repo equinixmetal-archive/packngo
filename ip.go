@@ -11,6 +11,7 @@ type DeviceIPService interface {
 	Assign(deviceID string, assignRequest *AddressStruct) (*IPAddressAssignment, *Response, error)
 	Unassign(assignmentID string) (*Response, error)
 	Get(assignmentID string, getOpt *GetOptions) (*IPAddressAssignment, *Response, error)
+	List(deviceID string, listOpt *ListOptions) ([]IPAddressAssignment, *Response, error)
 }
 
 // ProjectIPService handles reservation of IP address blocks for a project.
@@ -134,6 +135,27 @@ func (i *DeviceIPServiceOp) Get(assignmentID string, getOpt *GetOptions) (*IPAdd
 	}
 
 	return ipa, resp, err
+}
+
+// List list all of the IP address assignments on a device
+func (i *DeviceIPServiceOp) List(deviceID string, listOpt *ListOptions) ([]IPAddressAssignment, *Response, error) {
+	params := createListOptionsURL(listOpt)
+
+	path := fmt.Sprintf("%s/%s%s?%s", deviceBasePath, deviceID, ipBasePath, params)
+
+	//ipList represents collection of IP Address reservations
+	type ipList struct {
+		IPs []IPAddressAssignment `json:"ip_addresses,omitempty"`
+	}
+
+	ips := new(ipList)
+
+	resp, err := i.client.DoRequest("GET", path, nil, ips)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return ips.IPs, resp, err
 }
 
 // ProjectIPServiceOp is interface for IP assignment methods.

@@ -161,9 +161,9 @@ func (i *DevicePortServiceOp) PortToLayerThree(portID string) (*Port, *Response,
 
 	req := BackToL3Request{
 		RequestIPs: []AddressRequest{
-			AddressRequest{AddressFamily: 4, Public: true},
-			AddressRequest{AddressFamily: 4, Public: false},
-			AddressRequest{AddressFamily: 6, Public: true},
+			{AddressFamily: 4, Public: true},
+			{AddressFamily: 4, Public: false},
+			{AddressFamily: 6, Public: true},
 		},
 	}
 
