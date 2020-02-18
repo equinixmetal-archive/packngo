@@ -6,6 +6,21 @@ import (
 
 const ipBasePath = "/ips"
 
+const (
+	// PublicIPv4 fixed string representation of public ipv4
+	PublicIPv4 = "public_ipv4"
+	// PrivateIPv4 fixed string representation of private ipv4
+	PrivateIPv4 = "private_ipv4"
+	// GlobalIPv4 fixed string representation of global ipv4
+	GlobalIPv4 = "global_ipv4"
+	// PublicIPv6 fixed string representation of public ipv6
+	PublicIPv6 = "public_ipv6"
+	// PrivateIPv6 fixed string representation of private ipv6
+	PrivateIPv6 = "private_ipv6"
+	// GlobalIPv6 fixed string representation of global ipv6
+	GlobalIPv6 = "global_ipv6"
+)
+
 // DeviceIPService handles assignment of addresses from reserved blocks to instances in a project.
 type DeviceIPService interface {
 	Assign(deviceID string, assignRequest *AddressStruct) (*IPAddressAssignment, *Response, error)
