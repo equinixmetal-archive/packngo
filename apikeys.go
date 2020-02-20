@@ -80,11 +80,11 @@ func (s *APIKeyServiceOp) ProjectGet(projectID, apiKeyID string, getOpt *GetOpti
 	if getOpt != nil {
 		lopts = &ListOptions{Includes: getOpt.Includes, Excludes: getOpt.Excludes}
 	}
-	pkeyes, _, err := s.ProjectList(projectID, lopts)
+	pkeys, _, err := s.ProjectList(projectID, lopts)
 	if err != nil {
 		return nil, err
 	}
-	for _, k := range pkeyes {
+	for _, k := range pkeys {
 		if k.ID == apiKeyID {
 			return &k, nil
 		}
@@ -98,11 +98,11 @@ func (s *APIKeyServiceOp) UserGet(apiKeyID string, getOpt *GetOptions) (*APIKey,
 	if getOpt != nil {
 		lopts = &ListOptions{Includes: getOpt.Includes, Excludes: getOpt.Excludes}
 	}
-	ukeyes, _, err := s.UserList(lopts)
+	ukeys, _, err := s.UserList(lopts)
 	if err != nil {
 		return nil, err
 	}
-	for _, k := range ukeyes {
+	for _, k := range ukeys {
 		if k.ID == apiKeyID {
 			return &k, nil
 		}
