@@ -182,32 +182,33 @@ type Client struct {
 	RateLimit Rate
 
 	// Packet Api Objects
-	Plans                  PlanService
-	Users                  UserService
-	Emails                 EmailService
-	SSHKeys                SSHKeyService
-	Devices                DeviceService
-	Projects               ProjectService
-	Facilities             FacilityService
-	OperatingSystems       OSService
+	APIKeys                APIKeyService
+	BGPConfig              BGPConfigService
+	BGPSessions            BGPSessionService
+	Batches                BatchService
+	CapacityService        CapacityService
 	DeviceIPs              DeviceIPService
 	DevicePorts            DevicePortService
+	Devices                DeviceService
+	Emails                 EmailService
+	Events                 EventService
+	Facilities             FacilityService
+	HardwareReservations   HardwareReservationService
+	Notifications          NotificationService
+	OperatingSystems       OSService
+	Organizations          OrganizationService
+	Plans                  PlanService
 	ProjectIPs             ProjectIPService
 	ProjectVirtualNetworks ProjectVirtualNetworkService
-	Volumes                VolumeService
-	VolumeAttachments      VolumeAttachmentService
+	Projects               ProjectService
+	SSHKeys                SSHKeyService
 	SpotMarket             SpotMarketService
 	SpotMarketRequests     SpotMarketRequestService
-	Organizations          OrganizationService
-	BGPSessions            BGPSessionService
-	BGPConfig              BGPConfigService
-	CapacityService        CapacityService
-	Batches                BatchService
 	TwoFactorAuth          TwoFactorAuthService
+	Users                  UserService
 	VPN                    VPNService
-	HardwareReservations   HardwareReservationService
-	Events                 EventService
-	Notifications          NotificationService
+	VolumeAttachments      VolumeAttachmentService
+	Volumes                VolumeService
 }
 
 // NewRequest inits a new http request with the proper headers
@@ -257,8 +258,7 @@ func (c *Client) Do(req *retryablehttp.Request, v interface{}) (*Response, error
 	response := Response{Response: resp}
 	response.populateRate()
 	if c.debug {
-		o, _ := httputil.DumpResponse(response.Response, true)
-		log.Printf("\n=======[RESPONSE]============\n%s\n\n", string(o))
+		dumpResponse(response.Response)
 	}
 	c.RateLimit = response.Rate
 
@@ -281,6 +281,17 @@ func (c *Client) Do(req *retryablehttp.Request, v interface{}) (*Response, error
 	}
 
 	return &response, err
+}
+
+func dumpResponse(resp *http.Response) {
+	o, _ := httputil.DumpResponse(resp, true)
+	strResp := string(o)
+	reg, _ := regexp.Compile(`"token":(.+?),`)
+	reMatches := reg.FindStringSubmatch(strResp)
+	if len(reMatches) == 2 {
+		strResp = strings.Replace(strResp, reMatches[1], strings.Repeat("-", len(reMatches[1])), 1)
+	}
+	log.Printf("\n=======[RESPONSE]============\n%s\n\n", strResp)
 }
 
 func dumpRequest(req *retryablehttp.Request) {
@@ -398,33 +409,34 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retry
 	}
 
 	c := &Client{client: httpClient, BaseURL: u, UserAgent: userAgent, ConsumerToken: consumerToken, APIKey: apiKey}
-	c.debug = os.Getenv(debugEnvVar) != ""
-	c.Plans = &PlanServiceOp{client: c}
-	c.Organizations = &OrganizationServiceOp{client: c}
-	c.Users = &UserServiceOp{client: c}
-	c.Emails = &EmailServiceOp{client: c}
-	c.SSHKeys = &SSHKeyServiceOp{client: c}
-	c.Devices = &DeviceServiceOp{client: c}
-	c.Projects = &ProjectServiceOp{client: c}
-	c.Facilities = &FacilityServiceOp{client: c}
-	c.OperatingSystems = &OSServiceOp{client: c}
+	c.APIKeys = &APIKeyServiceOp{client: c}
+	c.BGPConfig = &BGPConfigServiceOp{client: c}
+	c.BGPSessions = &BGPSessionServiceOp{client: c}
+	c.Batches = &BatchServiceOp{client: c}
+	c.CapacityService = &CapacityServiceOp{client: c}
 	c.DeviceIPs = &DeviceIPServiceOp{client: c}
 	c.DevicePorts = &DevicePortServiceOp{client: c}
-	c.ProjectVirtualNetworks = &ProjectVirtualNetworkServiceOp{client: c}
-	c.ProjectIPs = &ProjectIPServiceOp{client: c}
-	c.Volumes = &VolumeServiceOp{client: c}
-	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
-	c.SpotMarket = &SpotMarketServiceOp{client: c}
-	c.BGPSessions = &BGPSessionServiceOp{client: c}
-	c.BGPConfig = &BGPConfigServiceOp{client: c}
-	c.CapacityService = &CapacityServiceOp{client: c}
-	c.Batches = &BatchServiceOp{client: c}
-	c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
-	c.VPN = &VPNServiceOp{client: c}
-	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
-	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
+	c.Devices = &DeviceServiceOp{client: c}
+	c.Emails = &EmailServiceOp{client: c}
 	c.Events = &EventServiceOp{client: c}
+	c.Facilities = &FacilityServiceOp{client: c}
+	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
 	c.Notifications = &NotificationServiceOp{client: c}
+	c.OperatingSystems = &OSServiceOp{client: c}
+	c.Organizations = &OrganizationServiceOp{client: c}
+	c.Plans = &PlanServiceOp{client: c}
+	c.ProjectIPs = &ProjectIPServiceOp{client: c}
+	c.ProjectVirtualNetworks = &ProjectVirtualNetworkServiceOp{client: c}
+	c.Projects = &ProjectServiceOp{client: c}
+	c.SSHKeys = &SSHKeyServiceOp{client: c}
+	c.SpotMarket = &SpotMarketServiceOp{client: c}
+	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
+	c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
+	c.Users = &UserServiceOp{client: c}
+	c.VPN = &VPNServiceOp{client: c}
+	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
+	c.Volumes = &VolumeServiceOp{client: c}
+	c.debug = os.Getenv(debugEnvVar) != ""
 
 	return c, nil
 }
