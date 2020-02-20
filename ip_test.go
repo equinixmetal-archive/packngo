@@ -29,7 +29,7 @@ func TestAccPublicIPReservation(t *testing.T) {
 	customData := map[string]interface{}{"custom1": "data", "custom2": map[string]interface{}{"nested": "data"}}
 
 	req := IPReservationRequest{
-		Type:       "public_ipv4",
+		Type:     PublicIPv4,
 		Quantity:   quantity,
 		Facility:   &testFac,
 		CustomData: customData,
@@ -128,7 +128,7 @@ func TestAccGlobalIPReservation(t *testing.T) {
 
 	description := "packngo test"
 	req := IPReservationRequest{
-		Type:        "global_ipv4",
+		Type:        GlobalIPv4,
 		Quantity:    quantity,
 		Description: description,
 	}
