@@ -126,8 +126,10 @@ func (d DeviceRaw) GetNetworkType() (string, error) {
 }
 
 type IPAddressCreateRequest struct {
-	AddressFamily int  `json:"address_family"`
-	Public        bool `json:"public"`
+	AddressFamily int      `json:"address_family"`
+	Public        bool     `json:"public"`
+	CIDR          int      `json:"cidr,omitempty"`
+	Reservations  []string `json:"ip_reservations,omitempty"`
 }
 
 // DeviceCreateRequest type used to create a Packet device

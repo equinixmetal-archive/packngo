@@ -346,6 +346,64 @@ func TestAccDeviceAssignGlobalIP(t *testing.T) {
 	}
 }
 
+func TestAccDeviceCreateWithReservedIP(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+	hn := randString8()
+
+	fac := testFacility()
+
+	req := IPReservationRequest{
+		Type:        "public_ipv4",
+		Quantity:    2,
+		Description: "packngo test",
+		Facility:    &fac,
+	}
+
+	reservation, _, err := c.ProjectIPs.Request(projectID, &req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.ProjectIPs.Remove(reservation.ID)
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     []string{fac},
+		Plan:         "baremetal_0",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+		OS:           "ubuntu_16_04",
+		IPAddresses: []IPAddressCreateRequest{
+			// NOTE: only one public IPv4 entry is allowed here
+			{AddressFamily: 4, Public: false},
+			{AddressFamily: 4, Public: true,
+				Reservations: []string{reservation.ID}, CIDR: 31},
+		},
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	d, err = waitDeviceActive(d.ID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Devices.Delete(d.ID, false)
+
+	reservation, _, err = c.ProjectIPs.Get(reservation.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(reservation.Assignments) != 1 {
+		t.Fatalf("reservation %s should have exactly 1 assignment", reservation)
+	}
+}
+
 func TestAccDeviceAssignIP(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
