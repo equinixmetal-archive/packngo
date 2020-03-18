@@ -129,9 +129,9 @@ func TestAccDeviceBasic(t *testing.T) {
 	if len(d.SwitchUUID) == 0 {
 		t.Fatal("Device should have switch UUID")
 	}
-
-	if len(d.NetworkType) == 0 {
-		t.Fatal("NetworkType of a device can't be found")
+	_, err = d.GetNetworkType()
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	if len(d.RootPassword) == 0 {
@@ -1052,9 +1052,9 @@ func TestAccDeviceIPAddresses(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	if len(d.NetworkType) == 0 {
-		t.Fatal("NetworkType of a device can't be found")
+	_, err = d.GetNetworkType()
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	if len(d.RootPassword) == 0 {

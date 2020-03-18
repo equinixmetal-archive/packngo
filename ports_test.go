@@ -1,6 +1,7 @@
 package packngo
 
 import (
+	"fmt"
 	"log"
 	"path"
 	"testing"
@@ -140,46 +141,46 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 	log.Println("Testing type", plan, "convert to Hybrid L2 and back to L3")
 
 	// MARK_2
-
-	c, projectID, teardown := setupWithProject(t)
-	defer teardown()
-
-	hn := randString8()
-
-	fac := testFacility()
-
-	cr := DeviceCreateRequest{
-		Hostname:     hn,
-		Facility:     []string{fac},
-		Plan:         plan,
-		OS:           "ubuntu_16_04",
-		ProjectID:    projectID,
-		BillingCycle: "hourly",
-	}
-
-	d, _, err := c.Devices.Create(&cr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteDevice(t, c, d.ID)
-	dID := d.ID
-
-	// If you need to test this, run a ${plan} device in your project in a
-	// facility,
-	// and then comment code from MARK_2 to here and uncomment following.
-	// Fill the values from youri testing device, project and facility.
-
 	/*
 
-		c := setup(t)
+		c, projectID, teardown := setupWithProject(t)
+		defer teardown()
 
-		dID := "2dd8d2a3-fcb5-44ef-9150-00167c4392ec"
-		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-		fac := "nrt1"
+		hn := randString8()
 
-		d := &Device{}
-		err := fmt.Errorf("hi")
+		fac := testFacility()
+
+		cr := DeviceCreateRequest{
+			Hostname:     hn,
+			Facility:     []string{fac},
+			Plan:         plan,
+			OS:           "ubuntu_16_04",
+			ProjectID:    projectID,
+			BillingCycle: "hourly",
+		}
+
+		d, _, err := c.Devices.Create(&cr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer deleteDevice(t, c, d.ID)
+		dID := d.ID
+
+		// If you need to test this, run a ${plan} device in your project in a
+		// facility,
+		// and then comment code from MARK_2 to here and uncomment following.
+		// Fill the values from youri testing device, project and facility.
+
 	*/
+
+	c := setup(t)
+
+	dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+	projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
+	fac := "ewr1"
+
+	d := &Device{}
+	err := fmt.Errorf("hi")
 
 	d, err = waitDeviceActive(dID, c)
 	if err != nil {
@@ -204,9 +205,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	eth1, _, err = c.DevicePorts.Disbond(
-		&DisbondRequest{PortID: eth1.ID, BulkDisable: false},
-	)
+	eth1, _, err = c.DevicePorts.Disbond(eth1, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -260,7 +259,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal("No vlans should be attached to the port at this time")
 	}
 
-	eth1, _, err = c.DevicePorts.Bond(&BondRequest{PortID: eth1.ID, BulkEnable: false})
+	eth1, _, err = c.DevicePorts.Bond(eth1, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -302,45 +301,45 @@ func testL2L3Convert(t *testing.T, plan string) {
 
 	// MARK_2
 
-	c, projectID, teardown := setupWithProject(t)
-	defer teardown()
+	/*
 
-	hn := randString8()
+		c, projectID, teardown := setupWithProject(t)
+		defer teardown()
 
-	fac := testFacility()
+		hn := randString8()
 
-	cr := DeviceCreateRequest{
-		Hostname:     hn,
-		Facility:     []string{fac},
-		Plan:         plan,
-		OS:           "ubuntu_16_04",
-		ProjectID:    projectID,
-		BillingCycle: "hourly",
-	}
+		fac := testFacility()
 
-	d, _, err := c.Devices.Create(&cr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteDevice(t, c, d.ID)
-	dID := d.ID
+		cr := DeviceCreateRequest{
+			Hostname:     hn,
+			Facility:     []string{fac},
+			Plan:         plan,
+			OS:           "ubuntu_16_04",
+			ProjectID:    projectID,
+			BillingCycle: "hourly",
+		}
+
+		d, _, err := c.Devices.Create(&cr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer deleteDevice(t, c, d.ID)
+		dID := d.ID
+	*/
 
 	// If you need to test this, run a ${plan} device in your project in a
 	// facility,
 	// and then comment code from MARK_2 to here and uncomment following.
 	// Fill the values from youri testing device, project and facility.
 
-	/*
+	c := setup(t)
 
-		c := setup(t)
+	dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+	projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
+	fac := "ewr1"
 
-		dID := "873fecd1-85a0-4998-ae61-13cfb4f199a8"
-		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-		fac := "nrt1"
-
-		d := &Device{}
-		err := fmt.Errorf("hi")
-	*/
+	d := &Device{}
+	err := fmt.Errorf("hi")
 
 	d, err = waitDeviceActive(dID, c)
 	if err != nil {
@@ -370,7 +369,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal("the device should now be in network type L2 Bonded")
 	}
 
-	bond0, err := c.DevicePorts.GetBondPort(d.ID)
+	bond0, err := c.DevicePorts.GetPortByName(d.ID, "bond0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -448,32 +447,49 @@ func deviceToNetworkType(t *testing.T, c *Client, deviceID, targetNetworkType st
 func TestAccPortNetworkStateTransitions(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
-	c, projectID, teardown := setupWithProject(t)
-	defer teardown()
+	// MARK 1
+	/*
+		c, projectID, teardown := setupWithProject(t)
+		defer teardown()
 
-	fac := testFacility()
+		fac := testFacility()
 
-	cr := DeviceCreateRequest{
-		Hostname:     "networktypetest",
-		Facility:     []string{fac},
-		Plan:         "m1.xlarge.x86",
-		OS:           "ubuntu_16_04",
-		ProjectID:    projectID,
-		BillingCycle: "hourly",
-	}
-	d, _, err := c.Devices.Create(&cr)
+		cr := DeviceCreateRequest{
+			Hostname:     "networktypetest",
+			Facility:     []string{fac},
+			Plan:         "m1.xlarge.x86",
+			OS:           "ubuntu_16_04",
+			ProjectID:    projectID,
+			BillingCycle: "hourly",
+		}
+		d, _, err := c.Devices.Create(&cr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer deleteDevice(t, c, d.ID)
+		deviceID := d.ID
+
+		d, err = waitDeviceActive(deviceID, c)
+		if err != nil {
+			t.Fatal(err)
+		}
+	*/
+	// MARK 2
+
+	c := setup(t)
+	deviceID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+	d, _, err := c.Devices.Get(deviceID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteDevice(t, c, d.ID)
-	deviceID := d.ID
+	// MARK 3
 
-	d, err = waitDeviceActive(deviceID, c)
+	networkType, err := d.GetNetworkType()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if d.NetworkType != "layer2-bonded" {
+	if networkType != "layer2-bonded" {
 		deviceToNetworkType(t, c, deviceID, "layer2-bonded")
 	}
 

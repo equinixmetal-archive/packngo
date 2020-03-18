@@ -1,7 +1,6 @@
 package packngo
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -28,8 +27,8 @@ type devicesRoot struct {
 	Meta    meta     `json:"meta"`
 }
 
-// DeviceRaw represents a Packet device from API
-type DeviceRaw struct {
+// Device represents a Packet device from API
+type Device struct {
 	ID                  string                 `json:"id"`
 	Href                string                 `json:"href,omitempty"`
 	Hostname            string                 `json:"hostname,omitempty"`
@@ -63,27 +62,6 @@ type DeviceRaw struct {
 	SwitchUUID          string                 `json:"switch_uuid,omitempty"`
 }
 
-type Device struct {
-	DeviceRaw
-	NetworkType string
-}
-
-func (d *Device) UnmarshalJSON(b []byte) error {
-	dJSON := DeviceRaw{}
-	if err := json.Unmarshal(b, &dJSON); err != nil {
-		return err
-	}
-	d.DeviceRaw = dJSON
-	if len(dJSON.NetworkPorts) > 0 {
-		networkType, err := dJSON.GetNetworkType()
-		if err != nil {
-			return err
-		}
-		d.NetworkType = networkType
-	}
-	return nil
-}
-
 type NetworkInfo struct {
 	PublicIPv4  string
 	PublicIPv6  string
@@ -113,16 +91,48 @@ func (d Device) String() string {
 	return Stringify(d)
 }
 
-func (d DeviceRaw) GetNetworkType() (string, error) {
-	if len(d.NetworkPorts) == 0 {
-		return "", fmt.Errorf("Device has no network ports listed")
-	}
+func (d *Device) NumOfBonds() int {
+	numOfBonds := 0
 	for _, p := range d.NetworkPorts {
-		if p.Name == "bond0" {
-			return p.NetworkType, nil
+		if p.Type == "NetworkBondPort" {
+			numOfBonds += 1
 		}
 	}
-	return "", fmt.Errorf("Bound port not found")
+	return numOfBonds
+}
+
+func (d *Device) GetPortByName(name string) (*Port, error) {
+	for _, port := range d.NetworkPorts {
+		if port.Name == name {
+			return &port, nil
+		}
+	}
+	return nil, fmt.Errorf("Port %s not found in device %s", name, d.ID)
+}
+
+func (d *Device) GetNetworkType() (string, error) {
+	numOfBonds := d.NumOfBonds()
+	if (numOfBonds < 1) || (numOfBonds > 2) {
+		return "", fmt.Errorf("Wrong number of Bond ports")
+	}
+	bond0, err := d.GetPortByName("bond0")
+	if err != nil {
+		return "", err
+	}
+	if numOfBonds == 2 {
+		bond1, err := d.GetPortByName("bond1")
+		if err != nil {
+			return "", err
+		}
+		if bond0.NetworkType == bond1.NetworkType {
+			return bond0.NetworkType, nil
+		}
+		if (bond0.NetworkType == "layer3") && (bond1.NetworkType == "layer2-individual") {
+			return "hybrid", nil
+		}
+		return "", fmt.Errorf("Strange 2-bond ports conf - bond0: %s, bond1: %s", bond0.NetworkType, bond1.NetworkType)
+	}
+	return bond0.NetworkType, nil
 }
 
 type IPAddressCreateRequest struct {
