@@ -134,6 +134,10 @@ func TestAccPortL2HybridL3ConvertTypeS(t *testing.T) {
 	testL2HybridL3Convert(t, "baremetal_s")
 }
 
+func TestAccPortL2HybridL3ConvertN2(t *testing.T) {
+	testL2HybridL3Convert(t, "n2.xlarge.x86")
+}
+
 func testL2HybridL3Convert(t *testing.T, plan string) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
@@ -170,12 +174,14 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 	// Fill the values from youri testing device, project and facility.
 
 	/*
-
 		c := setup(t)
 
-		dID := "2dd8d2a3-fcb5-44ef-9150-00167c4392ec"
 		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-		fac := "nrt1"
+		dID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
+		fac := "dfw2"
+
+		//dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+		//fac := "ewr1"
 
 		d := &Device{}
 		err := fmt.Errorf("hi")
@@ -195,18 +201,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatalf("New %s device should be in network type L3", plan)
 	}
 
-	// The "hybrid" network type means removing eth1 from the bond.
-	// We can then assign VLAN to eth1, instead of bond0 like in the other
-	// L2 network type.
-
-	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	eth1, _, err = c.DevicePorts.Disbond(
-		&DisbondRequest{PortID: eth1.ID, BulkDisable: false},
-	)
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "hybrid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -220,6 +215,10 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal("the device should now be in network type L2 Bonded")
 	}
 
+	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(eth1.AttachedVirtualNetworks) != 0 {
 		t.Fatal("No vlans should be attached to a eth1 in the begining of this test")
 	}
@@ -260,7 +259,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal("No vlans should be attached to the port at this time")
 	}
 
-	eth1, _, err = c.DevicePorts.Bond(&BondRequest{PortID: eth1.ID, BulkEnable: false})
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "layer3")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -295,6 +294,10 @@ func TestAccPortL2L3ConvertTypeS(t *testing.T) {
 	testL2L3Convert(t, "baremetal_s")
 }
 
+func TestAccPortL2L3ConvertN2(t *testing.T) {
+	testL2L3Convert(t, "n2.xlarge.x86")
+}
+
 func testL2L3Convert(t *testing.T, plan string) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
@@ -324,19 +327,19 @@ func testL2L3Convert(t *testing.T, plan string) {
 	}
 	defer deleteDevice(t, c, d.ID)
 	dID := d.ID
-
-	// If you need to test this, run a ${plan} device in your project in a
-	// facility,
-	// and then comment code from MARK_2 to here and uncomment following.
-	// Fill the values from youri testing device, project and facility.
-
 	/*
+
+		// If you need to test this, run a ${plan} device in your project in a
+		// facility,
+		// and then comment code from MARK_2 to here and uncomment following.
+		// Fill the values from youri testing device, project and facility.
 
 		c := setup(t)
 
-		dID := "873fecd1-85a0-4998-ae61-13cfb4f199a8"
+		//	dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+		dID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
 		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-		fac := "nrt1"
+		fac := "dfw2"
 
 		d := &Device{}
 		err := fmt.Errorf("hi")
@@ -370,7 +373,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal("the device should now be in network type L2 Bonded")
 	}
 
-	bond0, err := c.DevicePorts.GetBondPort(d.ID)
+	bond0, err := c.DevicePorts.GetPortByName(d.ID, "bond0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -445,6 +448,28 @@ func deviceToNetworkType(t *testing.T, c *Client, deviceID, targetNetworkType st
 	time.Sleep(15 * time.Second)
 }
 
+/*
+func TestXXX(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c := setup(t)
+	//	deviceID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+	deviceID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
+	d, _, err := c.Devices.Get(deviceID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	log.Println(d)
+	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, "hybrid")
+	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, "layer2-individual")
+	deviceToNetworkType(t, c, deviceID, "layer3")
+
+}
+*/
+
 func TestAccPortNetworkStateTransitions(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
@@ -473,7 +498,12 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if d.NetworkType != "layer2-bonded" {
+	networkType, err := d.GetNetworkType()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if networkType != "layer2-bonded" {
 		deviceToNetworkType(t, c, deviceID, "layer2-bonded")
 	}
 
