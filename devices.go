@@ -197,7 +197,7 @@ type DeviceCreateRequest struct {
 	// UserSSHKeys is a list of user UUIDs - essentialy a list of
 	// collaborators. The users must be a collaborator in the same project
 	// where the device is created. The user's SSH keys then go to the
-	// device.
+	// device
 	UserSSHKeys []string `json:"user_ssh_keys,omitempty"`
 	// Project SSHKeys is a list of SSHKeys resource UUIDs. If this param
 	// is supplied, only the listed SSHKeys will go to the device.
