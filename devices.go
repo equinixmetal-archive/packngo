@@ -95,7 +95,7 @@ func (d *Device) NumOfBonds() int {
 	numOfBonds := 0
 	for _, p := range d.NetworkPorts {
 		if p.Type == "NetworkBondPort" {
-			numOfBonds += 1
+			numOfBonds++
 		}
 	}
 	return numOfBonds
