@@ -1,7 +1,6 @@
 package packngo
 
 import (
-	"fmt"
 	"log"
 	"path"
 	"testing"
@@ -135,52 +134,58 @@ func TestAccPortL2HybridL3ConvertTypeS(t *testing.T) {
 	testL2HybridL3Convert(t, "baremetal_s")
 }
 
+func TestAccPortL2HybridL3ConvertN2(t *testing.T) {
+	testL2HybridL3Convert(t, "n2.xlarge.x86")
+}
+
 func testL2HybridL3Convert(t *testing.T, plan string) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 	log.Println("Testing type", plan, "convert to Hybrid L2 and back to L3")
 
 	// MARK_2
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+
+	fac := testFacility()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     []string{fac},
+		Plan:         plan,
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+	dID := d.ID
+
+	// If you need to test this, run a ${plan} device in your project in a
+	// facility,
+	// and then comment code from MARK_2 to here and uncomment following.
+	// Fill the values from youri testing device, project and facility.
+
 	/*
+		c := setup(t)
 
-		c, projectID, teardown := setupWithProject(t)
-		defer teardown()
+		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
+		dID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
+		fac := "dfw2"
 
-		hn := randString8()
+		//dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+		//fac := "ewr1"
 
-		fac := testFacility()
-
-		cr := DeviceCreateRequest{
-			Hostname:     hn,
-			Facility:     []string{fac},
-			Plan:         plan,
-			OS:           "ubuntu_16_04",
-			ProjectID:    projectID,
-			BillingCycle: "hourly",
-		}
-
-		d, _, err := c.Devices.Create(&cr)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer deleteDevice(t, c, d.ID)
-		dID := d.ID
-
-		// If you need to test this, run a ${plan} device in your project in a
-		// facility,
-		// and then comment code from MARK_2 to here and uncomment following.
-		// Fill the values from youri testing device, project and facility.
-
+		d := &Device{}
+		err := fmt.Errorf("hi")
 	*/
-
-	c := setup(t)
-
-	dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
-	projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-	fac := "ewr1"
-
-	d := &Device{}
-	err := fmt.Errorf("hi")
 
 	d, err = waitDeviceActive(dID, c)
 	if err != nil {
@@ -196,16 +201,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatalf("New %s device should be in network type L3", plan)
 	}
 
-	// The "hybrid" network type means removing eth1 from the bond.
-	// We can then assign VLAN to eth1, instead of bond0 like in the other
-	// L2 network type.
-
-	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	eth1, _, err = c.DevicePorts.Disbond(eth1, false)
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "hybrid")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,6 +215,10 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal("the device should now be in network type L2 Bonded")
 	}
 
+	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(eth1.AttachedVirtualNetworks) != 0 {
 		t.Fatal("No vlans should be attached to a eth1 in the begining of this test")
 	}
@@ -259,7 +259,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal("No vlans should be attached to the port at this time")
 	}
 
-	eth1, _, err = c.DevicePorts.Bond(eth1, false)
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "layer3")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -294,6 +294,10 @@ func TestAccPortL2L3ConvertTypeS(t *testing.T) {
 	testL2L3Convert(t, "baremetal_s")
 }
 
+func TestAccPortL2L3ConvertN2(t *testing.T) {
+	testL2L3Convert(t, "n2.xlarge.x86")
+}
+
 func testL2L3Convert(t *testing.T, plan string) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
@@ -301,45 +305,45 @@ func testL2L3Convert(t *testing.T, plan string) {
 
 	// MARK_2
 
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+
+	fac := testFacility()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     []string{fac},
+		Plan:         plan,
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+	dID := d.ID
 	/*
 
-		c, projectID, teardown := setupWithProject(t)
-		defer teardown()
+		// If you need to test this, run a ${plan} device in your project in a
+		// facility,
+		// and then comment code from MARK_2 to here and uncomment following.
+		// Fill the values from youri testing device, project and facility.
 
-		hn := randString8()
+		c := setup(t)
 
-		fac := testFacility()
+		//	dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+		dID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
+		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
+		fac := "dfw2"
 
-		cr := DeviceCreateRequest{
-			Hostname:     hn,
-			Facility:     []string{fac},
-			Plan:         plan,
-			OS:           "ubuntu_16_04",
-			ProjectID:    projectID,
-			BillingCycle: "hourly",
-		}
-
-		d, _, err := c.Devices.Create(&cr)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer deleteDevice(t, c, d.ID)
-		dID := d.ID
+		d := &Device{}
+		err := fmt.Errorf("hi")
 	*/
-
-	// If you need to test this, run a ${plan} device in your project in a
-	// facility,
-	// and then comment code from MARK_2 to here and uncomment following.
-	// Fill the values from youri testing device, project and facility.
-
-	c := setup(t)
-
-	dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
-	projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-	fac := "ewr1"
-
-	d := &Device{}
-	err := fmt.Errorf("hi")
 
 	d, err = waitDeviceActive(dID, c)
 	if err != nil {
@@ -444,45 +448,55 @@ func deviceToNetworkType(t *testing.T, c *Client, deviceID, targetNetworkType st
 	time.Sleep(15 * time.Second)
 }
 
-func TestAccPortNetworkStateTransitions(t *testing.T) {
+/*
+func TestXXX(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
-	// MARK 1
-	/*
-		c, projectID, teardown := setupWithProject(t)
-		defer teardown()
-
-		fac := testFacility()
-
-		cr := DeviceCreateRequest{
-			Hostname:     "networktypetest",
-			Facility:     []string{fac},
-			Plan:         "m1.xlarge.x86",
-			OS:           "ubuntu_16_04",
-			ProjectID:    projectID,
-			BillingCycle: "hourly",
-		}
-		d, _, err := c.Devices.Create(&cr)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer deleteDevice(t, c, d.ID)
-		deviceID := d.ID
-
-		d, err = waitDeviceActive(deviceID, c)
-		if err != nil {
-			t.Fatal(err)
-		}
-	*/
-	// MARK 2
-
 	c := setup(t)
-	deviceID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+	//	deviceID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+	deviceID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
 	d, _, err := c.Devices.Get(deviceID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	// MARK 3
+
+	log.Println(d)
+	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, "hybrid")
+	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, "layer2-individual")
+	deviceToNetworkType(t, c, deviceID, "layer3")
+
+}
+*/
+
+func TestAccPortNetworkStateTransitions(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	fac := testFacility()
+
+	cr := DeviceCreateRequest{
+		Hostname:     "networktypetest",
+		Facility:     []string{fac},
+		Plan:         "m1.xlarge.x86",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID)
+	deviceID := d.ID
+
+	d, err = waitDeviceActive(deviceID, c)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	networkType, err := d.GetNetworkType()
 	if err != nil {

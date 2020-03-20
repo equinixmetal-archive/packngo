@@ -101,6 +101,39 @@ func (d *Device) NumOfBonds() int {
 	return numOfBonds
 }
 
+func (d *Device) GetPortsInBond(name string) map[string]*Port {
+	ports := map[string]*Port{}
+	for _, port := range d.NetworkPorts {
+		if port.Bond != nil && port.Bond.Name == name {
+			p := port
+			ports[p.Name] = &p
+		}
+	}
+	return ports
+}
+
+func (d *Device) GetBondPorts() map[string]*Port {
+	ports := map[string]*Port{}
+	for _, port := range d.NetworkPorts {
+		if port.Type == "NetworkBondPort" {
+			p := port
+			ports[p.Name] = &p
+		}
+	}
+	return ports
+}
+
+func (d *Device) GetPhysicalPorts() map[string]*Port {
+	ports := map[string]*Port{}
+	for _, port := range d.NetworkPorts {
+		if port.Type == "NetworkPort" {
+			p := port
+			ports[p.Name] = &p
+		}
+	}
+	return ports
+}
+
 func (d *Device) GetPortByName(name string) (*Port, error) {
 	for _, port := range d.NetworkPorts {
 		if port.Name == name {
