@@ -29,7 +29,7 @@ func TestAccPublicIPReservation(t *testing.T) {
 	customData := map[string]interface{}{"custom1": "data", "custom2": map[string]interface{}{"nested": "data"}}
 
 	req := IPReservationRequest{
-		Type:     PublicIPv4,
+		Type:       PublicIPv4,
 		Quantity:   quantity,
 		Facility:   &testFac,
 		CustomData: customData,
