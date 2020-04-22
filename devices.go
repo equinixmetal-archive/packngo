@@ -19,6 +19,7 @@ type DeviceService interface {
 	Lock(string) (*Response, error)
 	Unlock(string) (*Response, error)
 	ListBGPSessions(deviceID string, listOpt *ListOptions) ([]BGPSession, *Response, error)
+	ListBGPNeighbors(deviceID string, listOpt *ListOptions) ([]BGPSession, *Response, error)
 	ListEvents(string, *ListOptions) ([]Event, *Response, error)
 }
 
@@ -396,6 +397,11 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 
 	return s.client.DoRequest("PATCH", path, action, nil)
 }
+
+/*
+func (s *DeviceServiceOp) ListBGPNeighbods(deviceID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
+}
+*/
 
 // ListBGPSessions returns all BGP Sessions associated with the device
 func (s *DeviceServiceOp) ListBGPSessions(deviceID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
