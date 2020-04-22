@@ -37,7 +37,7 @@ type Device struct {
 	Updated             string                 `json:"updated_at,omitempty"`
 	Locked              bool                   `json:"locked,omitempty"`
 	BillingCycle        string                 `json:"billing_cycle,omitempty"`
-	Storage             map[string]interface{} `json:"storage,omitempty"`
+	Storage             *CPR                   `json:"storage,omitempty"`
 	Tags                []string               `json:"tags,omitempty"`
 	Network             []*IPAddressAssignment `json:"ip_addresses"`
 	Volumes             []*Volume              `json:"volumes"`
@@ -175,6 +175,42 @@ type IPAddressCreateRequest struct {
 	Reservations  []string `json:"ip_reservations,omitempty"`
 }
 
+// CPR is a struct for custom partitioning and RAID
+// If you don't want to bother writing the struct, just write the CPR conf to
+// a string and then do
+//
+// 	var cpr CPR
+//  err := json.Unmarshal([]byte(cprString), &cpr)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+type CPR struct {
+	Disks []struct {
+		Device     string `json:"device"`
+		WipeTable  bool   `json:"wipeTable"`
+		Partitions []struct {
+			Label  string `json:"label"`
+			Number int    `json:"number"`
+			Size   string `json:"size"`
+		} `json:"partitions"`
+	} `json:"disks"`
+	Raid []struct {
+		Devices []string `json:"devices"`
+		Level   string   `json:"level"`
+		Name    string   `json:"name"`
+	} `json:"raid"`
+	Filesystems []struct {
+		Mount struct {
+			Device string `json:"device"`
+			Format string `json:"format"`
+			Point  string `json:"point"`
+			Create struct {
+				Options []string `json:"options"`
+			} `json:"create"`
+		} `json:"mount"`
+	} `json:"filesystems"`
+}
+
 // DeviceCreateRequest type used to create a Packet device
 type DeviceCreateRequest struct {
 	Hostname              string     `json:"hostname"`
@@ -184,7 +220,7 @@ type DeviceCreateRequest struct {
 	BillingCycle          string     `json:"billing_cycle"`
 	ProjectID             string     `json:"project_id"`
 	UserData              string     `json:"userdata"`
-	Storage               string     `json:"storage,omitempty"`
+	Storage               *CPR       `json:"storage,omitempty"`
 	Tags                  []string   `json:"tags"`
 	IPXEScriptURL         string     `json:"ipxe_script_url,omitempty"`
 	PublicIPv4SubnetSize  int        `json:"public_ipv4_subnet_size,omitempty"`

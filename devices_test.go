@@ -19,6 +19,9 @@ func waitDeviceActive(id string, c *Client) (*Device, error) {
 		if d.State == "active" {
 			return d, nil
 		}
+		if d.State == "failed" {
+			return nil, fmt.Errorf("device %s provisioning failed", id)
+		}
 	}
 	return nil, fmt.Errorf("device %s is still not active after timeout", id)
 }
