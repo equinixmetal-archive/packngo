@@ -198,7 +198,7 @@ type CPR struct {
 		Devices []string `json:"devices"`
 		Level   string   `json:"level"`
 		Name    string   `json:"name"`
-	} `json:"raid"`
+	} `json:"raid,omitempty"`
 	Filesystems []struct {
 		Mount struct {
 			Device string `json:"device"`
