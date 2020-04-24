@@ -28,7 +28,7 @@ func TestAccBGPSession(t *testing.T) {
 		Plan:         "baremetal_0",
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
-		OS:           "ubuntu_18_04",
+		OS:           "ubuntu_16_04",
 	}
 
 	d, _, err := c.Devices.Create(&cr)
