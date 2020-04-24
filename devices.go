@@ -19,6 +19,7 @@ type DeviceService interface {
 	Lock(string) (*Response, error)
 	Unlock(string) (*Response, error)
 	ListBGPSessions(deviceID string, listOpt *ListOptions) ([]BGPSession, *Response, error)
+	ListBGPNeighbors(deviceID string, listOpt *ListOptions) ([]BGPNeighbor, *Response, error)
 	ListEvents(string, *ListOptions) ([]Event, *Response, error)
 }
 
@@ -395,6 +396,19 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 	action := lockType{Locked: false}
 
 	return s.client.DoRequest("PATCH", path, action, nil)
+}
+
+func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, listOpt *ListOptions) ([]BGPNeighbor, *Response, error) {
+	root := new(bgpNeighborsRoot)
+	params := createListOptionsURL(listOpt)
+	path := fmt.Sprintf("%s/%s%s?%s", deviceBasePath, deviceID, bgpNeighborsBasePath, params)
+
+	resp, err := s.client.DoRequest("GET", path, nil, root)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return root.BGPNeighbors, resp, err
 }
 
 // ListBGPSessions returns all BGP Sessions associated with the device
