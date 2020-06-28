@@ -200,3 +200,35 @@ func TestAccGlobalIPReservation(t *testing.T) {
 		t.Fatalf("Reservation %s should be deleted at this point", res)
 	}
 }
+
+func TestPublicIPReservationFailFast(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	testFac := testFacility()
+	// this should be an absurdly high number
+	quantity := 256
+
+	customData := map[string]interface{}{"custom1": "data", "custom2": map[string]interface{}{"nested": "data"}}
+
+	req := IPReservationRequest{
+		Type:                   PublicIPv4,
+		Quantity:               quantity,
+		Facility:               &testFac,
+		CustomData:             customData,
+		FailOnApprovalRequired: true,
+	}
+
+	_, resp, err := c.ProjectIPs.Request(projectID, &req)
+	if err == nil {
+		t.Fatal("should have had an error 422")
+	}
+	if resp == nil {
+		t.Fatal("unexpected response was nil")
+	}
+	if resp.StatusCode != 422 {
+		t.Fatalf("received response code %d instead of expected %d", resp.StatusCode, 422)
+	}
+}
