@@ -93,6 +93,9 @@ type IPReservationRequest struct {
 	Facility    *string                `json:"facility,omitempty"`
 	Tags        []string               `json:"tags,omitempty"`
 	CustomData  map[string]interface{} `json:"customdata,omitempty"`
+	// FailOnApprovalRequired if the IP request cannot be approved automatically, rather than sending to
+	// the longer Packet approval process, fail immediately with a 422 error
+	FailOnApprovalRequired bool `json:"fail_on_approval_required,omitempty"`
 }
 
 // AddressStruct is a helper type for request/response with dict like {"address": ... }
