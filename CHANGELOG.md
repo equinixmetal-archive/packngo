@@ -22,6 +22,7 @@ minimize them and move towards a 1.0 release.
 - Add ListProject function to the SSHKeys interface
 - Operations for switching between Network Modes, aka "L2 support"
   Support for Organization, Payment Method and Billing address resources
+- Device.Description has been added to packngo (it was missing)
 
 ### Fixed
 - User.Emails json tag is fixed to match api response
