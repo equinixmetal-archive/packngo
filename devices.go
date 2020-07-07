@@ -33,6 +33,7 @@ type Device struct {
 	ID                  string                 `json:"id"`
 	Href                string                 `json:"href,omitempty"`
 	Hostname            string                 `json:"hostname,omitempty"`
+	Description         *string                `json:"description,omitempty"`
 	State               string                 `json:"state,omitempty"`
 	Created             string                 `json:"created_at,omitempty"`
 	Updated             string                 `json:"updated_at,omitempty"`
@@ -49,6 +50,7 @@ type Device struct {
 	ProvisionEvents     []*Event               `json:"provisioning_events,omitempty"`
 	ProvisionPer        float32                `json:"provisioning_percentage,omitempty"`
 	UserData            string                 `json:"userdata,omitempty"`
+	User                string                 `json:"user,omitempty"`
 	RootPassword        string                 `json:"root_password,omitempty"`
 	IPXEScriptURL       string                 `json:"ipxe_script_url,omitempty"`
 	AlwaysPXE           bool                   `json:"always_pxe,omitempty"`
@@ -223,6 +225,7 @@ type DeviceCreateRequest struct {
 	UserData              string     `json:"userdata"`
 	Storage               *CPR       `json:"storage,omitempty"`
 	Tags                  []string   `json:"tags"`
+	Description           string     `json:"description,omitempty"`
 	IPXEScriptURL         string     `json:"ipxe_script_url,omitempty"`
 	PublicIPv4SubnetSize  int        `json:"public_ipv4_subnet_size,omitempty"`
 	AlwaysPXE             bool       `json:"always_pxe,omitempty"`

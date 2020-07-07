@@ -107,6 +107,7 @@ func TestAccDeviceBasic(t *testing.T) {
 		OS:           "ubuntu_16_04",
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
+		Description:  "test",
 	}
 
 	d, _, err := c.Devices.Create(&cr)
@@ -137,6 +138,12 @@ func TestAccDeviceBasic(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if d.User != "root" {
+		t.Fatal("user should be 'root'")
+	}
+	if d.Description == nil || *d.Description != cr.Description {
+		t.Fatal("description is empty or non-existent")
+	}
 	if len(d.RootPassword) == 0 {
 		t.Fatal("root_password is empty or non-existent")
 	}
