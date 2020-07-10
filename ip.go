@@ -32,7 +32,7 @@ type DeviceIPService interface {
 // ProjectIPService handles reservation of IP address blocks for a project.
 type ProjectIPService interface {
 	Get(reservationID string, getOpt *GetOptions) (*IPAddressReservation, *Response, error)
-	List(projectID string) ([]IPAddressReservation, *Response, error)
+	List(projectID string, listOpt *ListOptions) ([]IPAddressReservation, *Response, error)
 	Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error)
 	Remove(ipReservationID string) (*Response, error)
 	AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error)
@@ -61,12 +61,12 @@ type IpAddressCommon struct { //nolint:golint
 // IPAddressReservation is created when user sends IP reservation request for a project (considering it's within quota).
 type IPAddressReservation struct {
 	IpAddressCommon
-	Assignments []Href    `json:"assignments"`
-	Facility    *Facility `json:"facility,omitempty"`
-	Available   string    `json:"available"`
-	Addon       bool      `json:"addon"`
-	Bill        bool      `json:"bill"`
-	Description *string   `json:"details"`
+	Assignments []*IPAddressAssignment `json:"assignments"`
+	Facility    *Facility              `json:"facility,omitempty"`
+	Available   string                 `json:"available"`
+	Addon       bool                   `json:"addon"`
+	Bill        bool                   `json:"bill"`
+	Description *string                `json:"details"`
 }
 
 // AvailableResponse is a type for listing of available addresses from a reserved block.
@@ -198,8 +198,10 @@ func (i *ProjectIPServiceOp) Get(reservationID string, getOpt *GetOptions) (*IPA
 }
 
 // List provides a list of IP resevations for a single project.
-func (i *ProjectIPServiceOp) List(projectID string) ([]IPAddressReservation, *Response, error) {
-	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, ipBasePath)
+func (i *ProjectIPServiceOp) List(projectID string, listOpt *ListOptions) ([]IPAddressReservation, *Response, error) {
+	params := createListOptionsURL(listOpt)
+
+	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, ipBasePath, params)
 	reservations := new(struct {
 		Reservations []IPAddressReservation `json:"ip_addresses"`
 	})
