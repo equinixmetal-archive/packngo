@@ -18,7 +18,7 @@ func TestAccPublicIPReservation(t *testing.T) {
 	testFac := testFacility()
 	quantity := 2
 
-	ipList, _, err := c.ProjectIPs.List(projectID)
+	ipList, _, err := c.ProjectIPs.List(projectID, &ListOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func TestAccPublicIPReservation(t *testing.T) {
 			"CustomData of new reservation should be %+v, was %+v", customData, res.CustomData)
 	}
 
-	ipList, _, err = c.ProjectIPs.List(projectID)
+	ipList, _, err = c.ProjectIPs.List(projectID, &ListOptions{})
 	if len(ipList) != 1 {
 		t.Fatalf("There should be only one reservation, was: %s", ipList)
 	}
@@ -118,7 +118,7 @@ func TestAccGlobalIPReservation(t *testing.T) {
 
 	quantity := 1
 
-	ipList, _, err := c.ProjectIPs.List(projectID)
+	ipList, _, err := c.ProjectIPs.List(projectID, &ListOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,7 +160,7 @@ func TestAccGlobalIPReservation(t *testing.T) {
 		t.Fatalf("Facility of new reservation should be nil")
 	}
 
-	ipList, _, err = c.ProjectIPs.List(projectID)
+	ipList, _, err = c.ProjectIPs.List(projectID, &ListOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
