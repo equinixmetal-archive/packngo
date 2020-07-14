@@ -8,6 +8,34 @@ import (
 	"time"
 )
 
+var (
+	// managementIPS is a block of public ipv4 and ipv6, with private ipv4. all
+	// with management enabled. This is standard in Layer3 configurations.
+	managementIPS = []*IPAddressAssignment{
+		{
+			IpAddressCommon: IpAddressCommon{
+				Management:    true,
+				AddressFamily: 4,
+				Public:        true,
+			},
+		},
+		{
+			IpAddressCommon: IpAddressCommon{
+				Management:    true,
+				AddressFamily: 6,
+				Public:        true,
+			},
+		},
+		{
+			IpAddressCommon: IpAddressCommon{
+				Management:    true,
+				AddressFamily: 4,
+				Public:        false,
+			},
+		},
+	}
+)
+
 func waitDeviceActive(t *testing.T, c *Client, id string) *Device {
 	// 15 minutes = 180 * 5sec-retry
 	for i := 0; i < 180; i++ {
@@ -1075,4 +1103,505 @@ func TestAccDeviceIPAddresses(t *testing.T) {
 		t.Fatalf("Device List should contain exactly one device, was: %v", dl)
 	}
 
+}
+
+func TestDevice_NumOfBonds(t *testing.T) {
+	tests := []struct {
+		name  string
+		ports []Port
+		want  int
+	}{
+		{
+			name:  "NumOfBonds-none",
+			ports: []Port{},
+			want:  0,
+		}, {
+			name:  "NumOfBonds-missed",
+			ports: []Port{{Type: "foo"}},
+			want:  0,
+		}, {
+			name:  "NumOfBonds-one",
+			ports: []Port{{Type: "NetworkBondPort"}},
+			want:  1,
+		}, {
+			name:  "NumOfBonds-two",
+			ports: []Port{{Type: "NetworkBondPort"}, {Type: "NetworkBondPort"}},
+			want:  2,
+		}, {
+			name:  "NumOfBonds-mixed-one",
+			ports: []Port{{Type: "NetworkBondPort"}, {Type: "foo"}},
+			want:  1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := &Device{
+				NetworkPorts: tt.ports,
+			}
+			if got := d.NumOfBonds(); got != tt.want {
+				t.Errorf("Device.NumOfBonds() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDevice_GetNetworkType(t *testing.T) {
+	type fields struct {
+		Network      []*IPAddressAssignment
+		Plan         *Plan
+		NetworkPorts []Port
+	}
+
+	tests := []struct {
+		name    string
+		fields  fields
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "GetNetworkType_bm0_provisiong", // t1.small.x86
+			fields: fields{Plan: &Plan{Slug: "baremetal_0"},
+				NetworkPorts: []Port{{
+					Type: "NetworkBondPort",
+					Name: "bond0",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer2-bonded",
+				}, {
+					Type: "NetworkPort",
+					Name: "eth0",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth1",
+					Data: PortData{
+						Bonded: true,
+					},
+				}},
+			},
+			want:    NetworkTypeL3,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_bm0_ready", // t1.small.x86 post-provision
+			fields: fields{Plan: &Plan{Slug: "baremetal_0"},
+				Network: managementIPS,
+				NetworkPorts: []Port{{
+					Type: "NetworkBondPort",
+					Name: "bond0",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer3",
+				}, {
+					Type: "NetworkPort",
+					Name: "eth0",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth1",
+					Data: PortData{
+						Bonded: true,
+					},
+				}},
+			},
+			want:    NetworkTypeL3,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_bm1", // c1.small.x86
+			fields: fields{Plan: &Plan{Slug: "baremetal_1"},
+				NetworkPorts: []Port{{
+					Type: "NetworkBondPort",
+					Name: "bond0",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer2-bonded",
+				}, {
+					Type: "NetworkPort",
+					Name: "eth0",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth1",
+					Data: PortData{
+						Bonded: true,
+					},
+				}}},
+			want:    NetworkTypeL3,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_bm1e_provisioning", // x1.small.x86
+			fields: fields{Plan: &Plan{Slug: "baremetal_1e"},
+				Network: managementIPS,
+				NetworkPorts: []Port{{
+					Type: "NetworkBondPort",
+					Name: "bond0",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer2-bonded",
+				}, {
+					Type: "NetworkPort",
+					Name: "eth0",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth1",
+					Data: PortData{
+						Bonded: true,
+					},
+				}}},
+			want:    NetworkTypeHybrid,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_bm1e_provisioning", // x1.small.x86
+			fields: fields{Plan: &Plan{Slug: "baremetal_1e"},
+				NetworkPorts: []Port{{
+					Type: "NetworkBondPort",
+					Name: "bond0",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "hybrid",
+				}, {
+					Type: "NetworkPort",
+					Name: "eth0",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth1",
+					Data: PortData{
+						Bonded: false,
+					},
+				}}},
+			want:    NetworkTypeHybrid,
+			wantErr: false,
+		},
+		{
+			// a configuration that should not be observed, one nic, no bonds.
+			name:    "GetNetworkType_OneNic_NoBonds",
+			fields:  fields{NetworkPorts: []Port{{Bond: nil}}},
+			want:    NetworkTypeL2Individual,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_TwoNics_NoBonds", // c3-medium l2-individual
+			fields: fields{NetworkPorts: []Port{{
+				Type: "NetworkBondPort",
+				Name: "bond0",
+				Data: PortData{
+					Bonded: false,
+				},
+				NetworkType: "layer2-individual",
+			}, {
+				Type: "NetworkPort",
+				Name: "eth0",
+				Data: PortData{
+					Bonded: false,
+				},
+			}, {
+				Type: "NetworkPort",
+				Name: "eth1",
+				Data: PortData{
+					Bonded: false,
+				},
+			}}},
+			want:    NetworkTypeL2Individual,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_FourNics_NotBonded", // n2-xlarge l2-individual
+			fields: fields{NetworkPorts: []Port{{
+				Type: "NetworkBondPort",
+				Name: "bond0",
+				Data: PortData{
+					Bonded: false,
+				},
+				NetworkType: "layer2-individual",
+			}, {
+				Type: "NetworkBondPort",
+				Name: "bond1",
+				Data: PortData{
+					Bonded: false,
+				},
+				NetworkType: "layer2-individual",
+			}, {
+				Type: "NetworkPort",
+				Name: "eth0",
+				Data: PortData{
+					Bonded: false,
+				},
+			}, {
+				Type: "NetworkPort",
+				Name: "eth1",
+				Data: PortData{
+					Bonded: false,
+				},
+			}, {
+				Type: "NetworkPort",
+				Name: "eth2",
+				Data: PortData{
+					Bonded: false,
+				},
+			}, {
+				Type: "NetworkPort",
+				Name: "eth3",
+				Data: PortData{
+					Bonded: false,
+				},
+			}}},
+			want:    NetworkTypeL2Individual,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_TwoNics_Bonded_WithManagement", // c3-medium l3
+			fields: fields{
+				Network: managementIPS,
+				NetworkPorts: []Port{{
+					Type: "NetworkBondPort",
+					Name: "bond0",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer3",
+				}, {
+					Type: "NetworkPort",
+					Name: "eth0",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth1",
+					Data: PortData{
+						Bonded: true,
+					},
+				}}},
+			want:    NetworkTypeL3,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_FourNics_Bonded_WithManagement", // n2-xlarge l3
+			fields: fields{
+				Network: managementIPS,
+				NetworkPorts: []Port{{
+					Type: "NetworkBondPort",
+					Name: "bond0",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer3",
+				}, {
+					Type: "NetworkBondPort",
+					Name: "bond1",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer3",
+				}, {
+					Type: "NetworkPort",
+					Name: "eth0",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth1",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth2",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth3",
+					Data: PortData{
+						Bonded: true,
+					},
+				},
+				}},
+			want:    NetworkTypeL3,
+			wantErr: false,
+		},
+
+		{
+			name: "GetNetworkType_FourNics_Bonded_NoIPs", // n2-xlarge l2-bonded
+			fields: fields{
+				Network: []*IPAddressAssignment{},
+				NetworkPorts: []Port{{
+					Type: "NetworkBondPort",
+					Name: "bond0",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer2-bonded",
+				}, {
+					Type: "NetworkBondPort",
+					Name: "bond1",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer2-bonded",
+				}, {
+					Type: "NetworkPort",
+					Name: "eth0",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth1",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth2",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth3",
+					Data: PortData{
+						Bonded: true,
+					},
+				},
+				}},
+			want:    NetworkTypeL2Bonded,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_TwoNics_Bonded", // c3-medium l2-bonded
+			fields: fields{NetworkPorts: []Port{{
+				Type: "NetworkBondPort",
+				Name: "bond0",
+				Data: PortData{
+					Bonded: true,
+				},
+				NetworkType: "layer2-bonded",
+			}, {
+				Type: "NetworkPort",
+				Name: "eth0",
+				Data: PortData{
+					Bonded: true,
+				},
+			}, {
+				Type: "NetworkPort",
+				Name: "eth1",
+				Data: PortData{
+					Bonded: true,
+				},
+			}}},
+			want:    NetworkTypeL2Bonded,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_TwoNics_OneBonded", // c3-medium hybrid
+			fields: fields{NetworkPorts: []Port{{
+				Type: "NetworkBondPort",
+				Name: "bond0",
+				Data: PortData{
+					Bonded: true,
+				},
+				NetworkType: "hybrid",
+			}, {
+				Type: "NetworkPort",
+				Name: "eth0",
+				Data: PortData{
+					Bonded: true,
+				},
+			}, {
+				Type: "NetworkPort",
+				Name: "eth1",
+				Data: PortData{
+					Bonded: false,
+				},
+			}}},
+			want:    NetworkTypeHybrid,
+			wantErr: false,
+		},
+		{
+			name: "GetNetworkType_FourNics_Bonded", // n2-xlarge hybrid
+			fields: fields{
+				Network: managementIPS,
+				NetworkPorts: []Port{{
+					Type: "NetworkBondPort",
+					Name: "bond0",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer3", // the API reports layer3
+				}, {
+					Type: "NetworkBondPort",
+					Name: "bond1",
+					Data: PortData{
+						Bonded: true,
+					},
+					NetworkType: "layer2-individual",
+				}, {
+					Type: "NetworkPort",
+					Name: "eth0",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth1",
+					Data: PortData{
+						Bonded: false,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth2",
+					Data: PortData{
+						Bonded: true,
+					},
+				}, {
+					Type: "NetworkPort",
+					Name: "eth3",
+					Data: PortData{
+						Bonded: false,
+					},
+				}}},
+			want:    NetworkTypeHybrid,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := &Device{
+				Network:      tt.fields.Network,
+				Plan:         tt.fields.Plan,
+				NetworkPorts: tt.fields.NetworkPorts,
+			}
+			got, err := d.GetNetworkType()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Device.GetNetworkType() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Device.GetNetworkType() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

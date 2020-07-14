@@ -64,7 +64,7 @@ func TestAccPort1E(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if nType != "hybrid" {
+	if nType != NetworkTypeHybrid {
 		t.Fatal("New 1E device should be in Hybrid Network Type")
 	}
 
@@ -193,11 +193,11 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != "layer3" {
+	if nType != NetworkTypeL3 {
 		t.Fatalf("New %s device should be in network type L3", plan)
 	}
 
-	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "hybrid")
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, NetworkTypeHybrid)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -207,7 +207,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != "hybrid" {
+	if nType != NetworkTypeHybrid {
 		t.Fatal("the device should now be in network type L2 Bonded")
 	}
 
@@ -255,7 +255,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal("No vlans should be attached to the port at this time")
 	}
 
-	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "layer3")
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, NetworkTypeL3)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -265,7 +265,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != "layer3" {
+	if nType != NetworkTypeL3 {
 		t.Fatal("the device should now be back in network type L3")
 	}
 
@@ -349,11 +349,11 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != "layer3" {
+	if nType != NetworkTypeL3 {
 		t.Fatalf("New %s device should be in network type L3", plan)
 	}
 
-	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "layer2-bonded")
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, NetworkTypeL2Bonded)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -363,7 +363,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != "layer2-bonded" {
+	if nType != NetworkTypeL2Bonded {
 		t.Fatal("the device should now be in network type L2 Bonded")
 	}
 
@@ -412,7 +412,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal("No vlans should be attached to the port at this time")
 	}
 
-	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, "layer3")
+	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, NetworkTypeL3)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -422,7 +422,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 
-	if nType != "layer3" {
+	if nType != NetworkTypeL3 {
 		t.Fatal("the device now should be back in network type L3")
 	}
 
@@ -456,11 +456,11 @@ defer stopRecord()
 	}
 
 	log.Println(d)
-	deviceToNetworkType(t, c, deviceID, "layer3")
-	deviceToNetworkType(t, c, deviceID, "hybrid")
-	deviceToNetworkType(t, c, deviceID, "layer3")
-	deviceToNetworkType(t, c, deviceID, "layer2-individual")
-	deviceToNetworkType(t, c, deviceID, "layer3")
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeHybrid)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Individual)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
 
 }
 */
@@ -495,25 +495,25 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if networkType != "layer2-bonded" {
-		deviceToNetworkType(t, c, deviceID, "layer2-bonded")
+	if networkType != NetworkTypeL2Bonded {
+		deviceToNetworkType(t, c, deviceID, NetworkTypeL2Bonded)
 	}
 
-	deviceToNetworkType(t, c, deviceID, "layer2-individual")
-	deviceToNetworkType(t, c, deviceID, "layer3")
-	deviceToNetworkType(t, c, deviceID, "hybrid")
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Individual)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeHybrid)
 
-	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
-	deviceToNetworkType(t, c, deviceID, "layer3")
-	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Bonded)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Bonded)
 
-	deviceToNetworkType(t, c, deviceID, "hybrid")
-	deviceToNetworkType(t, c, deviceID, "layer2-individual")
-	deviceToNetworkType(t, c, deviceID, "hybrid")
+	deviceToNetworkType(t, c, deviceID, NetworkTypeHybrid)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Individual)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeHybrid)
 
-	deviceToNetworkType(t, c, deviceID, "layer3")
-	deviceToNetworkType(t, c, deviceID, "layer2-individual")
-	deviceToNetworkType(t, c, deviceID, "layer2-bonded")
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Individual)
+	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Bonded)
 }
 
 func TestAccPortNativeVlan(t *testing.T) {
@@ -541,7 +541,7 @@ func TestAccPortNativeVlan(t *testing.T) {
 	d = waitDeviceActive(t, c, deviceID)
 	defer deleteDevice(t, c, d.ID, false)
 
-	deviceToNetworkType(t, c, deviceID, "hybrid")
+	deviceToNetworkType(t, c, deviceID, NetworkTypeHybrid)
 
 	vncr := VirtualNetworkCreateRequest{
 		ProjectID: projectID,

@@ -6,6 +6,13 @@ import (
 
 const deviceBasePath = "/devices"
 
+const (
+	NetworkTypeHybrid       = "hybrid"
+	NetworkTypeL2Bonded     = "layer2-bonded"
+	NetworkTypeL2Individual = "layer2-individual"
+	NetworkTypeL3           = "layer3"
+)
+
 // DeviceService interface defines available device methods
 type DeviceService interface {
 	List(ProjectID string, listOpt *ListOptions) ([]Device, *Response, error)
@@ -146,29 +153,57 @@ func (d *Device) GetPortByName(name string) (*Port, error) {
 	return nil, fmt.Errorf("Port %s not found in device %s", name, d.ID)
 }
 
+type ports map[string]*Port
+
+func (ports ports) allBonded() bool {
+	if ports == nil {
+		return false
+	}
+
+	if len(ports) == 0 {
+		return false
+	}
+
+	for _, p := range ports {
+		if (p == nil) || (!p.Data.Bonded) {
+			return false
+		}
+	}
+	return true
+}
+
+func (d *Device) HasManagementIPs() bool {
+	for _, ip := range d.Network {
+		if ip.Management {
+			return true
+		}
+	}
+	return false
+}
+
 func (d *Device) GetNetworkType() (string, error) {
-	numOfBonds := d.NumOfBonds()
-	if (numOfBonds < 1) || (numOfBonds > 2) {
-		return "", fmt.Errorf("Wrong number of Bond ports")
-	}
-	bond0, err := d.GetPortByName("bond0")
-	if err != nil {
-		return "", err
-	}
-	if numOfBonds == 2 {
-		bond1, err := d.GetPortByName("bond1")
-		if err != nil {
-			return "", err
+	if d.Plan != nil {
+		if d.Plan.Slug == "baremetal_0" || d.Plan.Slug == "baremetal_1" {
+			return NetworkTypeL3, nil
 		}
-		if bond0.NetworkType == bond1.NetworkType {
-			return bond0.NetworkType, nil
+		if d.Plan.Slug == "baremetal_1e" {
+			return NetworkTypeHybrid, nil
 		}
-		if (bond0.NetworkType == "layer3") && (bond1.NetworkType == "layer2-individual") {
-			return "hybrid", nil
-		}
-		return "", fmt.Errorf("Strange 2-bond ports conf - bond0: %s, bond1: %s", bond0.NetworkType, bond1.NetworkType)
 	}
-	return bond0.NetworkType, nil
+
+	bonds := ports(d.GetBondPorts())
+	phys := ports(d.GetPhysicalPorts())
+
+	if bonds.allBonded() {
+		if phys.allBonded() {
+			if !d.HasManagementIPs() {
+				return NetworkTypeL2Bonded, nil
+			}
+			return NetworkTypeL3, nil
+		}
+		return NetworkTypeHybrid, nil
+	}
+	return NetworkTypeL2Individual, nil
 }
 
 type IPAddressCreateRequest struct {

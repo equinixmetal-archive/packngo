@@ -161,7 +161,7 @@ func (i *DevicePortServiceOp) PortToLayerThree(deviceID, portName string) (*Port
 	if err != nil {
 		return nil, nil, err
 	}
-	if p.NetworkType == "layer3" {
+	if p.NetworkType == NetworkTypeL3 {
 		return p, nil, nil
 	}
 	path := fmt.Sprintf("%s/%s/convert/layer-3", portBasePath, p.ID)
@@ -195,7 +195,7 @@ func (i *DevicePortServiceOp) Convert2BondDevice(d *Device, targetType string) e
 	bondPorts := d.GetBondPorts()
 	ethPorts := d.GetPhysicalPorts()
 
-	if targetType == "layer3" {
+	if targetType == NetworkTypeL3 {
 		for _, p := range ethPorts {
 			_, _, err := i.client.DevicePorts.Bond(p, false)
 			if err != nil {
@@ -209,7 +209,7 @@ func (i *DevicePortServiceOp) Convert2BondDevice(d *Device, targetType string) e
 			}
 		}
 	}
-	if targetType == "hybrid" {
+	if targetType == NetworkTypeHybrid {
 		for _, p := range d.GetPortsInBond("bond1") {
 			_, _, err := i.client.DevicePorts.Disbond(p, false)
 			if err != nil {
@@ -225,7 +225,7 @@ func (i *DevicePortServiceOp) Convert2BondDevice(d *Device, targetType string) e
 			return err
 		}
 	}
-	if targetType == "layer2-individual" {
+	if targetType == NetworkTypeL2Individual {
 		for _, p := range bondPorts {
 			_, _, err := i.client.DevicePorts.PortToLayerTwo(d.ID, p.Name)
 			if err != nil {
@@ -239,7 +239,7 @@ func (i *DevicePortServiceOp) Convert2BondDevice(d *Device, targetType string) e
 			}
 		}
 	}
-	if targetType == "layer2-bonded" {
+	if targetType == NetworkTypeL2Bonded {
 		for _, p := range bondPorts {
 			_, _, err := i.client.DevicePorts.PortToLayerTwo(d.ID, p.Name)
 			if err != nil {
@@ -263,7 +263,7 @@ func (i *DevicePortServiceOp) Convert1BondDevice(d *Device, targetType string) e
 	}
 	bond0ports := d.GetPortsInBond("bond0")
 
-	if targetType == "layer3" {
+	if targetType == NetworkTypeL3 {
 		for _, p := range bond0ports {
 			_, _, err = i.client.DevicePorts.Bond(p, false)
 			if err != nil {
@@ -275,7 +275,7 @@ func (i *DevicePortServiceOp) Convert1BondDevice(d *Device, targetType string) e
 			return err
 		}
 	}
-	if targetType == "hybrid" {
+	if targetType == NetworkTypeHybrid {
 		_, _, err = i.client.DevicePorts.Bond(bond0, false)
 		if err != nil {
 			return err
@@ -293,7 +293,7 @@ func (i *DevicePortServiceOp) Convert1BondDevice(d *Device, targetType string) e
 			return err
 		}
 	}
-	if targetType == "layer2-individual" {
+	if targetType == NetworkTypeL2Individual {
 		bond0, _, err = i.client.DevicePorts.PortToLayerTwo(d.ID, "bond0")
 		if err != nil {
 			return err
@@ -303,7 +303,7 @@ func (i *DevicePortServiceOp) Convert1BondDevice(d *Device, targetType string) e
 			return err
 		}
 	}
-	if targetType == "layer2-bonded" {
+	if targetType == NetworkTypeL2Bonded {
 		for _, p := range bond0ports {
 			_, _, err = i.client.DevicePorts.Bond(p, false)
 			if err != nil {
