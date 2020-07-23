@@ -181,13 +181,17 @@ func (d *Device) HasManagementIPs() bool {
 	return false
 }
 
-func (d *Device) GetNetworkType() (string, error) {
+// GetNetworkType returns a composite network type identification for a device
+// based on the plan, network_type, and IP management state of the device.
+// GetNetworkType provides the same composite state rendered in the Packet
+// Portal for a given device.
+func (d *Device) GetNetworkType() string {
 	if d.Plan != nil {
 		if d.Plan.Slug == "baremetal_0" || d.Plan.Slug == "baremetal_1" {
-			return NetworkTypeL3, nil
+			return NetworkTypeL3
 		}
 		if d.Plan.Slug == "baremetal_1e" {
-			return NetworkTypeHybrid, nil
+			return NetworkTypeHybrid
 		}
 	}
 
@@ -197,13 +201,13 @@ func (d *Device) GetNetworkType() (string, error) {
 	if bonds.allBonded() {
 		if phys.allBonded() {
 			if !d.HasManagementIPs() {
-				return NetworkTypeL2Bonded, nil
+				return NetworkTypeL2Bonded
 			}
-			return NetworkTypeL3, nil
+			return NetworkTypeL3
 		}
-		return NetworkTypeHybrid, nil
+		return NetworkTypeHybrid
 	}
-	return NetworkTypeL2Individual, nil
+	return NetworkTypeL2Individual
 }
 
 type IPAddressCreateRequest struct {

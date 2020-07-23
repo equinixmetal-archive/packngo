@@ -186,9 +186,9 @@ func TestAccDeviceBasic(t *testing.T) {
 	if len(d.SwitchUUID) == 0 {
 		t.Fatal("Device should have switch UUID")
 	}
-	_, err = d.GetNetworkType()
-	if err != nil {
-		t.Fatal(err)
+	networkType := d.GetNetworkType()
+	if networkType != NetworkTypeL3 {
+		t.Fatal("network_type should be 'layer3'")
 	}
 
 	if d.User != "root" {
@@ -1077,9 +1077,9 @@ func TestAccDeviceIPAddresses(t *testing.T) {
 	dID := d.ID
 
 	d = waitDeviceActive(t, c, dID)
-	_, err = d.GetNetworkType()
-	if err != nil {
-		t.Fatal(err)
+	networkType := d.GetNetworkType()
+	if networkType != NetworkTypeL3 {
+		t.Fatal("network_type should be 'layer3'")
 	}
 
 	if len(d.RootPassword) == 0 {
@@ -1153,13 +1153,12 @@ func TestDevice_GetNetworkType(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		fields  fields
-		want    string
-		wantErr bool
+		name   string
+		fields fields
+		want   string
 	}{
 		{
-			name: "GetNetworkType_bm0_provisiong", // t1.small.x86
+			name: "GetNetworkType_bm0_provisioning", // t1.small.x86
 			fields: fields{Plan: &Plan{Slug: "baremetal_0"},
 				NetworkPorts: []Port{{
 					Type: "NetworkBondPort",
@@ -1182,8 +1181,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					},
 				}},
 			},
-			want:    NetworkTypeL3,
-			wantErr: false,
+			want: NetworkTypeL3,
 		},
 		{
 			name: "GetNetworkType_bm0_ready", // t1.small.x86 post-provision
@@ -1210,8 +1208,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					},
 				}},
 			},
-			want:    NetworkTypeL3,
-			wantErr: false,
+			want: NetworkTypeL3,
 		},
 		{
 			name: "GetNetworkType_bm1", // c1.small.x86
@@ -1236,8 +1233,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 						Bonded: true,
 					},
 				}}},
-			want:    NetworkTypeL3,
-			wantErr: false,
+			want: NetworkTypeL3,
 		},
 		{
 			name: "GetNetworkType_bm1e_provisioning", // x1.small.x86
@@ -1263,8 +1259,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 						Bonded: true,
 					},
 				}}},
-			want:    NetworkTypeHybrid,
-			wantErr: false,
+			want: NetworkTypeHybrid,
 		},
 		{
 			name: "GetNetworkType_bm1e_provisioning", // x1.small.x86
@@ -1289,15 +1284,13 @@ func TestDevice_GetNetworkType(t *testing.T) {
 						Bonded: false,
 					},
 				}}},
-			want:    NetworkTypeHybrid,
-			wantErr: false,
+			want: NetworkTypeHybrid,
 		},
 		{
 			// a configuration that should not be observed, one nic, no bonds.
-			name:    "GetNetworkType_OneNic_NoBonds",
-			fields:  fields{NetworkPorts: []Port{{Bond: nil}}},
-			want:    NetworkTypeL2Individual,
-			wantErr: false,
+			name:   "GetNetworkType_OneNic_NoBonds",
+			fields: fields{NetworkPorts: []Port{{Bond: nil}}},
+			want:   NetworkTypeL2Individual,
 		},
 		{
 			name: "GetNetworkType_TwoNics_NoBonds", // c3-medium l2-individual
@@ -1321,8 +1314,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					Bonded: false,
 				},
 			}}},
-			want:    NetworkTypeL2Individual,
-			wantErr: false,
+			want: NetworkTypeL2Individual,
 		},
 		{
 			name: "GetNetworkType_FourNics_NotBonded", // n2-xlarge l2-individual
@@ -1365,8 +1357,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					Bonded: false,
 				},
 			}}},
-			want:    NetworkTypeL2Individual,
-			wantErr: false,
+			want: NetworkTypeL2Individual,
 		},
 		{
 			name: "GetNetworkType_TwoNics_Bonded_WithManagement", // c3-medium l3
@@ -1392,8 +1383,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 						Bonded: true,
 					},
 				}}},
-			want:    NetworkTypeL3,
-			wantErr: false,
+			want: NetworkTypeL3,
 		},
 		{
 			name: "GetNetworkType_FourNics_Bonded_WithManagement", // n2-xlarge l3
@@ -1439,8 +1429,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					},
 				},
 				}},
-			want:    NetworkTypeL3,
-			wantErr: false,
+			want: NetworkTypeL3,
 		},
 
 		{
@@ -1487,8 +1476,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					},
 				},
 				}},
-			want:    NetworkTypeL2Bonded,
-			wantErr: false,
+			want: NetworkTypeL2Bonded,
 		},
 		{
 			name: "GetNetworkType_TwoNics_Bonded", // c3-medium l2-bonded
@@ -1512,8 +1500,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					Bonded: true,
 				},
 			}}},
-			want:    NetworkTypeL2Bonded,
-			wantErr: false,
+			want: NetworkTypeL2Bonded,
 		},
 		{
 			name: "GetNetworkType_TwoNics_OneBonded", // c3-medium hybrid
@@ -1537,8 +1524,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					Bonded: false,
 				},
 			}}},
-			want:    NetworkTypeHybrid,
-			wantErr: false,
+			want: NetworkTypeHybrid,
 		},
 		{
 			name: "GetNetworkType_FourNics_Bonded", // n2-xlarge hybrid
@@ -1583,8 +1569,7 @@ func TestDevice_GetNetworkType(t *testing.T) {
 						Bonded: false,
 					},
 				}}},
-			want:    NetworkTypeHybrid,
-			wantErr: false,
+			want: NetworkTypeHybrid,
 		},
 	}
 	for _, tt := range tests {
@@ -1594,11 +1579,8 @@ func TestDevice_GetNetworkType(t *testing.T) {
 				Plan:         tt.fields.Plan,
 				NetworkPorts: tt.fields.NetworkPorts,
 			}
-			got, err := d.GetNetworkType()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Device.GetNetworkType() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := d.GetNetworkType()
+
 			if got != tt.want {
 				t.Errorf("Device.GetNetworkType() = %v, want %v", got, tt.want)
 			}

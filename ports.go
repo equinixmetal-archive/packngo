@@ -188,7 +188,7 @@ func (i *DevicePortServiceOp) DeviceNetworkType(deviceID string) (string, error)
 	if err != nil {
 		return "", err
 	}
-	return d.GetNetworkType()
+	return d.GetNetworkType(), nil
 }
 
 func (i *DevicePortServiceOp) Convert2BondDevice(d *Device, targetType string) error {
@@ -325,10 +325,7 @@ func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, targetType st
 		return nil, err
 	}
 
-	curType, err := d.GetNetworkType()
-	if err != nil {
-		return nil, err
-	}
+	curType := d.GetNetworkType()
 
 	if curType == targetType {
 		return nil, fmt.Errorf("Device already is in state %s", targetType)
@@ -353,10 +350,7 @@ func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, targetType st
 		return nil, err
 	}
 
-	finalType, err := d.GetNetworkType()
-	if err != nil {
-		return nil, err
-	}
+	finalType := d.GetNetworkType()
 
 	if finalType != targetType {
 		return nil, fmt.Errorf(

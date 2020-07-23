@@ -490,9 +490,9 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 
 	d = waitDeviceActive(t, c, deviceID)
 
-	networkType, err := d.GetNetworkType()
-	if err != nil {
-		t.Fatal(err)
+	networkType := d.GetNetworkType()
+	if networkType != NetworkTypeL3 {
+		t.Fatal("network_type should be 'layer3'")
 	}
 
 	if networkType != NetworkTypeL2Bonded {
