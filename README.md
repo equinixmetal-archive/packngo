@@ -1,5 +1,11 @@
 # packngo
+
 A Golang client for the Packet API.
+
+[![GitHub release](https://img.shields.io/github/release/packethost/packngo/all.svg?style=flat-square)](https://github.com/packethost/packngo/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/packethost/packngo)](https://goreportcard.com/report/github.com/packethost/packngo)
+[![Slack](https://slack.packet.com/badge.svg)](https://slack.packet.com)
+[![Twitter Follow](https://img.shields.io/twitter/follow/packethost.svg?style=social&label=Follow)](https://twitter.com/intent/follow?screen_name=packethost)
 
 ![](https://www.packet.net/media/images/xeiw-packettwitterprofilew.png)
 
