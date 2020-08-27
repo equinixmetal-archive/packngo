@@ -42,7 +42,7 @@ func (s *NotificationServiceOp) List(listOpt *ListOptions) ([]Notification, *Res
 
 // Get returns a notification by ID
 func (s *NotificationServiceOp) Get(notificationID string, getOpt *GetOptions) (*Notification, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 
 	path := fmt.Sprintf("%s/%s?%s", notificationBasePath, notificationID, params)
 	return getNotifications(s.client, path)
@@ -56,7 +56,7 @@ func (s *NotificationServiceOp) MarkAsRead(notificationID string) (*Notification
 
 // list helper function for all notification functions
 func listNotifications(client *Client, path string, listOpt *ListOptions) ([]Notification, *Response, error) {
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 
 	root := new(notificationsRoot)
 

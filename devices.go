@@ -285,7 +285,7 @@ type DeviceServiceOp struct {
 // List returns devices on a project
 func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices []Device, resp *Response, err error) {
 	listOpt = makeSureListOptionsInclude(listOpt, "facility")
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, deviceBasePath, params)
 
 	for {
@@ -313,7 +313,7 @@ func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices 
 // Get returns a device by id
 func (s *DeviceServiceOp) Get(deviceID string, getOpt *GetOptions) (*Device, *Response, error) {
 	getOpt = makeSureGetOptionsInclude(getOpt, "facility")
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 
 	path := fmt.Sprintf("%s/%s?%s", deviceBasePath, deviceID, params)
 	device := new(Device)
@@ -403,7 +403,7 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 
 func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, listOpt *ListOptions) ([]BGPNeighbor, *Response, error) {
 	root := new(bgpNeighborsRoot)
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", deviceBasePath, deviceID, bgpNeighborsBasePath, params)
 
 	resp, err := s.client.DoRequest("GET", path, nil, root)
@@ -416,7 +416,7 @@ func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, listOpt *ListOptions
 
 // ListBGPSessions returns all BGP Sessions associated with the device
 func (s *DeviceServiceOp) ListBGPSessions(deviceID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", deviceBasePath, deviceID, bgpSessionBasePath, params)
 
 	for {

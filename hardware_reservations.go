@@ -41,7 +41,7 @@ type hardwareReservationRoot struct {
 // List returns all hardware reservations for a given project
 func (s *HardwareReservationServiceOp) List(projectID string, listOpt *ListOptions) (reservations []HardwareReservation, resp *Response, err error) {
 	root := new(hardwareReservationRoot)
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, hardwareReservationBasePath, params)
 
@@ -69,7 +69,7 @@ func (s *HardwareReservationServiceOp) List(projectID string, listOpt *ListOptio
 
 // Get returns a single hardware reservation
 func (s *HardwareReservationServiceOp) Get(hardwareReservationdID string, getOpt *GetOptions) (*HardwareReservation, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 
 	hardwareReservation := new(HardwareReservation)
 

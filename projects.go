@@ -70,7 +70,7 @@ type ProjectServiceOp struct {
 
 // List returns the user's projects
 func (s *ProjectServiceOp) List(listOpt *ListOptions) (projects []Project, resp *Response, err error) {
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	root := new(projectsRoot)
 
 	path := fmt.Sprintf("%s?%s", projectBasePath, params)
@@ -97,7 +97,7 @@ func (s *ProjectServiceOp) List(listOpt *ListOptions) (projects []Project, resp 
 
 // Get returns a project by id
 func (s *ProjectServiceOp) Get(projectID string, getOpt *GetOptions) (*Project, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", projectBasePath, projectID, params)
 	project := new(Project)
 	resp, err := s.client.DoRequest("GET", path, nil, project)
@@ -141,7 +141,7 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 
 // ListBGPSessions returns all BGP Sessions associated with the project
 func (s *ProjectServiceOp) ListBGPSessions(projectID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, bgpSessionBasePath, params)
 
 	for {

@@ -52,7 +52,7 @@ type APIKeyServiceOp struct {
 
 func (s *APIKeyServiceOp) list(url string, lopts *ListOptions) ([]APIKey, *Response, error) {
 	root := new(apiKeyRoot)
-	params := createListOptionsURL(lopts)
+	params := urlQuery(lopts)
 	paramURL := fmt.Sprintf("%s?%s", url, params)
 
 	resp, err := s.client.DoRequest("GET", paramURL, nil, root)
@@ -78,7 +78,12 @@ func (s *APIKeyServiceOp) UserList(lopts *ListOptions) ([]APIKey, *Response, err
 func (s *APIKeyServiceOp) ProjectGet(projectID, apiKeyID string, getOpt *GetOptions) (*APIKey, error) {
 	var lopts *ListOptions
 	if getOpt != nil {
-		lopts = &ListOptions{Includes: getOpt.Includes, Excludes: getOpt.Excludes}
+		lopts = &ListOptions{
+			GetOptions: GetOptions{
+				Includes: getOpt.Includes,
+				Excludes: getOpt.Excludes,
+			},
+		}
 	}
 	pkeys, _, err := s.ProjectList(projectID, lopts)
 	if err != nil {
@@ -96,7 +101,12 @@ func (s *APIKeyServiceOp) ProjectGet(projectID, apiKeyID string, getOpt *GetOpti
 func (s *APIKeyServiceOp) UserGet(apiKeyID string, getOpt *GetOptions) (*APIKey, error) {
 	var lopts *ListOptions
 	if getOpt != nil {
-		lopts = &ListOptions{Includes: getOpt.Includes, Excludes: getOpt.Excludes}
+		lopts = &ListOptions{
+			GetOptions: GetOptions{
+				Includes: getOpt.Includes,
+				Excludes: getOpt.Excludes,
+			},
+		}
 	}
 	ukeys, _, err := s.UserList(lopts)
 	if err != nil {

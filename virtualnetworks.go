@@ -34,7 +34,7 @@ type VirtualNetworkListResponse struct {
 
 func (i *ProjectVirtualNetworkServiceOp) List(projectID string, listOpt *ListOptions) (*VirtualNetworkListResponse, *Response, error) {
 
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, virtualNetworkBasePath, params)
 	output := new(VirtualNetworkListResponse)
 
@@ -53,7 +53,7 @@ type VirtualNetworkCreateRequest struct {
 }
 
 func (i *ProjectVirtualNetworkServiceOp) Get(vlanID string, getOpt *GetOptions) (*VirtualNetwork, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", virtualNetworkBasePath, vlanID, params)
 	vlan := new(VirtualNetwork)
 

@@ -246,8 +246,8 @@ func TestAccVolumeLargeList(t *testing.T) {
 	// Last test get all volume, 5 per page and includes
 
 	listOpt2 := &ListOptions{
-		Includes: []string{"snapshot_policies", "facility"},
-		PerPage:  5,
+		GetOptions: GetOptions{Includes: []string{"snapshot_policies", "facility"}},
+		PerPage:    5,
 	}
 	volumes, _, err = c.Volumes.List(projectID, listOpt2)
 	if err != nil {

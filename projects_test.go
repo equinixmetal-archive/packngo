@@ -206,7 +206,9 @@ func TestAccListProjects(t *testing.T) {
 	}
 
 	listOpt := &ListOptions{
-		Includes: []string{"members"},
+		GetOptions: GetOptions{
+			Includes: []string{"members"},
+		},
 	}
 	projs, _, err := c.Projects.List(listOpt)
 	if err != nil {

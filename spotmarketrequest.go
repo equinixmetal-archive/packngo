@@ -79,7 +79,7 @@ func (s *SpotMarketRequestServiceOp) List(pID string, listOpt *ListOptions) ([]S
 		SMRs []SpotMarketRequest `json:"spot_market_requests"`
 	}
 
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, pID, spotMarketRequestBasePath, params)
 	output := new(smrRoot)
 
@@ -92,7 +92,7 @@ func (s *SpotMarketRequestServiceOp) List(pID string, listOpt *ListOptions) ([]S
 }
 
 func (s *SpotMarketRequestServiceOp) Get(id string, getOpt *GetOptions) (*SpotMarketRequest, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", spotMarketRequestBasePath, id, params)
 	smr := new(SpotMarketRequest)
 

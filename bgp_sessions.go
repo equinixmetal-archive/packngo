@@ -85,7 +85,7 @@ func (s *BGPSessionServiceOp) Delete(id string) (*Response, error) {
 
 // Get function
 func (s *BGPSessionServiceOp) Get(id string, getOpt *GetOptions) (session *BGPSession, response *Response, err error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", bgpSessionBasePath, id, params)
 	session = new(BGPSession)
 	response, err = s.client.DoRequest("GET", path, nil, session)

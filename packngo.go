@@ -36,19 +36,48 @@ const (
 
 var redirectsErrorRe = regexp.MustCompile(`stopped after \d+ redirects\z`)
 
+// GetOptions are options common to Packet API GET requests
 type GetOptions struct {
-	Includes []string
-	Excludes []string
+	// Includes are a list of fields to expand in the request results.
+	//
+	// For resources that contain collections of other resources, the Packet API
+	// will only return the `Href` value of these resources by default. In
+	// nested API Go types, this will result in objects that have zero values in
+	// all fiends except their `Href` field. When an object's associated field
+	// name is "included", the returned fields will be Uumarshalled into the
+	// nested object. Field specifiers can use a dotted notation up to three
+	// references deep. (For example, "memberships.projects" can be used in
+	// ListUsers.)
+	Includes []string `url:"includes,omitempty"`
+
+	// Excludes reduce the size of the API response by removing nested objects
+	// that may be returned.
+	//
+	// The default behavior of the Packet API is to "exclude" fields, but some
+	// API endpoints have an "include" behavior on certain fields. Nested Go
+	// types unmarshalled into an "excluded" field will only have a values in
+	// their `Href` field.
+	Excludes []string `url:"excludes,omitempty"`
 }
 
-// ListOptions specifies optional global API parameters
+// ListOptions are options common to Packet API paginated GET requests
 type ListOptions struct {
-	// for paginated result sets, page of results to retrieve
+	GetOptions
+
+	// Page is the page of results to retrieve for paginated result sets
 	Page int `url:"page,omitempty"`
-	// for paginated result sets, the number of results to return per page
-	PerPage  int `url:"per_page,omitempty"`
-	Includes []string
-	Excludes []string
+
+	// PerPage is the number of results to return per page for paginated result
+	// sets,
+	PerPage int `url:"per_page,omitempty"`
+}
+
+// SearchOptions are options common to API GET requests that include a
+// multi-field search filter.
+type SearchOptions struct {
+	GetOptions
+
+	Search string `url:"search,omitempty"`
 }
 
 func makeSureGetOptionsInclude(g *GetOptions, s string) *GetOptions {
@@ -63,7 +92,7 @@ func makeSureGetOptionsInclude(g *GetOptions, s string) *GetOptions {
 
 func makeSureListOptionsInclude(l *ListOptions, s string) *ListOptions {
 	if l == nil {
-		return &ListOptions{Includes: []string{s}}
+		return &ListOptions{GetOptions: GetOptions{Includes: []string{s}}}
 	}
 	if !contains(l.Includes, s) {
 		l.Includes = append(l.Includes, s)
@@ -71,51 +100,58 @@ func makeSureListOptionsInclude(l *ListOptions, s string) *ListOptions {
 	return l
 }
 
-func createGetOptionsURL(g *GetOptions) (url string) {
+type paramsReady interface {
+	Params() url.Values
+}
+
+func urlQuery(p paramsReady) string {
+	return p.Params().Encode()
+}
+
+// Params generates URL values from GetOptions fields
+func (g *GetOptions) Params() url.Values {
+	params := url.Values{}
 	if g == nil {
-		return ""
+		return params
 	}
+
 	if len(g.Includes) != 0 {
-		url += fmt.Sprintf("include=%s", strings.Join(g.Includes, ","))
+		params.Set("include", strings.Join(g.Includes, ","))
 	}
 	if len(g.Excludes) != 0 {
-		if url != "" {
-			url += "&"
-		}
-		url += fmt.Sprintf("exclude=%s", strings.Join(g.Excludes, ","))
+		params.Set("exclude", strings.Join(g.Excludes, ","))
 	}
-	return
+
+	return params
 
 }
 
-func createListOptionsURL(l *ListOptions) (url string) {
+// Params generates URL values from ListOptions fields
+func (l *ListOptions) Params() url.Values {
 	if l == nil {
-		return ""
+		return url.Values{}
 	}
-	if len(l.Includes) != 0 {
-		url += fmt.Sprintf("include=%s", strings.Join(l.Includes, ","))
-	}
-	if len(l.Excludes) != 0 {
-		if url != "" {
-			url += "&"
-		}
-		url += fmt.Sprintf("exclude=%s", strings.Join(l.Excludes, ","))
-	}
+	params := l.GetOptions.Params()
+
 	if l.Page != 0 {
-		if url != "" {
-			url += "&"
-		}
-		url += fmt.Sprintf("page=%d", l.Page)
+		params.Set("page", fmt.Sprintf("%d", l.Page))
 	}
-
 	if l.PerPage != 0 {
-		if url != "" {
-			url += "&"
-		}
-		url += fmt.Sprintf("per_page=%d", l.PerPage)
+		params.Set("per_page", fmt.Sprintf("%d", l.PerPage))
 	}
 
-	return
+	return params
+}
+
+// Params generates a URL values from SearchOptions fields
+func (s *SearchOptions) Params() url.Values {
+	if s == nil {
+		return url.Values{}
+	}
+
+	params := s.GetOptions.Params()
+	params.Set("search", s.Search)
+	return params
 }
 
 // meta contains pagination information

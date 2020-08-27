@@ -49,7 +49,7 @@ type BatchServiceOp struct {
 
 // Get returns batch details
 func (s *BatchServiceOp) Get(batchID string, getOpt *GetOptions) (*Batch, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", batchBasePath, batchID, params)
 	batch := new(Batch)
 
@@ -63,7 +63,7 @@ func (s *BatchServiceOp) Get(batchID string, getOpt *GetOptions) (*Batch, *Respo
 
 // List returns batches on a project
 func (s *BatchServiceOp) List(projectID string, listOpt *ListOptions) (batches []Batch, resp *Response, err error) {
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, batchBasePath, params)
 	subset := new(batchesList)
 	resp, err = s.client.DoRequest("GET", path, nil, subset)

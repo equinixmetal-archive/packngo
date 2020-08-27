@@ -48,7 +48,7 @@ func TestAccVirtualNetworks(t *testing.T) {
 	}
 
 	l, _, err = c.ProjectVirtualNetworks.List(projectID,
-		&ListOptions{Includes: []string{"assigned_to"}})
+		&ListOptions{GetOptions: GetOptions{Includes: []string{"assigned_to"}}})
 	if err != nil {
 		t.Fatal(err)
 	}

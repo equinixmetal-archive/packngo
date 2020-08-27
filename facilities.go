@@ -44,7 +44,7 @@ type FacilityServiceOp struct {
 // List returns all facilities
 func (s *FacilityServiceOp) List(listOpt *ListOptions) ([]Facility, *Response, error) {
 	root := new(facilityRoot)
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	path := fmt.Sprintf("%s?%s", facilityBasePath, params)
 
 	resp, err := s.client.DoRequest("GET", path, nil, root)
