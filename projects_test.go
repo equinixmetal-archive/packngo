@@ -314,3 +314,32 @@ func TestAccProjectListEvents(t *testing.T) {
 	}
 
 }
+
+func TestAccProjectListSSHKeys(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	key := createKey(t, c, projectID)
+	defer c.SSHKeys.Delete(key.ID)
+
+	keys, _, err := c.Projects.ListSSHKeys(projectID, &SearchOptions{Search: key.Label})
+	if err != nil {
+		t.Fatalf("failed to list project sshkeys: %v", err)
+	}
+
+	if len(keys) != 1 {
+		t.Fatal("there should be exactly one key for the project")
+	}
+
+	for _, k := range keys {
+		if k.ID == key.ID {
+			if len(k.Owner.Href) == 0 {
+				t.Error("new Key doesn't have owner URL set")
+			}
+			return
+		}
+	}
+	t.Error("failed to find created project key in list of project keys retrieved")
+}

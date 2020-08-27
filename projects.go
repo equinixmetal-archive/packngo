@@ -15,6 +15,7 @@ type ProjectService interface {
 	Delete(string) (*Response, error)
 	ListBGPSessions(projectID string, listOpt *ListOptions) ([]BGPSession, *Response, error)
 	ListEvents(string, *ListOptions) ([]Event, *Response, error)
+	ListSSHKeys(projectID string, searchOpt *SearchOptions) ([]SSHKey, *Response, error)
 }
 
 type projectsRoot struct {
@@ -164,6 +165,23 @@ func (s *ProjectServiceOp) ListBGPSessions(projectID string, listOpt *ListOption
 
 		return
 	}
+}
+
+// ListSSHKeys returns all SSH Keys associated with the project
+func (s *ProjectServiceOp) ListSSHKeys(projectID string, searchOpt *SearchOptions) (sshKeys []SSHKey, resp *Response, err error) {
+	params := urlQuery(searchOpt)
+	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, sshKeyBasePath, params)
+
+	subset := new(sshKeyRoot)
+
+	resp, err = s.client.DoRequest("GET", path, nil, subset)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	sshKeys = append(sshKeys, subset.SSHKeys...)
+
+	return
 }
 
 // ListEvents returns list of project events
