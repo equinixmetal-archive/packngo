@@ -66,7 +66,7 @@ func (p ProjectUpdateRequest) String() string {
 
 // ProjectServiceOp implements ProjectService
 type ProjectServiceOp struct {
-	client *Client
+	client requestDoer
 }
 
 // List returns the user's projects

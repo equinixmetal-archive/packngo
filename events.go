@@ -44,7 +44,7 @@ func (s *EventServiceOp) Get(eventID string, getOpt *GetOptions) (*Event, *Respo
 }
 
 // list helper function for all event functions
-func listEvents(client *Client, path string, listOpt *ListOptions) (events []Event, resp *Response, err error) {
+func listEvents(client requestDoer, path string, listOpt *ListOptions) (events []Event, resp *Response, err error) {
 	params := urlQuery(listOpt)
 	path = fmt.Sprintf("%s?%s", path, params)
 

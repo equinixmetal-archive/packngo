@@ -1,6 +1,8 @@
 package packngo
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -342,4 +344,63 @@ func TestAccProjectListSSHKeys(t *testing.T) {
 		}
 	}
 	t.Error("failed to find created project key in list of project keys retrieved")
+}
+
+func TestProjectServiceOp_ListSSHKeys(t *testing.T) {
+	type fields struct {
+		client requestDoer
+	}
+	type args struct {
+		projectID string
+		searchOpt *SearchOptions
+	}
+	tests := []struct {
+		name        string
+		fields      fields
+		args        args
+		wantSshKeys []SSHKey
+		wantResp    *Response
+		wantErr     bool
+	}{
+		{
+			name: "RequestIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					if v, ok := v.(*sshKeyRoot); ok {
+						v.SSHKeys = []SSHKey{{Label: "foo"}}
+					}
+					return &Response{}, nil
+				},
+			}},
+			wantResp:    &Response{},
+			wantSshKeys: []SSHKey{{Label: "foo"}},
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &ProjectServiceOp{
+				client: tt.fields.client,
+			}
+			gotSshKeys, gotResp, err := s.ListSSHKeys(tt.args.projectID, tt.args.searchOpt)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ProjectServiceOp.ListSSHKeys() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotSshKeys, tt.wantSshKeys) {
+				t.Errorf("ProjectServiceOp.ListSSHKeys() gotSshKeys = %v, want %v", gotSshKeys, tt.wantSshKeys)
+			}
+			if !reflect.DeepEqual(gotResp, tt.wantResp) {
+				t.Errorf("ProjectServiceOp.ListSSHKeys() gotResp = %v, want %v", gotResp, tt.wantResp)
+			}
+		})
+	}
 }
