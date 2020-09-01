@@ -51,7 +51,7 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 	}
 
 	smrs, _, err := c.SpotMarketRequests.List(projectID,
-		&ListOptions{GetOptions: GetOptions{Includes: []string{"devices,project,plan"}}})
+		&ListOptions{Includes: []string{"devices,project,plan"}})
 	if err != nil {
 		t.Fatal(err)
 	}

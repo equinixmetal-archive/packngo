@@ -78,12 +78,7 @@ func (s *APIKeyServiceOp) UserList(lopts *ListOptions) ([]APIKey, *Response, err
 func (s *APIKeyServiceOp) ProjectGet(projectID, apiKeyID string, getOpt *GetOptions) (*APIKey, error) {
 	var lopts *ListOptions
 	if getOpt != nil {
-		lopts = &ListOptions{
-			GetOptions: GetOptions{
-				Includes: getOpt.Includes,
-				Excludes: getOpt.Excludes,
-			},
-		}
+		lopts = &ListOptions{Includes: getOpt.Includes, Excludes: getOpt.Excludes}
 	}
 	pkeys, _, err := s.ProjectList(projectID, lopts)
 	if err != nil {
@@ -101,12 +96,7 @@ func (s *APIKeyServiceOp) ProjectGet(projectID, apiKeyID string, getOpt *GetOpti
 func (s *APIKeyServiceOp) UserGet(apiKeyID string, getOpt *GetOptions) (*APIKey, error) {
 	var lopts *ListOptions
 	if getOpt != nil {
-		lopts = &ListOptions{
-			GetOptions: GetOptions{
-				Includes: getOpt.Includes,
-				Excludes: getOpt.Excludes,
-			},
-		}
+		lopts = &ListOptions{Includes: getOpt.Includes, Excludes: getOpt.Excludes}
 	}
 	ukeys, _, err := s.UserList(lopts)
 	if err != nil {

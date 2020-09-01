@@ -10,11 +10,7 @@ func TestAccPlans(t *testing.T) {
 
 	c, stopRecord := setup(t)
 	defer stopRecord()
-	l, _, err := c.Plans.List(&ListOptions{
-		GetOptions: GetOptions{
-			Includes: []string{"available_in"},
-		},
-	})
+	l, _, err := c.Plans.List(&ListOptions{Includes: []string{"available_in"}})
 
 	avail := map[string][]string{}
 	for _, p := range l {

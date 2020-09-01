@@ -11,11 +11,7 @@ func TestAccFacilities(t *testing.T) {
 	c, stopRecord := setup(t)
 	defer stopRecord()
 
-	l, _, err := c.Facilities.List(
-		&ListOptions{
-			GetOptions: GetOptions{Includes: []string{"address"}},
-		},
-	)
+	l, _, err := c.Facilities.List(&ListOptions{Includes: []string{"address"}})
 	if err != nil {
 		t.Fatal(err)
 	}

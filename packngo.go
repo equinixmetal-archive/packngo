@@ -60,9 +60,26 @@ type GetOptions struct {
 	Excludes []string `url:"excludes,omitempty"`
 }
 
+// GetOptions returns GetOptions from GetOptions (and is nil-receiver safe)
+func (g *GetOptions) GetOptions() *GetOptions {
+	getOpts := GetOptions{}
+	if g != nil {
+		getOpts.Includes = g.Includes
+		getOpts.Excludes = g.Excludes
+	}
+	return &getOpts
+}
+
 // ListOptions are options common to Packet API paginated GET requests
 type ListOptions struct {
-	GetOptions
+	// avoid embedding GetOptions (packngo-breaking-change) for now
+
+	// Includes are a list of fields to expand in the request results.
+	Includes []string `url:"includes,omitempty"`
+
+	// Excludes reduce the size of the API response by removing nested objects
+	// that may be returned.
+	Excludes []string `url:"excludes,omitempty"`
 
 	// Page is the page of results to retrieve for paginated result sets
 	Page int `url:"page,omitempty"`
@@ -72,12 +89,50 @@ type ListOptions struct {
 	PerPage int `url:"per_page,omitempty"`
 }
 
+// GetOptions returns GetOptions from ListOptions (and is nil-receiver safe)
+func (l *ListOptions) GetOptions() *GetOptions {
+	getOpts := GetOptions{}
+	if l != nil {
+		getOpts.Includes = l.Includes
+		getOpts.Excludes = l.Excludes
+	}
+	return &getOpts
+}
+
 // SearchOptions are options common to API GET requests that include a
 // multi-field search filter.
 type SearchOptions struct {
-	GetOptions
+	// avoid embedding GetOptions (for similar behavior to ListOptions)
 
+	// Includes are a list of fields to expand in the request results.
+	Includes []string `url:"includes,omitempty"`
+
+	// Excludes reduce the size of the API response by removing nested objects
+	// that may be returned.
+	Excludes []string `url:"excludes,omitempty"`
+
+	// Search is a special API query parameter that, for resources that support
+	// it, will filter results to those with any one of various fields matching
+	// the supplied keyword.  For example, a resource may have a defined search
+	// behavior matches either a name or a fingerprint field, while another
+	// resource may match entirely different fields.  Search is currently
+	// implemented for SSHKeys and uses an exact match.
 	Search string `url:"search,omitempty"`
+}
+
+// GetOptions returns GetOptions from ListOptions (and is nil-receiver safe)
+func (s *SearchOptions) GetOptions() *GetOptions {
+	getOpts := GetOptions{}
+	if s != nil {
+		getOpts.Includes = s.Includes
+		getOpts.Excludes = s.Excludes
+	}
+	return &getOpts
+}
+
+// OptionsGetter provides GetOptions
+type OptionsGetter interface {
+	GetOptions() *GetOptions
 }
 
 func makeSureGetOptionsInclude(g *GetOptions, s string) *GetOptions {
@@ -92,7 +147,7 @@ func makeSureGetOptionsInclude(g *GetOptions, s string) *GetOptions {
 
 func makeSureListOptionsInclude(l *ListOptions, s string) *ListOptions {
 	if l == nil {
-		return &ListOptions{GetOptions: GetOptions{Includes: []string{s}}}
+		return &ListOptions{Includes: []string{s}}
 	}
 	if !contains(l.Includes, s) {
 		l.Includes = append(l.Includes, s)
@@ -104,6 +159,12 @@ type paramsReady interface {
 	Params() url.Values
 }
 
+var (
+	_ paramsReady = &GetOptions{}
+	_ paramsReady = &ListOptions{}
+	_ paramsReady = &SearchOptions{}
+)
+
 func urlQuery(p paramsReady) string {
 	return p.Params().Encode()
 }
@@ -114,7 +175,6 @@ func (g *GetOptions) Params() url.Values {
 	if g == nil {
 		return params
 	}
-
 	if len(g.Includes) != 0 {
 		params.Set("include", strings.Join(g.Includes, ","))
 	}
@@ -123,7 +183,6 @@ func (g *GetOptions) Params() url.Values {
 	}
 
 	return params
-
 }
 
 // Params generates URL values from ListOptions fields
@@ -131,7 +190,7 @@ func (l *ListOptions) Params() url.Values {
 	if l == nil {
 		return url.Values{}
 	}
-	params := l.GetOptions.Params()
+	params := l.GetOptions().Params()
 
 	if l.Page != 0 {
 		params.Set("page", fmt.Sprintf("%d", l.Page))
@@ -149,7 +208,7 @@ func (s *SearchOptions) Params() url.Values {
 		return url.Values{}
 	}
 
-	params := s.GetOptions.Params()
+	params := s.GetOptions().Params()
 	params.Set("search", s.Search)
 	return params
 }

@@ -208,9 +208,7 @@ func TestAccListProjects(t *testing.T) {
 	}
 
 	listOpt := &ListOptions{
-		GetOptions: GetOptions{
-			Includes: []string{"members"},
-		},
+		Includes: []string{"members"},
 	}
 	projs, _, err := c.Projects.List(listOpt)
 	if err != nil {
@@ -358,7 +356,7 @@ func TestProjectServiceOp_ListSSHKeys(t *testing.T) {
 		name        string
 		fields      fields
 		args        args
-		wantSshKeys []SSHKey
+		wantSSHKeys []SSHKey
 		wantResp    *Response
 		wantErr     bool
 	}{
@@ -373,7 +371,7 @@ func TestProjectServiceOp_ListSSHKeys(t *testing.T) {
 				},
 			}},
 			wantResp:    &Response{},
-			wantSshKeys: []SSHKey{{Label: "foo"}},
+			wantSSHKeys: []SSHKey{{Label: "foo"}},
 		},
 		{
 			name: "ErrorIsHandled",
@@ -390,13 +388,13 @@ func TestProjectServiceOp_ListSSHKeys(t *testing.T) {
 			s := &ProjectServiceOp{
 				client: tt.fields.client,
 			}
-			gotSshKeys, gotResp, err := s.ListSSHKeys(tt.args.projectID, tt.args.searchOpt)
+			gotSSHKeys, gotResp, err := s.ListSSHKeys(tt.args.projectID, tt.args.searchOpt)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ProjectServiceOp.ListSSHKeys() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(gotSshKeys, tt.wantSshKeys) {
-				t.Errorf("ProjectServiceOp.ListSSHKeys() gotSshKeys = %v, want %v", gotSshKeys, tt.wantSshKeys)
+			if !reflect.DeepEqual(gotSSHKeys, tt.wantSSHKeys) {
+				t.Errorf("ProjectServiceOp.ListSSHKeys() gotSSHKeys = %v, want %v", gotSSHKeys, tt.wantSSHKeys)
 			}
 			if !reflect.DeepEqual(gotResp, tt.wantResp) {
 				t.Errorf("ProjectServiceOp.ListSSHKeys() gotResp = %v, want %v", gotResp, tt.wantResp)
