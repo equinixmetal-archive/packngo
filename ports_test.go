@@ -37,7 +37,7 @@ func TestAccPort1E(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteDevice(t, c, d.ID)
+	defer deleteDevice(t, c, d.ID, false)
 	dID := d.ID
 
 	// If you need to test this, run a 1e device in your project in a faciltiy
@@ -46,20 +46,18 @@ func TestAccPort1E(t *testing.T) {
 
 	/*
 
-		c := setup(t)
+				c, stopRecord := setup(t)
+		defer stopRecord()
 
-		dID := "414f52d3-022a-420d-a521-915fdcc66801"
-		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-		fac := "atl1"
-		d := &Device{}
-		err := fmt.Errorf("hi")
+				dID := "414f52d3-022a-420d-a521-915fdcc66801"
+				projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
+				fac := "atl1"
+				d := &Device{}
+				err := fmt.Errorf("hi")
 
 	*/
 
-	d, err = waitDeviceActive(dID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d = waitDeviceActive(t, c, dID)
 
 	nType, err := c.DevicePorts.DeviceNetworkType(d.ID)
 	if err != nil {
@@ -165,7 +163,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteDevice(t, c, d.ID)
+	defer deleteDevice(t, c, d.ID, false)
 	dID := d.ID
 
 	// If you need to test this, run a ${plan} device in your project in a
@@ -174,23 +172,21 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 	// Fill the values from youri testing device, project and facility.
 
 	/*
-		c := setup(t)
+				c, stopRecord := setup(t)
+		defer stopRecord()
 
-		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-		dID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
-		fac := "dfw2"
+				projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
+				dID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
+				fac := "dfw2"
 
-		//dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
-		//fac := "ewr1"
+				//dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
+				//fac := "ewr1"
 
-		d := &Device{}
-		err := fmt.Errorf("hi")
+				d := &Device{}
+				err := fmt.Errorf("hi")
 	*/
 
-	d, err = waitDeviceActive(dID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d = waitDeviceActive(t, c, dID)
 
 	nType, err := c.DevicePorts.DeviceNetworkType(d.ID)
 	if err != nil {
@@ -325,7 +321,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteDevice(t, c, d.ID)
+	defer deleteDevice(t, c, d.ID, false)
 	dID := d.ID
 	/*
 
@@ -334,7 +330,8 @@ func testL2L3Convert(t *testing.T, plan string) {
 		// and then comment code from MARK_2 to here and uncomment following.
 		// Fill the values from youri testing device, project and facility.
 
-		c := setup(t)
+		c, stopRecord := setup(t)
+		defer stopRecord()
 
 		//	dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
 		dID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
@@ -345,10 +342,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 		err := fmt.Errorf("hi")
 	*/
 
-	d, err = waitDeviceActive(dID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d = waitDeviceActive(t, c, dID)
 
 	nType, err := c.DevicePorts.DeviceNetworkType(d.ID)
 	if err != nil {
@@ -452,7 +446,8 @@ func deviceToNetworkType(t *testing.T, c *Client, deviceID, targetNetworkType st
 func TestXXX(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
-	c := setup(t)
+	c, stopRecord := setup(t)
+defer stopRecord()
 	//	deviceID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
 	deviceID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
 	d, _, err := c.Devices.Get(deviceID, nil)
@@ -490,13 +485,10 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteDevice(t, c, d.ID)
+	defer deleteDevice(t, c, d.ID, false)
 	deviceID := d.ID
 
-	d, err = waitDeviceActive(deviceID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d = waitDeviceActive(t, c, deviceID)
 
 	networkType, err := d.GetNetworkType()
 	if err != nil {
@@ -546,11 +538,8 @@ func TestAccPortNativeVlan(t *testing.T) {
 	}
 	deviceID := d.ID
 
-	d, err = waitDeviceActive(deviceID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteDevice(t, c, d.ID)
+	d = waitDeviceActive(t, c, deviceID)
+	defer deleteDevice(t, c, d.ID, false)
 
 	deviceToNetworkType(t, c, deviceID, "hybrid")
 

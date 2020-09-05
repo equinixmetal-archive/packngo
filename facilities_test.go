@@ -8,7 +8,8 @@ import (
 func TestAccFacilities(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 
 	l, _, err := c.Facilities.List(&ListOptions{Includes: []string{"address"}})
 	if err != nil {

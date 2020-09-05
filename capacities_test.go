@@ -7,7 +7,8 @@ import (
 
 func TestAccCheckCapacity(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 
 	input := &CapacityInput{
 		[]ServerInfo{

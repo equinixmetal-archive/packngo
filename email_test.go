@@ -7,7 +7,8 @@ import (
 func TestAccCreateEmail(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	updatedAddress := "update@domain.com"
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 
 	req := &EmailRequest{
 		Address: "test@domain.com",

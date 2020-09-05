@@ -34,12 +34,13 @@ related API documentation will benefit users.
 
 ### Linters
 
-golangci-lint is used to verify that the style of the code remains consistent.
-
-`make lint` can be used to verify style before creating a pull request.
+`golangci-lint` is used to verify that the style of the code remains consistent.
 
 Before committing, it's a good idea to run `goimports -w .`.
-([goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports?tab=doc))
+([goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports?tab=doc)) and
+`gofmt -w *.go`. ([gofmt](https://golang.org/cmd/gofmt/))
+
+`make lint` can be used to verify style before creating a pull request.
 
 ## Building and Testing
 
@@ -62,9 +63,10 @@ make test BUILD=local
 
 ### Acceptance Tests
 
-If you want to run tests against the actual Packet API, you must set envvar
-`PACKET_TEST_ACTUAL_API` to non-empty string for the `go test`. The device tests
-wait for the device creation, so it's best to run a few in parallel.
+If you want to run tests against the actual Packet API, you must set the
+environment variable `PACKET_TEST_ACTUAL_API` to a non-empty string and set
+`PACKNGO_TEST_RECORDER` to `disabled`. The device tests wait for the device
+creation, so it's best to run a few in parallel.
 
 To run a particular test, you can do
 
@@ -78,6 +80,21 @@ string, for example:
 ```sh
 PACKNGO_DEBUG=1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccVolumeUpdate
 ```
+
+### Test Fixtures
+
+By default, the tests will playback from recorded HTTP response fixtures
+(`PACKNGO_TEST_RECORDER` is treated as `play` when empty).
+
+When adding new tests, record the HTTP interactions to fixtures by setting the
+environment variable `PACKNGO_TEST_RECORDER` to `record`.
+
+The fixtures are automatically named according to the test they were run from.
+They are placed in `fixtures/`.  The API token used during authentication is
+automatically removed from these fixtures. Nonetheless, caution should be
+exercised before committing any fixtures into the project.  Account details
+includes API tokens, contact, and payment details could easily be leaked by
+committing fixtures that haven't been thoroughly reviewed.
 
 ### Automation (CI/CD)
 

@@ -36,10 +36,7 @@ func TestAccBGPSession(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	d, err = waitDeviceActive(d.ID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d = waitDeviceActive(t, c, d.ID)
 
 	aTrue := true
 

@@ -6,7 +6,8 @@ import (
 
 func TestAccListNotifications(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 
 	notifications, _, err := c.Notifications.List(nil)
 	if err != nil {

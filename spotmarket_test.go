@@ -6,7 +6,8 @@ func TestAccSpotMarketBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	prices, _, err := c.SpotMarket.Prices()
 	if err != nil {
 		t.Fatal(err)

@@ -7,7 +7,8 @@ import (
 func TestAccOS(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	l, _, err := c.OperatingSystems.List()
 
 	if len(l) == 0 {

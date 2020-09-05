@@ -21,10 +21,7 @@ func createBGPDevice(t *testing.T, c *Client, projectID string) *Device {
 		t.Fatal(err)
 	}
 
-	d, err = waitDeviceActive(d.ID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d = waitDeviceActive(t, c, d.ID)
 
 	aTrue := true
 	_, _, err = c.BGPSessions.Create(d.ID,

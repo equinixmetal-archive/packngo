@@ -8,7 +8,8 @@ import (
 func TestAccOrgList(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	defer organizationTeardown(c)
 
 	rs := testProjectPrefix + randString8()
@@ -49,7 +50,8 @@ func TestAccOrgList(t *testing.T) {
 func TestAccOrgBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	defer organizationTeardown(c)
 
 	rs := testProjectPrefix + randString8()
@@ -107,7 +109,8 @@ func TestAccOrgListPaymentMethods(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
 	// setup
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	defer organizationTeardown(c)
 
 	rs := testProjectPrefix + randString8()

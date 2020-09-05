@@ -58,7 +58,7 @@ func TestAccInstanceBatches(t *testing.T) {
 	}
 
 	for _, d := range batch.Devices {
-		waitDeviceActive(d.ID, c)
+		waitDeviceActive(t, c, d.ID)
 	}
 
 	_, err = c.Batches.Delete(batchID, true)

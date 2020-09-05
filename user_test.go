@@ -7,7 +7,8 @@ import (
 func TestAccUserCurrent(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 
 	u, _, err := c.Users.Current()
 	if err != nil {
@@ -22,7 +23,8 @@ func TestAccUserCurrent(t *testing.T) {
 func TestAccUsersList(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 
 	us, _, err := c.Users.List(nil)
 	if err != nil {

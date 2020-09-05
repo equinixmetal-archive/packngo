@@ -7,7 +7,8 @@ import (
 func TestAccProjectBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	defer projectTeardown(c)
 
 	rs := testProjectPrefix + randString8()
@@ -49,7 +50,8 @@ func TestAccProjectBasic(t *testing.T) {
 func TestAccProjectExtra(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	defer projectTeardown(c)
 	u, _, err := c.Users.Current()
 	if err != nil {
@@ -107,7 +109,8 @@ func TestAccProjectExtra(t *testing.T) {
 func TestAccCreateOrgProject(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	defer projectTeardown(c)
 
 	u, _, err := c.Users.Current()
@@ -131,7 +134,8 @@ func TestAccCreateOrgProject(t *testing.T) {
 func TestAccCreateNonDefaultOrgProject(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	defer organizationTeardown(c)
 	defer projectTeardown(c)
 
@@ -177,7 +181,8 @@ func TestAccCreateNonDefaultOrgProject(t *testing.T) {
 
 func TestAccListProjects(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 
 	defer projectTeardown(c)
 
@@ -220,7 +225,8 @@ func TestAccListProjects(t *testing.T) {
 
 func TestAccProjectListPagination(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	defer projectTeardown(c)
 	for i := 0; i < 3; i++ {
 		pcr := ProjectCreateRequest{
