@@ -211,6 +211,18 @@ type Client struct {
 	Volumes                VolumeService
 }
 
+// requestDoer provides methods for making HTTP requests and receiving the
+// response, errors, and a structured result
+//
+// This interface is used in *ServiceOp as a mockable alternative to a full
+// Client object.
+type requestDoer interface {
+	NewRequest(method, path string, body interface{}) (*retryablehttp.Request, error)
+	Do(req *retryablehttp.Request, v interface{}) (*Response, error)
+	DoRequest(method, path string, body, v interface{}) (*Response, error)
+	DoRequestWithHeader(method string, headers map[string]string, path string, body, v interface{}) (*Response, error)
+}
+
 // NewRequest inits a new http request with the proper headers
 func (c *Client) NewRequest(method, path string, body interface{}) (*retryablehttp.Request, error) {
 	// relative path to append to the endpoint url, no leading slash please
