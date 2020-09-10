@@ -83,11 +83,26 @@ PACKNGO_DEBUG=1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccVolumeUpdate
 
 ### Test Fixtures
 
-By default, the tests will playback from recorded HTTP response fixtures
-(`PACKNGO_TEST_RECORDER` is treated as `play` when empty).
+By default, `go test ./...` will skip most of the tests unless
+`PACKNGO_TEST_ACTUAL_API` is non-empty.
 
-When adding new tests, record the HTTP interactions to fixtures by setting the
-environment variable `PACKNGO_TEST_RECORDER` to `record`.
+With the `PACKNGO_TEST_ACTUAL_API` environment variable set, tests will be run
+against the Packet API, creating real infrastructure and incurring costs.
+
+The `PACKNGO_TEST_RECORDER` variable can be used to record and playback API
+responses to test code changes without the delay and costs of making actual API
+calls. When unset, `PACKNGO_TEST_RECORDER` acts as though it was set to
+`disabled`. This is the default behavior. This default behavior may change in
+the future once fixtures are available for all tests.
+
+When `PACKNGO_TEST_RECORDER` is set to `play`, tests will playback API responses
+from recorded HTTP response fixtures. This is idea for refactoring and making
+changes to request and response handling without introducing changes to the data
+sent or received by the Packet API.
+
+When adding support for new end-points, recorded test sessions should be added.
+Record the HTTP interactions to fixtures by setting the environment variable
+`PACKNGO_TEST_RECORDER` to `record`.
 
 The fixtures are automatically named according to the test they were run from.
 They are placed in `fixtures/`.  The API token used during authentication is

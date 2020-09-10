@@ -25,6 +25,8 @@ const (
 	testRecorderRecord   = "record"
 	testRecorderPlay     = "play"
 	testRecorderDisabled = "disabled"
+
+	recorderDefaultMode = recorder.ModeDisabled
 )
 
 func testFacility() string {
@@ -133,9 +135,12 @@ func testRecordMode() (recorder.Mode, error) {
 	switch strings.ToLower(modeRaw) {
 	case testRecorderRecord:
 		mode = recorder.ModeRecording
-	case testRecorderPlay, "":
+	case testRecorderPlay:
 		mode = recorder.ModeReplaying
 	case testRecorderDisabled:
+		mode = recorder.ModeDisabled
+	case "":
+		mode = recorderDefaultMode
 	default:
 		return recorder.ModeDisabled, fmt.Errorf("invalid %s mode: %s", testRecorderEnv, modeRaw)
 	}
