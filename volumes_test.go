@@ -51,7 +51,7 @@ func TestAccVolumeBasic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.Volumes.Delete(v.ID)
+	defer deleteVolume(t, c, v.ID)
 
 	v, _, err = c.Volumes.Get(v.ID,
 		&GetOptions{Includes: []string{"snapshot_policies", "facility"}})
@@ -109,7 +109,7 @@ func TestAccVolumeUpdate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.Volumes.Delete(v.ID)
+	defer deleteVolume(t, c, v.ID)
 
 	vDesc := "new Desc"
 
@@ -194,7 +194,7 @@ func TestAccVolumeLargeList(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer c.Volumes.Delete(v.ID)
+		defer deleteVolume(t, c, v.ID)
 		createdVolumes[i] = *v
 	}
 

@@ -87,7 +87,7 @@ func TestAccPort1E(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.ProjectVirtualNetworks.Delete(vlan.ID)
+	defer deleteProjectVirtualNetwork(t, c, vlan.ID)
 	par := PortAssignRequest{
 		PortID:           eth1.ID,
 		VirtualNetworkID: vlan.ID}
@@ -228,7 +228,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.ProjectVirtualNetworks.Delete(vlan.ID)
+	defer deleteProjectVirtualNetwork(t, c, vlan.ID)
 
 	par := PortAssignRequest{
 		PortID:           eth1.ID,
@@ -385,7 +385,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.ProjectVirtualNetworks.Delete(vlan.ID)
+	defer deleteProjectVirtualNetwork(t, c, vlan.ID)
 
 	par := PortAssignRequest{
 		PortID:           bond0.ID,
@@ -552,12 +552,12 @@ func TestAccPortNativeVlan(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.ProjectVirtualNetworks.Delete(vlan1.ID)
+	defer deleteProjectVirtualNetwork(t, c, vlan1.ID)
 	vlan2, _, err := c.ProjectVirtualNetworks.Create(&vncr)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.ProjectVirtualNetworks.Delete(vlan2.ID)
+	defer deleteProjectVirtualNetwork(t, c, vlan2.ID)
 
 	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
 	if err != nil {
@@ -569,18 +569,18 @@ func TestAccPortNativeVlan(t *testing.T) {
 	par1 := PortAssignRequest{
 		PortID:           eth1.ID,
 		VirtualNetworkID: vlan1.ID}
-	p, _, err := c.DevicePorts.Assign(&par1)
+	_, _, err = c.DevicePorts.Assign(&par1)
 	if err != nil {
 		t.Fatal(err)
 	}
 	par2 := PortAssignRequest{
 		PortID:           eth1.ID,
 		VirtualNetworkID: vlan2.ID}
-	p, _, err = c.DevicePorts.Assign(&par2)
+	_, _, err = c.DevicePorts.Assign(&par2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	p, _, err = c.DevicePorts.AssignNative(&par1)
+	_, _, err = c.DevicePorts.AssignNative(&par1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -595,15 +595,15 @@ func TestAccPortNativeVlan(t *testing.T) {
 	} else {
 		t.Fatal("No native virtual network at the test device")
 	}
-	p, _, err = c.DevicePorts.UnassignNative(eth1.ID)
+	_, _, err = c.DevicePorts.UnassignNative(eth1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	p, _, err = c.DevicePorts.Unassign(&par2)
+	_, _, err = c.DevicePorts.Unassign(&par2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	p, _, err = c.DevicePorts.Unassign(&par1)
+	p, _, err := c.DevicePorts.Unassign(&par1)
 	if err != nil {
 		t.Fatal(err)
 	}

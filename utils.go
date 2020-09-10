@@ -9,14 +9,22 @@ import (
 
 var (
 	timestampType = reflect.TypeOf(Timestamp{})
-	Facilities    = []string{
+
+	// Facilities DEPRECATED See Facilities.List
+	Facilities = []string{
 		"yyz1", "nrt1", "atl1", "mrs1", "hkg1", "ams1",
 		"ewr1", "sin1", "dfw1", "lax1", "syd1", "sjc1",
 		"ord1", "iad1", "fra1", "sea1", "dfw2"}
+
+	// FacilityFeatures DEPRECATED See Facilities.List
 	FacilityFeatures = []string{
 		"baremetal", "layer_2", "backend_transfer", "storage", "global_ipv4"}
+
+	// UtilizationLevels DEPRECATED
 	UtilizationLevels = []string{"unavailable", "critical", "limited", "normal"}
-	DevicePlans       = []string{"c2.medium.x86", "g2.large.x86",
+
+	// DevicePlans DEPRECATED see Plans.List
+	DevicePlans = []string{"c2.medium.x86", "g2.large.x86",
 		"m2.xlarge.x86", "x2.xlarge.x86", "baremetal_2a", "baremetal_2a2",
 		"baremetal_1", "baremetal_3", "baremetal_2", "baremetal_s",
 		"baremetal_0", "baremetal_1e",
@@ -24,18 +32,23 @@ var (
 )
 
 // Stringify creates a string representation of the provided message
+// DEPRECATED This is used internally and should not be exported by packngo
 func Stringify(message interface{}) string {
 	var buf bytes.Buffer
 	v := reflect.ValueOf(message)
-	stringifyValue(&buf, v)
+	// TODO(displague) errors here are not reported
+	_ = stringifyValue(&buf, v)
 	return buf.String()
 }
 
 // StreamToString converts a reader to a string
-func StreamToString(stream io.Reader) string {
+// DEPRECATED This is unused and should not be exported by packngo
+func StreamToString(stream io.Reader) (string, error) {
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(stream)
-	return buf.String()
+	if _, err := buf.ReadFrom(stream); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
 
 // contains tells whether a contains x.
@@ -49,41 +62,55 @@ func contains(a []string, x string) bool {
 }
 
 // stringifyValue was graciously cargoculted from the goprotubuf library
-func stringifyValue(w io.Writer, val reflect.Value) {
+func stringifyValue(w io.Writer, val reflect.Value) error {
 	if val.Kind() == reflect.Ptr && val.IsNil() {
-		w.Write([]byte("<nil>"))
-		return
+		_, err := w.Write([]byte("<nil>"))
+		return err
 	}
 
 	v := reflect.Indirect(val)
 
 	switch v.Kind() {
 	case reflect.String:
-		fmt.Fprintf(w, `"%s"`, v)
+		if _, err := fmt.Fprintf(w, `"%s"`, v); err != nil {
+			return err
+		}
 	case reflect.Slice:
-		w.Write([]byte{'['})
+		if _, err := w.Write([]byte{'['}); err != nil {
+			return err
+		}
 		for i := 0; i < v.Len(); i++ {
 			if i > 0 {
-				w.Write([]byte{' '})
+				if _, err := w.Write([]byte{' '}); err != nil {
+					return err
+				}
 			}
 
-			stringifyValue(w, v.Index(i))
+			if err := stringifyValue(w, v.Index(i)); err != nil {
+				return err
+			}
 		}
 
-		w.Write([]byte{']'})
-		return
+		if _, err := w.Write([]byte{']'}); err != nil {
+			return err
+		}
+		return nil
 	case reflect.Struct:
 		if v.Type().Name() != "" {
-			w.Write([]byte(v.Type().String()))
+			if _, err := w.Write([]byte(v.Type().String())); err != nil {
+				return err
+			}
 		}
 
 		// special handling of Timestamp values
 		if v.Type() == timestampType {
-			fmt.Fprintf(w, "{%s}", v.Interface())
-			return
+			_, err := fmt.Fprintf(w, "{%s}", v.Interface())
+			return err
 		}
 
-		w.Write([]byte{'{'})
+		if _, err := w.Write([]byte{'{'}); err != nil {
+			return err
+		}
 
 		var sep bool
 		for i := 0; i < v.NumField(); i++ {
@@ -96,20 +123,34 @@ func stringifyValue(w io.Writer, val reflect.Value) {
 			}
 
 			if sep {
-				w.Write([]byte(", "))
+				if _, err := w.Write([]byte(", ")); err != nil {
+					return err
+				}
 			} else {
 				sep = true
 			}
 
-			w.Write([]byte(v.Type().Field(i).Name))
-			w.Write([]byte{':'})
-			stringifyValue(w, fv)
+			if _, err := w.Write([]byte(v.Type().Field(i).Name)); err != nil {
+				return err
+			}
+			if _, err := w.Write([]byte{':'}); err != nil {
+				return err
+			}
+
+			if err := stringifyValue(w, fv); err != nil {
+				return err
+			}
 		}
 
-		w.Write([]byte{'}'})
+		if _, err := w.Write([]byte{'}'}); err != nil {
+			return err
+		}
 	default:
 		if v.CanInterface() {
-			fmt.Fprint(w, v.Interface())
+			if _, err := fmt.Fprint(w, v.Interface()); err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }

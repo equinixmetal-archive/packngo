@@ -283,7 +283,10 @@ func (c *Client) Do(req *retryablehttp.Request, v interface{}) (*Response, error
 	if v != nil {
 		// if v implements the io.Writer interface, return the raw response
 		if w, ok := v.(io.Writer); ok {
-			io.Copy(w, resp.Body)
+			_, err = io.Copy(w, resp.Body)
+			if err != nil {
+				return &response, err
+			}
 		} else {
 			err = json.NewDecoder(resp.Body).Decode(v)
 			if err != nil {
@@ -463,8 +466,15 @@ func checkResponse(r *http.Response) error {
 	errorResponse := &ErrorResponse{Response: r}
 	data, err := ioutil.ReadAll(r.Body)
 	// if the response has a body, populate the message in errorResponse
-	if err == nil && len(data) > 0 {
-		json.Unmarshal(data, errorResponse)
+	if err != nil {
+		return err
+	}
+
+	if len(data) > 0 {
+		err = json.Unmarshal(data, errorResponse)
+		if err != nil {
+			return err
+		}
 	}
 
 	return errorResponse

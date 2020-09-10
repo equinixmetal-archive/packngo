@@ -54,7 +54,7 @@ func TestAccBGPNeighbors(t *testing.T) {
 
 	d := createBGPDevice(t, c, projectID)
 
-	defer c.Devices.Delete(d.ID, false)
+	defer deleteDevice(t, c, d.ID, false)
 
 	bgpNeighbors, _, err := c.Devices.ListBGPNeighbors(d.ID, nil)
 	if err != nil {

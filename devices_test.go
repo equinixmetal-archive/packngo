@@ -36,6 +36,12 @@ func deleteDevice(t *testing.T, c *Client, id string, force bool) {
 	}
 }
 
+func deleteSpotMarketRequest(t *testing.T, c *Client, id string, force bool) {
+	if _, err := c.SpotMarketRequests.Delete(id, force); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func deleteSSHKey(t *testing.T, c *Client, id string) {
 	if _, err := c.SSHKeys.Delete(id); err != nil {
 		t.Fatal(err)
@@ -53,6 +59,19 @@ func deleteVolumeAttachments(t *testing.T, c *Client, id string) {
 		t.Fatal(err)
 	}
 }
+
+func deleteProjectIP(t *testing.T, c *Client, id string) {
+	if _, err := c.ProjectIPs.Remove(id); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func deleteProjectVirtualNetwork(t *testing.T, c *Client, id string) {
+	if _, err := c.ProjectVirtualNetworks.Delete(id); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestAccDeviceUpdate(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
@@ -377,7 +396,7 @@ func TestAccDeviceCreateWithReservedIP(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.ProjectIPs.Remove(reservation.ID)
+	defer deleteProjectIP(t, c, reservation.ID)
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
@@ -592,7 +611,7 @@ func TestAccDeviceAttachVolumeForceDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	v, _, err = c.Volumes.Get(v.ID,
+	_, _, err = c.Volumes.Get(v.ID,
 		&GetOptions{Includes: []string{"attachments.device"}})
 	if err != nil {
 		t.Fatal(err)
@@ -763,7 +782,7 @@ func TestAccDeviceCustomData(t *testing.T) {
 
 	dID := d.ID
 
-	d = waitDeviceActive(t, c, dID)
+	_ = waitDeviceActive(t, c, dID)
 
 	device, _, err := c.Devices.Get(dID, nil)
 	if err != nil {
@@ -875,7 +894,7 @@ func TestAccDeviceSSHKeys(t *testing.T) {
 	defer deleteDevice(t, c, d.ID, false)
 
 	dID := d.ID
-	d = waitDeviceActive(t, c, dID)
+	_ = waitDeviceActive(t, c, dID)
 
 	d, _, err = c.Devices.Get(dID, &GetOptions{Includes: []string{"ssh_keys"}})
 	if err != nil {
@@ -926,7 +945,7 @@ func TestAccDeviceListedSSHKeys(t *testing.T) {
 	}
 	defer deleteDevice(t, c, d.ID, false)
 	dID := d.ID
-	d = waitDeviceActive(t, c, dID)
+	_ = waitDeviceActive(t, c, dID)
 
 	d, _, err = c.Devices.Get(dID, &GetOptions{Includes: []string{"ssh_keys"}})
 	if err != nil {

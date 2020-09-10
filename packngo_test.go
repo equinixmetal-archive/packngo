@@ -130,19 +130,19 @@ func testRecorder(t *testing.T, name string, mode recorder.Mode) (*recorder.Reco
 
 func testRecordMode() (recorder.Mode, error) {
 	modeRaw := os.Getenv(testRecorderEnv)
-	mode := recorder.ModeDisabled
+	mode := recorderDefaultMode
 
 	switch strings.ToLower(modeRaw) {
 	case testRecorderRecord:
 		mode = recorder.ModeRecording
 	case testRecorderPlay:
 		mode = recorder.ModeReplaying
-	case testRecorderDisabled:
-		mode = recorder.ModeDisabled
 	case "":
-		mode = recorderDefaultMode
+		// no-op
+	case testRecorderDisabled:
+		// no-op
 	default:
-		return recorder.ModeDisabled, fmt.Errorf("invalid %s mode: %s", testRecorderEnv, modeRaw)
+		return mode, fmt.Errorf("invalid %s mode: %s", testRecorderEnv, modeRaw)
 	}
 	return mode, nil
 }
