@@ -58,10 +58,6 @@ func TestAccDeviceUpdate(t *testing.T) {
 	}
 	defer deleteDevice(t, c, d.ID)
 
-	if len(d.ProvisionEvents) != 10 {
-		t.Fatalf("10 provision events expected, but %d found", len(d.ProvisionEvents))
-	}
-
 	dID := d.ID
 
 	d, err = waitDeviceActive(dID, c)
@@ -115,10 +111,6 @@ func TestAccDeviceBasic(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer deleteDevice(t, c, d.ID)
-
-	if len(d.ProvisionEvents) != 10 {
-		t.Fatalf("10 provision events expected, but %d found", len(d.ProvisionEvents))
-	}
 
 	dID := d.ID
 
