@@ -159,12 +159,15 @@ type paramsReady interface {
 	Params() url.Values
 }
 
+// compile-time assertions that paramsReady is implemented
 var (
-	_ paramsReady = &GetOptions{}
-	_ paramsReady = &ListOptions{}
-	_ paramsReady = &SearchOptions{}
+	_ paramsReady = (*GetOptions)(nil)
+	_ paramsReady = (*ListOptions)(nil)
+	_ paramsReady = (*SearchOptions)(nil)
 )
 
+// urlQuery generates a URL query string ("?foo=bar") from any object that
+// implements the paramsReady interface
 func urlQuery(p paramsReady) string {
 	return p.Params().Encode()
 }
