@@ -35,11 +35,9 @@ func TestAccBGPSession(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer deleteDevice(t, c, d.ID, false)
 
-	d, err = waitDeviceActive(d.ID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d = waitDeviceActive(t, c, d.ID)
 
 	aTrue := true
 
@@ -111,6 +109,4 @@ func TestAccBGPSession(t *testing.T) {
 	if err == nil {
 		t.Fatal("Session not deleted")
 	}
-
-	c.Devices.Delete(d.ID, false)
 }

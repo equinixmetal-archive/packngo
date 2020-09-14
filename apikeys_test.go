@@ -60,7 +60,8 @@ func TestAccAPIKeyListProject(t *testing.T) {
 func TestAccAPIKeyListUser(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 
 	nKeys := 10
 
@@ -95,7 +96,8 @@ func TestAccAPIKeyListUser(t *testing.T) {
 func TestAccAPIKeyCreateUser(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	req := APIKeyCreateRequest{
 		Description: "PACKNGO_TEST_KEY_DELETE_ME-" + randString8(),
 		ReadOnly:    true,

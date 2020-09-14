@@ -97,10 +97,8 @@ func TestAccPublicIPReservation(t *testing.T) {
 			quantity, availableAddresses)
 	}
 
-	_, err = c.ProjectIPs.Remove(res.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
+	deleteProjectIP(t, c, res.ID)
+
 	_, _, err = c.ProjectIPs.Get(res.ID, nil)
 	if err == nil {
 		t.Fatalf("Reservation %s should be deleted at this point", res)

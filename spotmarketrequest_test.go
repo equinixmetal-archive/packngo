@@ -44,7 +44,7 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.SpotMarketRequests.Delete(smr.ID, true)
+	defer deleteSpotMarketRequest(t, c, smr.ID, true)
 
 	if smr.Project.ID != projectID {
 		t.Fatal("Strange project ID in SpotMarketReuqest:", smr.Project.ID)
@@ -111,43 +111,38 @@ func TestAccSpotMarketRequestPriceAware(t *testing.T) {
 
 out:
 	for {
-		select {
-		case <-time.Tick(5 * time.Second):
-			smr, _, err = c.SpotMarketRequests.Get(
-				smr.ID,
-				&GetOptions{Includes: []string{"devices"}},
-			)
-			if err != nil {
-				t.Fatal(err)
+		<-time.Tick(5 * time.Second)
+		smr, _, err = c.SpotMarketRequests.Get(
+			smr.ID,
+			&GetOptions{Includes: []string{"devices"}},
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+		activeDevs := 0
+		for _, d := range smr.Devices {
+			if d.State == "active" {
+				activeDevs++
 			}
-			activeDevs := 0
-			for _, d := range smr.Devices {
-				if d.State == "active" {
-					activeDevs++
-				}
-			}
-			if activeDevs == nDevices {
-				break out
-			}
+		}
+		if activeDevs == nDevices {
+			break out
 		}
 	}
 	log.Println("all devices active")
-	c.SpotMarketRequests.Delete(smr.ID, true)
+	defer deleteSpotMarketRequest(t, c, smr.ID, true)
 out2:
 	// wait for devices to disappear .. takes ~5 minutes
 	for {
-		select {
-		case <-time.Tick(5 * time.Second):
-			ds, _, err := c.Devices.List(projectID, nil)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if len(ds) > 0 {
-				log.Println(len(ds), "devices still exist")
-			} else {
-				break out2
-			}
-
+		<-time.Tick(5 * time.Second)
+		ds, _, err := c.Devices.List(projectID, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(ds) > 0 {
+			log.Println(len(ds), "devices still exist")
+		} else {
+			break out2
 		}
 	}
 }

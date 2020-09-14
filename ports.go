@@ -276,11 +276,11 @@ func (i *DevicePortServiceOp) Convert1BondDevice(d *Device, targetType string) e
 		}
 	}
 	if targetType == "hybrid" {
-		bond0, _, err = i.client.DevicePorts.Bond(bond0, false)
+		_, _, err = i.client.DevicePorts.Bond(bond0, false)
 		if err != nil {
 			return err
 		}
-		bond0, _, err = i.client.DevicePorts.PortToLayerThree(d.ID, "bond0")
+		_, _, err = i.client.DevicePorts.PortToLayerThree(d.ID, "bond0")
 		if err != nil {
 			return err
 		}
@@ -310,7 +310,7 @@ func (i *DevicePortServiceOp) Convert1BondDevice(d *Device, targetType string) e
 				return err
 			}
 		}
-		bond0, _, err = i.client.DevicePorts.PortToLayerTwo(d.ID, "bond0")
+		_, _, err = i.client.DevicePorts.PortToLayerTwo(d.ID, "bond0")
 		if err != nil {
 			return err
 		}

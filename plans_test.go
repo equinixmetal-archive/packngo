@@ -8,7 +8,8 @@ import (
 func TestAccPlans(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 	l, _, err := c.Plans.List(&ListOptions{Includes: []string{"available_in"}})
 
 	avail := map[string][]string{}

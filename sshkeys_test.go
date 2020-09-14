@@ -43,7 +43,7 @@ func TestAccSSHKeyList(t *testing.T) {
 	c, _, teardown := setupWithProject(t)
 	defer teardown()
 	key := createKey(t, c, "")
-	defer c.SSHKeys.Delete(key.ID)
+	defer deleteSSHKey(t, c, key.ID)
 
 	keys, _, err := c.SSHKeys.List()
 	if err != nil {
@@ -68,7 +68,7 @@ func TestAccSSHKeyProjectList(t *testing.T) {
 	defer teardown()
 
 	key := createKey(t, c, projectID)
-	defer c.SSHKeys.Delete(key.ID)
+	defer deleteSSHKey(t, c, key.ID)
 
 	keys, _, err := c.SSHKeys.ProjectList(projectID)
 	if err != nil {
@@ -96,7 +96,7 @@ func TestAccSSHKeyGet(t *testing.T) {
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 	user := createKey(t, c, "")
-	defer c.SSHKeys.Delete(user.ID)
+	defer deleteSSHKey(t, c, user.ID)
 	proj := createKey(t, c, projectID)
 
 	for _, k := range []*SSHKey{user, proj} {

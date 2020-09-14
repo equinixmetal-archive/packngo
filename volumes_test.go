@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+const (
+	minVolumeSize = 100
+)
+
 func waitVolumeActive(id string, c *Client) (*Volume, error) {
 	// 15 minutes = 180 * 5sec-retry
 	for i := 0; i < 180; i++ {
@@ -33,7 +37,7 @@ func TestAccVolumeBasic(t *testing.T) {
 	}
 
 	vcr := VolumeCreateRequest{
-		Size:             10,
+		Size:             minVolumeSize,
 		BillingCycle:     "hourly",
 		PlanID:           "storage_1",
 		FacilityID:       testFacility(),
@@ -51,7 +55,7 @@ func TestAccVolumeBasic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.Volumes.Delete(v.ID)
+	defer deleteVolume(t, c, v.ID)
 
 	v, _, err = c.Volumes.Get(v.ID,
 		&GetOptions{Includes: []string{"snapshot_policies", "facility"}})
@@ -93,7 +97,7 @@ func TestAccVolumeUpdate(t *testing.T) {
 	}
 
 	vcr := VolumeCreateRequest{
-		Size:             10,
+		Size:             minVolumeSize,
 		BillingCycle:     "hourly",
 		PlanID:           "storage_1",
 		FacilityID:       testFacility(),
@@ -109,7 +113,7 @@ func TestAccVolumeUpdate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.Volumes.Delete(v.ID)
+	defer deleteVolume(t, c, v.ID)
 
 	vDesc := "new Desc"
 
@@ -179,7 +183,7 @@ func TestAccVolumeLargeList(t *testing.T) {
 	}
 
 	vcr := VolumeCreateRequest{
-		Size:             10,
+		Size:             minVolumeSize,
 		BillingCycle:     "hourly",
 		PlanID:           "storage_1",
 		FacilityID:       testFacility(),
@@ -194,7 +198,7 @@ func TestAccVolumeLargeList(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer c.Volumes.Delete(v.ID)
+		defer deleteVolume(t, c, v.ID)
 		createdVolumes[i] = *v
 	}
 

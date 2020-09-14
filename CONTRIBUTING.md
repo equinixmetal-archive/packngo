@@ -34,12 +34,13 @@ related API documentation will benefit users.
 
 ### Linters
 
-golangci-lint is used to verify that the style of the code remains consistent.
-
-`make lint` can be used to verify style before creating a pull request.
+`golangci-lint` is used to verify that the style of the code remains consistent.
 
 Before committing, it's a good idea to run `goimports -w .`.
-([goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports?tab=doc))
+([goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports?tab=doc)) and
+`gofmt -w *.go`. ([gofmt](https://golang.org/cmd/gofmt/))
+
+`make lint` can be used to verify style before creating a pull request.
 
 ## Building and Testing
 
@@ -62,9 +63,10 @@ make test BUILD=local
 
 ### Acceptance Tests
 
-If you want to run tests against the actual Packet API, you must set envvar
-`PACKET_TEST_ACTUAL_API` to non-empty string for the `go test`. The device tests
-wait for the device creation, so it's best to run a few in parallel.
+If you want to run tests against the actual Packet API, you must set the
+environment variable `PACKET_TEST_ACTUAL_API` to a non-empty string and set
+`PACKNGO_TEST_RECORDER` to `disabled`. The device tests wait for the device
+creation, so it's best to run a few in parallel.
 
 To run a particular test, you can do
 
@@ -78,6 +80,36 @@ string, for example:
 ```sh
 PACKNGO_DEBUG=1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccVolumeUpdate
 ```
+
+### Test Fixtures
+
+By default, `go test ./...` will skip most of the tests unless
+`PACKNGO_TEST_ACTUAL_API` is non-empty.
+
+With the `PACKNGO_TEST_ACTUAL_API` environment variable set, tests will be run
+against the Packet API, creating real infrastructure and incurring costs.
+
+The `PACKNGO_TEST_RECORDER` variable can be used to record and playback API
+responses to test code changes without the delay and costs of making actual API
+calls. When unset, `PACKNGO_TEST_RECORDER` acts as though it was set to
+`disabled`. This is the default behavior. This default behavior may change in
+the future once fixtures are available for all tests.
+
+When `PACKNGO_TEST_RECORDER` is set to `play`, tests will playback API responses
+from recorded HTTP response fixtures. This is idea for refactoring and making
+changes to request and response handling without introducing changes to the data
+sent or received by the Packet API.
+
+When adding support for new end-points, recorded test sessions should be added.
+Record the HTTP interactions to fixtures by setting the environment variable
+`PACKNGO_TEST_RECORDER` to `record`.
+
+The fixtures are automatically named according to the test they were run from.
+They are placed in `fixtures/`.  The API token used during authentication is
+automatically removed from these fixtures. Nonetheless, caution should be
+exercised before committing any fixtures into the project.  Account details
+includes API tokens, contact, and payment details could easily be leaked by
+committing fixtures that haven't been thoroughly reviewed.
 
 ### Automation (CI/CD)
 

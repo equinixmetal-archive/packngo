@@ -6,7 +6,8 @@ import (
 
 func TestAccListEvents(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 
 	events, _, err := c.Events.List(&ListOptions{Page: 1, PerPage: 9})
 	if err != nil {

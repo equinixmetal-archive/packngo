@@ -23,9 +23,11 @@ func Test_Deserialization(t *testing.T) {
 	mux.HandleFunc("/metadata", func(w http.ResponseWriter, req *http.Request) {
 		b, err := ioutil.ReadFile("testdata/" + "device.json")
 		if err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	device, err := GetMetadataFromURL(baseURL)

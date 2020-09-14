@@ -8,7 +8,8 @@ func TestAccVPN(t *testing.T) {
 
 	skipUnlessAcceptanceTestsAllowed(t)
 
-	c := setup(t)
+	c, stopRecord := setup(t)
+	defer stopRecord()
 
 	u, _, err := c.Users.Current()
 	if err != nil {

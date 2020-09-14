@@ -21,10 +21,7 @@ func createBGPDevice(t *testing.T, c *Client, projectID string) *Device {
 		t.Fatal(err)
 	}
 
-	d, err = waitDeviceActive(d.ID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d = waitDeviceActive(t, c, d.ID)
 
 	aTrue := true
 	_, _, err = c.BGPSessions.Create(d.ID,
@@ -57,7 +54,7 @@ func TestAccBGPNeighbors(t *testing.T) {
 
 	d := createBGPDevice(t, c, projectID)
 
-	defer c.Devices.Delete(d.ID, false)
+	defer deleteDevice(t, c, d.ID, false)
 
 	bgpNeighbors, _, err := c.Devices.ListBGPNeighbors(d.ID, nil)
 	if err != nil {

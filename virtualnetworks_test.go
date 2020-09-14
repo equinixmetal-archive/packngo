@@ -34,6 +34,9 @@ func TestAccVirtualNetworks(t *testing.T) {
 
 	vlan, _, err = c.ProjectVirtualNetworks.Get(vlan.ID,
 		&GetOptions{Includes: []string{"assigned_to"}})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if vlan.Project.ID != projectID {
 		t.Fatalf("VLAN's project ID should be %s, was %s", projectID,
