@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+const (
+	minVolumeSize = 100
+)
+
 func waitVolumeActive(id string, c *Client) (*Volume, error) {
 	// 15 minutes = 180 * 5sec-retry
 	for i := 0; i < 180; i++ {
@@ -33,7 +37,7 @@ func TestAccVolumeBasic(t *testing.T) {
 	}
 
 	vcr := VolumeCreateRequest{
-		Size:             10,
+		Size:             minVolumeSize,
 		BillingCycle:     "hourly",
 		PlanID:           "storage_1",
 		FacilityID:       testFacility(),
@@ -93,7 +97,7 @@ func TestAccVolumeUpdate(t *testing.T) {
 	}
 
 	vcr := VolumeCreateRequest{
-		Size:             10,
+		Size:             minVolumeSize,
 		BillingCycle:     "hourly",
 		PlanID:           "storage_1",
 		FacilityID:       testFacility(),
@@ -179,7 +183,7 @@ func TestAccVolumeLargeList(t *testing.T) {
 	}
 
 	vcr := VolumeCreateRequest{
-		Size:             10,
+		Size:             minVolumeSize,
 		BillingCycle:     "hourly",
 		PlanID:           "storage_1",
 		FacilityID:       testFacility(),
