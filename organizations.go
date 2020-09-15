@@ -80,7 +80,7 @@ type OrganizationServiceOp struct {
 
 // List returns the user's organizations
 func (s *OrganizationServiceOp) List(listOpt *ListOptions) (orgs []Organization, resp *Response, err error) {
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	root := new(organizationsRoot)
 
 	path := fmt.Sprintf("%s?%s", organizationBasePath, params)
@@ -106,7 +106,7 @@ func (s *OrganizationServiceOp) List(listOpt *ListOptions) (orgs []Organization,
 
 // Get returns a organization by id
 func (s *OrganizationServiceOp) Get(organizationID string, getOpt *GetOptions) (*Organization, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", organizationBasePath, organizationID, params)
 	organization := new(Organization)
 

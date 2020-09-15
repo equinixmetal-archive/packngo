@@ -145,7 +145,7 @@ func (i *DeviceIPServiceOp) Assign(deviceID string, assignRequest *AddressStruct
 
 // Get returns assignment by ID.
 func (i *DeviceIPServiceOp) Get(assignmentID string, getOpt *GetOptions) (*IPAddressAssignment, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", ipBasePath, assignmentID, params)
 	ipa := new(IPAddressAssignment)
 
@@ -159,7 +159,7 @@ func (i *DeviceIPServiceOp) Get(assignmentID string, getOpt *GetOptions) (*IPAdd
 
 // List list all of the IP address assignments on a device
 func (i *DeviceIPServiceOp) List(deviceID string, listOpt *ListOptions) ([]IPAddressAssignment, *Response, error) {
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 
 	path := fmt.Sprintf("%s/%s%s?%s", deviceBasePath, deviceID, ipBasePath, params)
 
@@ -185,7 +185,7 @@ type ProjectIPServiceOp struct {
 
 // Get returns reservation by ID.
 func (i *ProjectIPServiceOp) Get(reservationID string, getOpt *GetOptions) (*IPAddressReservation, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", ipBasePath, reservationID, params)
 	ipr := new(IPAddressReservation)
 
@@ -199,7 +199,7 @@ func (i *ProjectIPServiceOp) Get(reservationID string, getOpt *GetOptions) (*IPA
 
 // List provides a list of IP resevations for a single project.
 func (i *ProjectIPServiceOp) List(projectID string, listOpt *ListOptions) ([]IPAddressReservation, *Response, error) {
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, ipBasePath, params)
 	reservations := new(struct {

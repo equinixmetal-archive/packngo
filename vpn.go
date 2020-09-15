@@ -34,7 +34,7 @@ func (s *VPNServiceOp) Disable() (resp *Response, err error) {
 
 // Get returns the client vpn config for the currently logged-in user.
 func (s *VPNServiceOp) Get(code string, getOpt *GetOptions) (config *VPNConfig, resp *Response, err error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 	config = &VPNConfig{}
 	path := fmt.Sprintf("%s?code=%s", vpnBasePath, code)
 	if params != "" {

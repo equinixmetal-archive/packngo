@@ -1,6 +1,8 @@
 package packngo
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -311,4 +313,92 @@ func TestAccProjectListEvents(t *testing.T) {
 		t.Fatal("At least 2 events should be in project - volume add and del")
 	}
 
+}
+
+func TestAccProjectListSSHKeys(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	key := createKey(t, c, projectID)
+	defer c.SSHKeys.Delete(key.ID)
+
+	keys, _, err := c.Projects.ListSSHKeys(projectID, &SearchOptions{Search: key.Label})
+	if err != nil {
+		t.Fatalf("failed to list project sshkeys: %v", err)
+	}
+
+	if len(keys) != 1 {
+		t.Fatal("there should be exactly one key for the project")
+	}
+
+	for _, k := range keys {
+		if k.ID == key.ID {
+			if len(k.Owner.Href) == 0 {
+				t.Error("new Key doesn't have owner URL set")
+			}
+			return
+		}
+	}
+	t.Error("failed to find created project key in list of project keys retrieved")
+}
+
+func TestProjectServiceOp_ListSSHKeys(t *testing.T) {
+	type fields struct {
+		client requestDoer
+	}
+	type args struct {
+		projectID string
+		searchOpt *SearchOptions
+	}
+	tests := []struct {
+		name        string
+		fields      fields
+		args        args
+		wantSSHKeys []SSHKey
+		wantResp    *Response
+		wantErr     bool
+	}{
+		{
+			name: "RequestIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					if v, ok := v.(*sshKeyRoot); ok {
+						v.SSHKeys = []SSHKey{{Label: "foo"}}
+					}
+					return &Response{}, nil
+				},
+			}},
+			wantResp:    &Response{},
+			wantSSHKeys: []SSHKey{{Label: "foo"}},
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &ProjectServiceOp{
+				client: tt.fields.client,
+			}
+			gotSSHKeys, gotResp, err := s.ListSSHKeys(tt.args.projectID, tt.args.searchOpt)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ProjectServiceOp.ListSSHKeys() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotSSHKeys, tt.wantSSHKeys) {
+				t.Errorf("ProjectServiceOp.ListSSHKeys() gotSSHKeys = %v, want %v", gotSSHKeys, tt.wantSSHKeys)
+			}
+			if !reflect.DeepEqual(gotResp, tt.wantResp) {
+				t.Errorf("ProjectServiceOp.ListSSHKeys() gotResp = %v, want %v", gotResp, tt.wantResp)
+			}
+		})
+	}
 }

@@ -54,7 +54,7 @@ func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigReq
 
 // Get function
 func (s *BGPConfigServiceOp) Get(projectID string, getOpt *GetOptions) (bgpConfig *BGPConfig, resp *Response, err error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, bgpConfigBasePath, params)
 

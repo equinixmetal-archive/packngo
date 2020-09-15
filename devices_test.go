@@ -875,7 +875,6 @@ func TestAccDeviceSSHKeys(t *testing.T) {
 	hn := randString8()
 	userKey := createKey(t, c, "")
 	defer deleteSSHKey(t, c, userKey.ID)
-
 	projectKey := createKey(t, c, projectID)
 	defer deleteSSHKey(t, c, projectKey.ID)
 

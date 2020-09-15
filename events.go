@@ -44,8 +44,8 @@ func (s *EventServiceOp) Get(eventID string, getOpt *GetOptions) (*Event, *Respo
 }
 
 // list helper function for all event functions
-func listEvents(client *Client, path string, listOpt *ListOptions) (events []Event, resp *Response, err error) {
-	params := createListOptionsURL(listOpt)
+func listEvents(client requestDoer, path string, listOpt *ListOptions) (events []Event, resp *Response, err error) {
+	params := urlQuery(listOpt)
 	path = fmt.Sprintf("%s?%s", path, params)
 
 	for {
@@ -74,7 +74,7 @@ func listEvents(client *Client, path string, listOpt *ListOptions) (events []Eve
 // list helper function for all event functions
 /*
 func listEvents(client *Client, path string, listOpt *ListOptions) ([]Event, *Response, error) {
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	root := new(eventsRoot)
 
 	path = fmt.Sprintf("%s?%s", path, params)
@@ -89,7 +89,7 @@ func listEvents(client *Client, path string, listOpt *ListOptions) ([]Event, *Re
 */
 
 func get(client *Client, path string, getOpt *GetOptions) (*Event, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 
 	event := new(Event)
 

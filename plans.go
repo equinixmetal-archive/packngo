@@ -114,7 +114,7 @@ type PlanServiceOp struct {
 // List method returns all available plans
 func (s *PlanServiceOp) List(listOpt *ListOptions) ([]Plan, *Response, error) {
 	root := new(planRoot)
-	params := createListOptionsURL(listOpt)
+	params := urlQuery(listOpt)
 	path := fmt.Sprintf("%s?%s", planBasePath, params)
 
 	resp, err := s.client.DoRequest("GET", path, nil, root)

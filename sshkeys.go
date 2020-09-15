@@ -74,6 +74,7 @@ func (s *SSHKeyServiceOp) list(url string) ([]SSHKey, *Response, error) {
 }
 
 // ProjectList lists ssh keys of a project
+// Deprecated: Use ProjectServiceOp.ListSSHKeys
 func (s *SSHKeyServiceOp) ProjectList(projectID string) ([]SSHKey, *Response, error) {
 	return s.list(fmt.Sprintf("%s/%s%s", projectBasePath, projectID, sshKeyBasePath))
 
@@ -86,7 +87,7 @@ func (s *SSHKeyServiceOp) List() ([]SSHKey, *Response, error) {
 
 // Get returns an ssh key by id
 func (s *SSHKeyServiceOp) Get(sshKeyID string, getOpt *GetOptions) (*SSHKey, *Response, error) {
-	params := createGetOptionsURL(getOpt)
+	params := urlQuery(getOpt)
 	path := fmt.Sprintf("%s/%s?%s", sshKeyBasePath, sshKeyID, params)
 	sshKey := new(SSHKey)
 
