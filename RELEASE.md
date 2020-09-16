@@ -29,11 +29,11 @@ they can be run in the absence of that automation.
   git commit --signoff -m 'v0.3.0 version bump' packngo.go
   ```
 
-* Tag `origin/master` with a semver tag that suits the level of changes
+* Tag `master` with a semver tag that suits the level of changes
   introduced:
 
   ```sh
-  git tag -m "v0.3.0" -a v0.3.0 origin/master # use -s if gpg is available
+  git tag -m "v0.3.0" -a v0.3.0 master # use -s if gpg is available
   ```
 * Push the tag:
 

@@ -23,7 +23,7 @@ import (
 
 const (
 	packetTokenEnvVar = "PACKET_AUTH_TOKEN"
-	libraryVersion    = "0.1.0"
+	libraryVersion    = "0.3.0"
 	baseURL           = "https://api.packet.net/"
 	userAgent         = "packngo/" + libraryVersion
 	mediaType         = "application/json"
