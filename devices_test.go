@@ -1076,3 +1076,66 @@ func TestAccDeviceIPAddresses(t *testing.T) {
 	}
 
 }
+
+func TestAccDeviceCreateWithHardwareID(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+	fac := testFacility()
+	hardwareID := "ffe7c743-4829-4b78-aca5-b924da847317"
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Facility:     []string{fac},
+		Plan:         "baremetal_0",
+		OS:           "ubuntu_16_04",
+		ProjectID:    projectID,
+		ID:           hardwareID,
+		BillingCycle: "hourly",
+		IPAddresses: []IPAddressCreateRequest{
+			{AddressFamily: 4, Public: false},
+		},
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID, false)
+
+	if d.ID != hardwareID {
+		t.Fatalf("expected ID %s to be provisioned, got %s", hardwareID, d.ID)
+	}
+	
+	dID := d.ID
+
+	d = waitDeviceActive(t, c, dID)
+	_, err = d.GetNetworkType()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(d.RootPassword) == 0 {
+		t.Fatal("root_password is empty or non-existent")
+	}
+
+	ni := d.GetNetworkInfo()
+	if ni.PrivateIPv4 == "" {
+		t.Fatal("Device should have private IPv4 present")
+	}
+	if ni.PublicIPv4 != "" {
+		t.Fatal("Device should not have public IPv4 present")
+	}
+
+	dl, _, err := c.Devices.List(projectID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(dl) != 1 {
+		t.Fatalf("Device List should contain exactly one device, was: %v", dl)
+	}
+
+}

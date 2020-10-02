@@ -246,6 +246,7 @@ type DeviceCreateRequest struct {
 	ProjectSSHKeys []string                 `json:"project_ssh_keys,omitempty"`
 	Features       map[string]string        `json:"features,omitempty"`
 	IPAddresses    []IPAddressCreateRequest `json:"ip_addresses,omitempty"`
+	ID             string                   `json:"id,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update a Packet device
