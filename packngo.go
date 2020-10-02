@@ -319,6 +319,7 @@ type Client struct {
 	Emails                 EmailService
 	Events                 EventService
 	Facilities             FacilityService
+	Hardware               HardwareService
 	HardwareReservations   HardwareReservationService
 	Notifications          NotificationService
 	OperatingSystems       OSService
@@ -561,6 +562,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retry
 	c.Emails = &EmailServiceOp{client: c}
 	c.Events = &EventServiceOp{client: c}
 	c.Facilities = &FacilityServiceOp{client: c}
+	c.Hardware = &HardwareServiceOp{client: c}
 	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
 	c.Notifications = &NotificationServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
