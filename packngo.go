@@ -22,12 +22,12 @@ import (
 )
 
 const (
-	packetTokenEnvVar = "PACKET_AUTH_TOKEN"
-	libraryVersion    = "0.3.0"
-	baseURL           = "https://api.equinix.com/metal/v1/"
-	userAgent         = "packngo/" + libraryVersion
-	mediaType         = "application/json"
-	debugEnvVar       = "PACKNGO_DEBUG"
+	authTokenEnvVar = "PACKET_AUTH_TOKEN"
+	libraryVersion  = "0.3.0"
+	baseURL         = "https://api.equinix.com/metal/v1/"
+	userAgent       = "packngo/" + libraryVersion
+	mediaType       = "application/json"
+	debugEnvVar     = "PACKNGO_DEBUG"
 
 	headerRateLimit     = "X-RateLimit-Limit"
 	headerRateRemaining = "X-RateLimit-Remaining"
@@ -450,9 +450,9 @@ func (c *Client) DoRequestWithHeader(method string, headers map[string]string, p
 
 // NewClient initializes and returns a Client
 func NewClient() (*Client, error) {
-	apiToken := os.Getenv(packetTokenEnvVar)
+	apiToken := os.Getenv(authTokenEnvVar)
 	if apiToken == "" {
-		return nil, fmt.Errorf("you must export %s", packetTokenEnvVar)
+		return nil, fmt.Errorf("you must export %s", authTokenEnvVar)
 	}
 	c := NewClientWithAuth("packngo lib", apiToken, nil)
 	return c, nil
