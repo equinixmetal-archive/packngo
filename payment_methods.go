@@ -68,5 +68,4 @@ func (pm PaymentMethodUpdateRequest) String() string {
 
 // PaymentMethodServiceOp implements PaymentMethodService
 type PaymentMethodServiceOp struct {
-	client *Client
 }
