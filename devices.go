@@ -28,7 +28,7 @@ type devicesRoot struct {
 	Meta    meta     `json:"meta"`
 }
 
-// Device represents a Packet device from API
+// Device represents an Equinix Metal device from API
 type Device struct {
 	ID                  string                 `json:"id"`
 	Href                string                 `json:"href,omitempty"`
@@ -214,7 +214,7 @@ type CPR struct {
 	} `json:"filesystems"`
 }
 
-// DeviceCreateRequest type used to create a Packet device
+// DeviceCreateRequest type used to create an Equinix Metal device
 type DeviceCreateRequest struct {
 	Hostname              string     `json:"hostname"`
 	Plan                  string     `json:"plan"`
@@ -248,7 +248,7 @@ type DeviceCreateRequest struct {
 	IPAddresses    []IPAddressCreateRequest `json:"ip_addresses,omitempty"`
 }
 
-// DeviceUpdateRequest type used to update a Packet device
+// DeviceUpdateRequest type used to update an Equinix Metal device
 type DeviceUpdateRequest struct {
 	Hostname      *string   `json:"hostname,omitempty"`
 	Description   *string   `json:"description,omitempty"`

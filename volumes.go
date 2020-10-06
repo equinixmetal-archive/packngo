@@ -63,7 +63,7 @@ func (v Volume) String() string {
 	return Stringify(v)
 }
 
-// VolumeCreateRequest type used to create a Packet volume
+// VolumeCreateRequest type used to create an Equinix Metal volume
 type VolumeCreateRequest struct {
 	BillingCycle     string            `json:"billing_cycle"`
 	Description      string            `json:"description,omitempty"`
@@ -78,7 +78,7 @@ func (v VolumeCreateRequest) String() string {
 	return Stringify(v)
 }
 
-// VolumeUpdateRequest type used to update a Packet volume
+// VolumeUpdateRequest type used to update an Equinix Metal volume
 type VolumeUpdateRequest struct {
 	Description  *string `json:"description,omitempty"`
 	PlanID       *string `json:"plan_id,omitempty"`
@@ -86,7 +86,7 @@ type VolumeUpdateRequest struct {
 	BillingCycle *string `json:"billing_cycle,omitempty"`
 }
 
-// VolumeAttachment is a type from Packet API
+// VolumeAttachment is a type from Equinix Metal API
 type VolumeAttachment struct {
 	Href   string `json:"href"`
 	ID     string `json:"id"`

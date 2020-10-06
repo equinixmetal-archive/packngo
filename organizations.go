@@ -2,7 +2,7 @@ package packngo
 
 import "fmt"
 
-// API documentation https://www.packet.net/developers/api/organizations/
+// API documentation https://metal.equinix.com/developers/api/organizations/
 const organizationBasePath = "/organizations"
 
 // OrganizationService interface defines available organization methods
@@ -21,7 +21,7 @@ type organizationsRoot struct {
 	Meta          meta           `json:"meta"`
 }
 
-// Organization represents a Packet organization
+// Organization represents an Equinix Metal organization
 type Organization struct {
 	ID           string    `json:"id"`
 	Name         string    `json:"name,omitempty"`
@@ -47,7 +47,7 @@ func (o Organization) String() string {
 	return Stringify(o)
 }
 
-// OrganizationCreateRequest type used to create a Packet organization
+// OrganizationCreateRequest type used to create an Equinix Metal organization
 type OrganizationCreateRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -60,7 +60,7 @@ func (o OrganizationCreateRequest) String() string {
 	return Stringify(o)
 }
 
-// OrganizationUpdateRequest type used to update a Packet organization
+// OrganizationUpdateRequest type used to update an Equinix Metal organization
 type OrganizationUpdateRequest struct {
 	Name        *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`

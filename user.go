@@ -17,7 +17,7 @@ type usersRoot struct {
 	Meta  meta   `json:"meta"`
 }
 
-// User represents a Packet user
+// User represents an Equinix Metal user
 type User struct {
 	ID                    string  `json:"id"`
 	FirstName             string  `json:"first_name,omitempty"`

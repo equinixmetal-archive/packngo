@@ -32,7 +32,7 @@ type APIKey struct {
 	Description string `json:"description"`
 
 	// Token is a sensitive credential that can be used as a `Client.APIKey` to
-	// access Packet resources.
+	// access Equinix Metal resources.
 	Token string `json:"token"`
 
 	// ReadOnly keys can not create new resources.
@@ -106,7 +106,7 @@ func (s *APIKeyServiceOp) UserList(lopts *ListOptions) ([]APIKey, *Response, err
 //
 // In other methods, it is typical for a Response to be returned, which could
 // include a StatusCode of `http.StatusNotFound` (404 error) when the resource
-// was not found. The Packet API does not expose a get by ID endpoint for
+// was not found. The Equinix Metal API does not expose a get by ID endpoint for
 // APIKeys.  That is why in this method, all API keys are listed and compared
 // for a match. Therefor, the Response is not returned and a custom error will
 // be returned when the key is not found.
@@ -131,7 +131,7 @@ func (s *APIKeyServiceOp) ProjectGet(projectID, apiKeyID string, getOpt *GetOpti
 //
 // In other methods, it is typical for a Response to be returned, which could
 // include a StatusCode of `http.StatusNotFound` (404 error) when the resource
-// was not found. The Packet API does not expose a get by ID endpoint for
+// was not found. The Equinix Metal API does not expose a get by ID endpoint for
 // APIKeys.  That is why in this method, all API keys are listed and compared
 // for a match. Therefor, the Response is not returned and a custom error will
 // be returned when the key is not found.

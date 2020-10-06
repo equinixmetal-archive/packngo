@@ -22,7 +22,7 @@ type BGPSessionServiceOp struct {
 	client *Client
 }
 
-// BGPSession represents a Packet BGP Session
+// BGPSession represents an Equinix Metal BGP Session
 type BGPSession struct {
 	ID            string   `json:"id,omitempty"`
 	Status        string   `json:"status,omitempty"`

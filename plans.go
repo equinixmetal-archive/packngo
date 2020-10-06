@@ -15,7 +15,7 @@ type planRoot struct {
 	Plans []Plan `json:"plans"`
 }
 
-// Plan represents a Packet service plan
+// Plan represents an Equinix Metal service plan
 type Plan struct {
 	ID              string     `json:"id"`
 	Slug            string     `json:"slug,omitempty"`
