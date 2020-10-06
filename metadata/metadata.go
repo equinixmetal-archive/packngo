@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-const BaseURL = "https://metadata.packet.net"
+const BaseURL = "https://metadata.platformequinix.com"
 
 func GetMetadata() (*CurrentDevice, error) {
 	return GetMetadataFromURL(BaseURL)

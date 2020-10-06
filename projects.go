@@ -23,7 +23,7 @@ type projectsRoot struct {
 	Meta     meta      `json:"meta"`
 }
 
-// Project represents a Packet project
+// Project represents an Equinix Metal project
 type Project struct {
 	ID              string        `json:"id"`
 	Name            string        `json:"name,omitempty"`
@@ -42,7 +42,7 @@ func (p Project) String() string {
 	return Stringify(p)
 }
 
-// ProjectCreateRequest type used to create a Packet project
+// ProjectCreateRequest type used to create an Equinix Metal project
 type ProjectCreateRequest struct {
 	Name            string `json:"name"`
 	PaymentMethodID string `json:"payment_method_id,omitempty"`
@@ -53,7 +53,7 @@ func (p ProjectCreateRequest) String() string {
 	return Stringify(p)
 }
 
-// ProjectUpdateRequest type used to update a Packet project
+// ProjectUpdateRequest type used to update an Equinix Metal project
 type ProjectUpdateRequest struct {
 	Name            *string `json:"name,omitempty"`
 	PaymentMethodID *string `json:"payment_method_id,omitempty"`

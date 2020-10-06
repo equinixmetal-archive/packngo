@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	packetURLEnvVar   = "PACKET_API_URL"
+	apiURLEnvVar      = "PACKET_API_URL"
 	packngoAccTestVar = "PACKNGO_TEST_ACTUAL_API"
 	testProjectPrefix = "PACKNGO_TEST_DELME_2d768716_"
 	testFacilityVar   = "PACKNGO_TEST_FACILITY"
@@ -149,16 +149,16 @@ func testRecordMode() (recorder.Mode, error) {
 
 func setup(t *testing.T) (*Client, func()) {
 	name := t.Name()
-	apiToken := os.Getenv(packetTokenEnvVar)
+	apiToken := os.Getenv(authTokenEnvVar)
 	if apiToken == "" {
-		t.Fatalf("If you want to run packngo test, you must export %s.", packetTokenEnvVar)
+		t.Fatalf("If you want to run packngo test, you must export %s.", authTokenEnvVar)
 	}
 
 	mode, err := testRecordMode()
 	if err != nil {
 		t.Fatal(err)
 	}
-	apiURL := os.Getenv(packetURLEnvVar)
+	apiURL := os.Getenv(apiURLEnvVar)
 	if apiURL == "" {
 		apiURL = baseURL
 	}

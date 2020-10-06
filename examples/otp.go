@@ -10,7 +10,7 @@ import (
 	"github.com/packethost/packngo"
 )
 
-func GetPacketOtpSms(c *packngo.Client) (string, error) {
+func GetOtpSms(c *packngo.Client) (string, error) {
 	_, err := c.TwoFactorAuth.ReceiveSms()
 	if err != nil {
 		return "", err
@@ -25,7 +25,7 @@ func GetPacketOtpSms(c *packngo.Client) (string, error) {
 	return otp[:len(otp)-1], nil
 }
 
-func SeedPacketOtpApp(c *packngo.Client) (string, error) {
+func SeedOtpApp(c *packngo.Client) (string, error) {
 	otpUri, _, err := c.TwoFactorAuth.SeedApp()
 	if err != nil {
 		return "", err
@@ -39,7 +39,7 @@ func SeedPacketOtpApp(c *packngo.Client) (string, error) {
 	log.Println("Secret for 2FA App:", q["secret"][0])
 
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter Packet 2FA App code: ")
+	fmt.Print("Enter Equinix Metal 2FA App code: ")
 	otp, err := reader.ReadString('\n')
 	if err != nil {
 		return "", err
@@ -63,7 +63,7 @@ func TestSMSEnable() {
 		log.Fatal(err)
 	}
 
-	otp, err := GetPacketOtpSms(c)
+	otp, err := GetOtpSms(c)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func TestSMSEnable() {
 	}
 	log.Println("SMS enabled")
 
-	otp, err = GetPacketOtpSms(c)
+	otp, err = GetOtpSms(c)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,7 +92,7 @@ func TestAppEnable() {
 		log.Fatal(err)
 	}
 
-	otp, err := SeedPacketOtpApp(c)
+	otp, err := SeedOtpApp(c)
 	if err != nil {
 		log.Fatal(err)
 	}

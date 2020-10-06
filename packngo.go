@@ -22,12 +22,12 @@ import (
 )
 
 const (
-	packetTokenEnvVar = "PACKET_AUTH_TOKEN"
-	libraryVersion    = "0.3.0"
-	baseURL           = "https://api.packet.net/"
-	userAgent         = "packngo/" + libraryVersion
-	mediaType         = "application/json"
-	debugEnvVar       = "PACKNGO_DEBUG"
+	authTokenEnvVar = "PACKET_AUTH_TOKEN"
+	libraryVersion  = "0.3.0"
+	baseURL         = "https://api.equinix.com/metal/v1/"
+	userAgent       = "packngo/" + libraryVersion
+	mediaType       = "application/json"
+	debugEnvVar     = "PACKNGO_DEBUG"
 
 	headerRateLimit     = "X-RateLimit-Limit"
 	headerRateRemaining = "X-RateLimit-Remaining"
@@ -36,11 +36,11 @@ const (
 
 var redirectsErrorRe = regexp.MustCompile(`stopped after \d+ redirects\z`)
 
-// GetOptions are options common to Packet API GET requests
+// GetOptions are options common to Equinix Metal API GET requests
 type GetOptions struct {
 	// Includes are a list of fields to expand in the request results.
 	//
-	// For resources that contain collections of other resources, the Packet API
+	// For resources that contain collections of other resources, the Equinix Metal API
 	// will only return the `Href` value of these resources by default. In
 	// nested API Go types, this will result in objects that have zero values in
 	// all fiends except their `Href` field. When an object's associated field
@@ -53,7 +53,7 @@ type GetOptions struct {
 	// Excludes reduce the size of the API response by removing nested objects
 	// that may be returned.
 	//
-	// The default behavior of the Packet API is to "exclude" fields, but some
+	// The default behavior of the Equinix Metal API is to "exclude" fields, but some
 	// API endpoints have an "include" behavior on certain fields. Nested Go
 	// types unmarshalled into an "excluded" field will only have a values in
 	// their `Href` field.
@@ -70,7 +70,7 @@ func (g *GetOptions) GetOptions() *GetOptions {
 	return &getOpts
 }
 
-// ListOptions are options common to Packet API paginated GET requests
+// ListOptions are options common to Equinix Metal API paginated GET requests
 type ListOptions struct {
 	// avoid embedding GetOptions (packngo-breaking-change) for now
 
@@ -279,7 +279,7 @@ type Client struct {
 
 	RateLimit Rate
 
-	// Packet Api Objects
+	// Equinix Metal Api Objects
 	APIKeys                APIKeyService
 	BGPConfig              BGPConfigService
 	BGPSessions            BGPSessionService
@@ -450,9 +450,9 @@ func (c *Client) DoRequestWithHeader(method string, headers map[string]string, p
 
 // NewClient initializes and returns a Client
 func NewClient() (*Client, error) {
-	apiToken := os.Getenv(packetTokenEnvVar)
+	apiToken := os.Getenv(authTokenEnvVar)
 	if apiToken == "" {
-		return nil, fmt.Errorf("you must export %s", packetTokenEnvVar)
+		return nil, fmt.Errorf("you must export %s", authTokenEnvVar)
 	}
 	c := NewClientWithAuth("packngo lib", apiToken, nil)
 	return c, nil
@@ -460,7 +460,7 @@ func NewClient() (*Client, error) {
 }
 
 // NewClientWithAuth initializes and returns a Client, use this to get an API Client to operate on
-// N.B.: Packet's API certificate requires Go 1.5+ to successfully parse. If you are using
+// N.B.: Equinix Metal's API certificate requires Go 1.5+ to successfully parse. If you are using
 // an older version of Go, pass in a custom http.Client with a custom TLS configuration
 // that sets "InsecureSkipVerify" to "true"
 func NewClientWithAuth(consumerToken string, apiKey string, httpClient *retryablehttp.Client) *Client {
@@ -468,7 +468,8 @@ func NewClientWithAuth(consumerToken string, apiKey string, httpClient *retryabl
 	return client
 }
 
-func PacketRetryPolicy(ctx context.Context, resp *http.Response, err error) (bool, error) {
+// RetryPolicy determines if the supplied http Response and error can be safely retried
+func RetryPolicy(ctx context.Context, resp *http.Response, err error) (bool, error) {
 	// do not retry on context.Canceled or context.DeadlineExceeded
 	if ctx.Err() != nil {
 		return false, ctx.Err()
@@ -513,7 +514,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retry
 		httpClient.RetryWaitMin = time.Second
 		httpClient.RetryWaitMax = 30 * time.Second
 		httpClient.RetryMax = 10
-		httpClient.CheckRetry = PacketRetryPolicy
+		httpClient.CheckRetry = RetryPolicy
 	}
 
 	u, err := url.Parse(apiBaseURL)

@@ -11,7 +11,7 @@ type osRoot struct {
 	OperatingSystems []OS `json:"operating_systems"`
 }
 
-// OS represents a Packet operating system
+// OS represents an Equinix Metal operating system
 type OS struct {
 	Name            string   `json:"name"`
 	Slug            string   `json:"slug"`

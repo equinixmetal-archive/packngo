@@ -322,7 +322,7 @@ func TestAccProjectListSSHKeys(t *testing.T) {
 	defer teardown()
 
 	key := createKey(t, c, projectID)
-	defer c.SSHKeys.Delete(key.ID)
+	defer deleteSSHKey(t, c, key.ID)
 
 	keys, _, err := c.Projects.ListSSHKeys(projectID, &SearchOptions{Search: key.Label})
 	if err != nil {

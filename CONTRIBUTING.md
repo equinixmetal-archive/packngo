@@ -28,7 +28,7 @@ Documentation at <https://godoc.org/github.com/packethost/packngo> will be
 generated from these comments.
 
 The documentation provided for packngo fields and functions should be at or
-better than the quality provided at <https://www.packet.com/developers/api/>.
+better than the quality provided at <https://metal.equinix.com/developers/api/>.
 When the API documentation provides a lengthy description, a linking to the
 related API documentation will benefit users.
 
@@ -63,7 +63,7 @@ make test BUILD=local
 
 ### Acceptance Tests
 
-If you want to run tests against the actual Packet API, you must set the
+If you want to run tests against the actual Equinix Metal API, you must set the
 environment variable `PACKET_TEST_ACTUAL_API` to a non-empty string and set
 `PACKNGO_TEST_RECORDER` to `disabled`. The device tests wait for the device
 creation, so it's best to run a few in parallel.
@@ -87,7 +87,7 @@ By default, `go test ./...` will skip most of the tests unless
 `PACKNGO_TEST_ACTUAL_API` is non-empty.
 
 With the `PACKNGO_TEST_ACTUAL_API` environment variable set, tests will be run
-against the Packet API, creating real infrastructure and incurring costs.
+against the Equinix Metal API, creating real infrastructure and incurring costs.
 
 The `PACKNGO_TEST_RECORDER` variable can be used to record and playback API
 responses to test code changes without the delay and costs of making actual API
@@ -98,7 +98,7 @@ the future once fixtures are available for all tests.
 When `PACKNGO_TEST_RECORDER` is set to `play`, tests will playback API responses
 from recorded HTTP response fixtures. This is idea for refactoring and making
 changes to request and response handling without introducing changes to the data
-sent or received by the Packet API.
+sent or received by the Equinix Metal API.
 
 When adding support for new end-points, recorded test sessions should be added.
 Record the HTTP interactions to fixtures by setting the environment variable

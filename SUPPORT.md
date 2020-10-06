@@ -12,6 +12,6 @@ guaranteed. Issues  will be addressed based on priorities that may or may not
 be reflected in Github or issue comments.
 
 For other forms of support, including our Slack community, visit
-<https://www.packet.com/about/contact/>.
+<https://metal.equinix.com/about/contact/>.
 
 [open a GitHub Issue]: https://github.com/packethost/packngo/issues/new

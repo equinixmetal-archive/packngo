@@ -13,7 +13,7 @@ type facilityRoot struct {
 	Facilities []Facility `json:"facilities"`
 }
 
-// Facility represents a Packet facility
+// Facility represents an Equinix Metal facility
 type Facility struct {
 	ID       string   `json:"id"`
 	Name     string   `json:"name,omitempty"`
