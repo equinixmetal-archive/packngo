@@ -4,10 +4,10 @@
 [![Release](https://img.shields.io/github/v/release/packethost/packngo)](https://github.com/packethost/packngo/releases/latest)
 [![GoDoc](https://godoc.org/github.com/packethost/packngo?status.svg)](https://godoc.org/github.com/packethost/packngo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/packethost/packngo)](https://goreportcard.com/report/github.com/packethost/packngo)
-[![Slack](https://slack.packet.com/badge.svg)](https://slack.packet.com)
-[![Twitter Follow](https://img.shields.io/twitter/follow/packethost.svg?style=social&label=Follow)](https://twitter.com/intent/follow?screen_name=packethost)
+[![Slack](https://slack.equinixmetal.com/badge.svg)](https://slack.equinixmetal.com/)
+[![Twitter Follow](https://img.shields.io/twitter/follow/equinixmetal.svg?style=social&label=Follow)](https://twitter.com/intent/follow?screen_name=equinixmetal)
 
-A Golang client for the Equinix Metal API. This client previously acted as the Equinix Metal API go-client.
+A Golang client for the Equinix Metal API. ([Packet is now Equinix Metal](https://blog.equinix.com/blog/2020/10/06/equinix-metal-metal-and-more/))
 
 ## Installation
 
