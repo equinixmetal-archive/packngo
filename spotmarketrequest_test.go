@@ -17,16 +17,17 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 	defer teardown()
 
 	hn := randString8()
+	fac := testFacility()
 
 	ps := SpotMarketRequestInstanceParameters{
 		BillingCycle:    "hourly",
-		Plan:            "baremetal_0",
+		Plan:            testPlan,
 		OperatingSystem: "rancher",
 		Hostname:        fmt.Sprintf("%s{{index}}", hn),
 	}
 
 	prices, _, err := c.SpotMarket.Prices()
-	pri := prices["ewr1"]["baremetal_0"]
+	pri := prices[fac][testPlan]
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +35,7 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 	cr := SpotMarketRequestCreateRequest{
 		DevicesMax:  3,
 		DevicesMin:  2,
-		FacilityIDs: []string{"ewr1", "sjc1"},
+		FacilityIDs: []string{fac, testFacilityAlternate},
 		MaxBidPrice: pri / 2,
 		Parameters:  ps,
 	}
@@ -59,8 +60,8 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 		t.Fatal("there should be only one SpotMarketRequest")
 	}
 
-	if smrs[0].Plan.Slug != "t1.small.x86" {
-		t.Fatal("Plan should be reported as t1.small.x86 (aka baremetal_0).")
+	if smrs[0].Plan.Slug != testPlan {
+		t.Fatalf("Plan should be reported as %s", testPlan)
 	}
 
 	smr2, _, err := c.SpotMarketRequests.Get(smr.ID, nil)
@@ -83,13 +84,14 @@ func TestAccSpotMarketRequestPriceAware(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	pri := prices["ewr1"]["baremetal_0"]
+	fac := testFacility()
+	pri := prices[fac][testPlan]
 	thr := pri * 2.0
 	hn := randString8()
 
 	ps := SpotMarketRequestInstanceParameters{
 		BillingCycle:    "hourly",
-		Plan:            "baremetal_0",
+		Plan:            testPlan,
 		OperatingSystem: "rancher",
 		Hostname:        fmt.Sprintf("%s{{index}}", hn),
 	}
@@ -99,7 +101,7 @@ func TestAccSpotMarketRequestPriceAware(t *testing.T) {
 	cr := SpotMarketRequestCreateRequest{
 		DevicesMax:  nDevices,
 		DevicesMin:  nDevices,
-		FacilityIDs: []string{"ewr1"},
+		FacilityIDs: []string{fac},
 		MaxBidPrice: thr,
 		Parameters:  ps,
 	}

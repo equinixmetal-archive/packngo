@@ -16,9 +16,9 @@ func TestAccInstanceBatches(t *testing.T) {
 			{
 				DeviceCreateRequest: DeviceCreateRequest{
 					Hostname:     "test1",
-					Plan:         "baremetal_0",
-					OS:           "ubuntu_16_04",
-					Facility:     []string{"ewr1"},
+					Plan:         testPlan,
+					OS:           testOS,
+					Facility:     []string{testFacility()},
 					BillingCycle: "hourly",
 					Tags:         []string{"abc"},
 				},

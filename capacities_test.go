@@ -14,7 +14,7 @@ func TestAccCheckCapacity(t *testing.T) {
 		[]ServerInfo{
 			{
 				Facility: "ams1",
-				Plan:     "baremetal_0",
+				Plan:     testPlan,
 				Quantity: 1},
 		},
 	}

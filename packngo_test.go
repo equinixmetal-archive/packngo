@@ -27,6 +27,12 @@ const (
 	testRecorderDisabled = "disabled"
 
 	recorderDefaultMode = recorder.ModeDisabled
+
+	// defaults should be available to most users
+	testFacilityDefault   = "ny5"
+	testFacilityAlternate = "dc13"
+	testPlan              = "c3.small.x86"
+	testOS                = "ubuntu_16_04"
 )
 
 func testFacility() string {
@@ -34,7 +40,7 @@ func testFacility() string {
 	if envFac != "" {
 		return envFac
 	}
-	return "ewr1"
+	return testFacilityDefault
 }
 
 func randString8() string {
