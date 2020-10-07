@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-const portBasePath = "/ports"
+const portBasePath = "ports"
 
 // DevicePortService handles operations on a port which belongs to a particular device
 type DevicePortService interface {

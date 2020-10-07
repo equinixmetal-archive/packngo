@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-const spotMarketRequestBasePath = "/spot-market-requests"
+const spotMarketRequestBasePath = "spot-market-requests"
 
 type SpotMarketRequestService interface {
 	List(string, *ListOptions) ([]SpotMarketRequest, *Response, error)

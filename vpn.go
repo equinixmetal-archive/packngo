@@ -2,7 +2,7 @@ package packngo
 
 import "fmt"
 
-const vpnBasePath = "/user/vpn"
+const vpnBasePath = "user/vpn"
 
 // VPNConfig struct
 type VPNConfig struct {

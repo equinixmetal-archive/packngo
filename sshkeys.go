@@ -3,7 +3,7 @@ package packngo
 import "fmt"
 
 const (
-	sshKeyBasePath = "/ssh-keys"
+	sshKeyBasePath = "ssh-keys"
 )
 
 // SSHKeyService interface defines available device methods

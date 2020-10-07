@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const planBasePath = "/plans"
+const planBasePath = "plans"
 
 // PlanService interface defines available plan methods
 type PlanService interface {

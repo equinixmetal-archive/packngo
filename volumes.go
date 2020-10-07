@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	volumeBasePath      = "/storage"
-	attachmentsBasePath = "/attachments"
+	volumeBasePath      = "storage"
+	attachmentsBasePath = "attachments"
 )
 
 // VolumeService interface defines available Volume methods

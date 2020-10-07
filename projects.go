@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const projectBasePath = "/projects"
+const projectBasePath = "projects"
 
 // ProjectService interface defines available project methods
 type ProjectService interface {

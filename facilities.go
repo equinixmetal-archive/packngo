@@ -2,7 +2,7 @@ package packngo
 
 import "fmt"
 
-const facilityBasePath = "/facilities"
+const facilityBasePath = "facilities"
 
 // FacilityService interface defines available facility methods
 type FacilityService interface {

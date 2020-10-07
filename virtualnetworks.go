@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const virtualNetworkBasePath = "/virtual-networks"
+const virtualNetworkBasePath = "virtual-networks"
 
 // DevicePortService handles operations on a port which belongs to a particular device
 type ProjectVirtualNetworkService interface {

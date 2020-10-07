@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const batchBasePath = "/batches"
+const batchBasePath = "batches"
 
 // BatchService interface defines available batch methods
 type BatchService interface {

@@ -2,7 +2,7 @@ package packngo
 
 import "fmt"
 
-const hardwareReservationBasePath = "/hardware-reservations"
+const hardwareReservationBasePath = "hardware-reservations"
 
 // HardwareReservationService interface defines available hardware reservation functions
 type HardwareReservationService interface {

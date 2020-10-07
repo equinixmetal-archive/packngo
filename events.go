@@ -2,7 +2,7 @@ package packngo
 
 import "fmt"
 
-const eventBasePath = "/events"
+const eventBasePath = "events"
 
 // Event struct
 type Event struct {

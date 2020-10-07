@@ -2,7 +2,7 @@ package packngo
 
 import "fmt"
 
-const emailBasePath = "/emails"
+const emailBasePath = "emails"
 
 // EmailRequest type used to add an email address to the current user
 type EmailRequest struct {

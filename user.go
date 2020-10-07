@@ -2,8 +2,8 @@ package packngo
 
 import "fmt"
 
-const usersBasePath = "/users"
-const userBasePath = "/user"
+const usersBasePath = "users"
+const userBasePath = "user"
 
 // UserService interface defines available user methods
 type UserService interface {

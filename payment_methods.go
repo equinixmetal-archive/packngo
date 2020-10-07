@@ -1,7 +1,7 @@
 package packngo
 
 // API documentation https://metal.equinix.com/developers/api/paymentmethods/
-const paymentMethodBasePath = "/payment-methods"
+const paymentMethodBasePath = "payment-methods"
 
 // ProjectService interface defines available project methods
 type PaymentMethodService interface {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const deviceBasePath = "/devices"
+const deviceBasePath = "devices"
 
 // DeviceService interface defines available device methods
 type DeviceService interface {

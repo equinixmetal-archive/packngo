@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const ipBasePath = "/ips"
+const ipBasePath = "ips"
 
 const (
 	// PublicIPv4 fixed string representation of public ipv4

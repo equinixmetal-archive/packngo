@@ -2,7 +2,7 @@ package packngo
 
 import "fmt"
 
-const notificationBasePath = "/notifications"
+const notificationBasePath = "notifications"
 
 // Notification struct
 type Notification struct {

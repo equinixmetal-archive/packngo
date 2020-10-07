@@ -2,7 +2,7 @@ package packngo
 
 import "fmt"
 
-var bgpConfigBasePath = "/bgp-config"
+var bgpConfigBasePath = "bgp-config"
 
 // BGPConfigService interface defines available BGP config methods
 type BGPConfigService interface {

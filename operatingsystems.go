@@ -1,6 +1,6 @@
 package packngo
 
-const osBasePath = "/operating-systems"
+const osBasePath = "operating-systems"
 
 // OSService interface defines available operating_systems methods
 type OSService interface {

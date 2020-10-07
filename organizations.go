@@ -3,7 +3,7 @@ package packngo
 import "fmt"
 
 // API documentation https://metal.equinix.com/developers/api/organizations/
-const organizationBasePath = "/organizations"
+const organizationBasePath = "organizations"
 
 // OrganizationService interface defines available organization methods
 type OrganizationService interface {

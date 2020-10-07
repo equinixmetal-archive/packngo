@@ -2,8 +2,8 @@ package packngo
 
 import "fmt"
 
-var bgpSessionBasePath = "/bgp/sessions"
-var bgpNeighborsBasePath = "/bgp/neighbors"
+var bgpSessionBasePath = "bgp/sessions"
+var bgpNeighborsBasePath = "bgp/neighbors"
 
 // BGPSessionService interface defines available BGP session methods
 type BGPSessionService interface {

@@ -1,6 +1,6 @@
 package packngo
 
-const spotMarketBasePath = "/market/spot/prices"
+const spotMarketBasePath = "market/spot/prices"
 
 // SpotMarketService expooses Spot Market methods
 type SpotMarketService interface {

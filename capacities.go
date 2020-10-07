@@ -1,6 +1,6 @@
 package packngo
 
-const capacityBasePath = "/capacity"
+const capacityBasePath = "capacity"
 
 // CapacityService interface defines available capacity methods
 type CapacityService interface {
