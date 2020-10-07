@@ -324,6 +324,9 @@ type requestDoer interface {
 // NewRequest inits a new http request with the proper headers
 func (c *Client) NewRequest(method, path string, body interface{}) (*retryablehttp.Request, error) {
 	// relative path to append to the endpoint url, no leading slash please
+	if path[0] == '/' {
+		path = path[1:]
+	}
 	rel, err := url.Parse(path)
 	if err != nil {
 		return nil, err
