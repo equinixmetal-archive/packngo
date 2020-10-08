@@ -233,6 +233,10 @@ func (i *DevicePortServiceOp) Convert2BondDevice(d *Device, targetType string) e
 			if err != nil {
 				return err
 			}
+			_, _, err = i.client.DevicePorts.Disbond(p, false)
+			if err != nil {
+				return err
+			}
 		}
 		for _, p := range ethPorts {
 			_, _, err := i.client.DevicePorts.Disbond(p, false)
