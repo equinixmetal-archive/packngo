@@ -218,7 +218,16 @@ func (i *DevicePortServiceOp) Convert2BondDevice(d *Device, targetType string) e
 				return err
 			}
 		}
-		_, _, err := i.client.DevicePorts.PortToLayerThree(d.ID, "bond0")
+		bond0, err := d.GetPortByName("bond0")
+		if err != nil {
+			return err
+		}
+		_, _, err = i.client.DevicePorts.Bond(bond0, false)
+		if err != nil {
+			return err
+		}
+
+		_, _, err = i.client.DevicePorts.PortToLayerThree(d.ID, "bond0")
 		if err != nil {
 			return err
 		}
