@@ -1,7 +1,7 @@
 # Owners
 
 This project is governed by [Equinix Metal] and benefits from a community of users that
-collaborate and contribute to its use in Go powered projects, such as th [Equinix Metal
+collaborate and contribute to its use in Go powered projects, such as the [Equinix Metal
 Terraform provider], [Docker machine driver], Kubernetes drivers for [CSI] and [CCM],
 the [Equinix Metal CLI], and others.
 
