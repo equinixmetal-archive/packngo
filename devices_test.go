@@ -85,8 +85,8 @@ func TestAccDeviceUpdate(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "baremetal_0",
-		OS:           "ubuntu_16_04",
+		Plan:         testPlan,
+		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 	}
@@ -135,8 +135,8 @@ func TestAccDeviceBasic(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "t1.small.x86",
-		OS:           "ubuntu_16_04",
+		Plan:         testPlan,
+		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		Description:  "test",
@@ -209,7 +209,7 @@ func TestAccDevicePXE(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:      "pxe-" + hn,
 		Facility:      []string{fac},
-		Plan:          "baremetal_0",
+		Plan:          testPlan,
 		ProjectID:     projectID,
 		BillingCycle:  "hourly",
 		OS:            "custom_ipxe",
@@ -274,10 +274,10 @@ func TestAccDeviceAssignGlobalIP(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "baremetal_0",
+		Plan:         testPlan,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
-		OS:           "ubuntu_16_04",
+		OS:           testOS,
 	}
 
 	d, _, err := c.Devices.Create(&cr)
@@ -401,10 +401,10 @@ func TestAccDeviceCreateWithReservedIP(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "baremetal_0",
+		Plan:         testPlan,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
-		OS:           "ubuntu_16_04",
+		OS:           testOS,
 		IPAddresses: []IPAddressCreateRequest{
 			// NOTE: only one public IPv4 entry is allowed here
 			{AddressFamily: 4, Public: false},
@@ -444,10 +444,10 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "baremetal_0",
+		Plan:         testPlan,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
-		OS:           "ubuntu_16_04",
+		OS:           testOS,
 	}
 
 	d, _, err := c.Devices.Create(&cr)
@@ -574,10 +574,10 @@ func TestAccDeviceAttachVolumeForceDelete(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "baremetal_0",
+		Plan:         testPlan,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
-		OS:           "ubuntu_16_04",
+		OS:           testOS,
 	}
 
 	d, _, err := c.Devices.Create(&cr)
@@ -640,10 +640,10 @@ func TestAccDeviceAttachVolume(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "baremetal_0",
+		Plan:         testPlan,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
-		OS:           "ubuntu_16_04",
+		OS:           testOS,
 	}
 
 	d, _, err := c.Devices.Create(&cr)
@@ -721,7 +721,7 @@ func TestAccDeviceSpotInstance(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:        hn,
 		Facility:        []string{fac},
-		Plan:            "baremetal_0",
+		Plan:            testPlan,
 		OS:              "coreos_stable",
 		ProjectID:       projectID,
 		BillingCycle:    "hourly",
@@ -767,8 +767,8 @@ func TestAccDeviceCustomData(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "baremetal_0",
-		OS:           "ubuntu_16_04",
+		Plan:         testPlan,
+		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		CustomData:   initialCustomData,
@@ -842,8 +842,8 @@ func TestAccListDeviceEvents(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "baremetal_0",
-		OS:           "ubuntu_16_04",
+		Plan:         testPlan,
+		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		CustomData:   initialCustomData,
@@ -881,8 +881,8 @@ func TestAccDeviceSSHKeys(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{testFacility()},
-		Plan:         "baremetal_0",
-		OS:           "ubuntu_16_04",
+		Plan:         testPlan,
+		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 	}
@@ -932,8 +932,8 @@ func TestAccDeviceListedSSHKeys(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:       hn,
 		Facility:       []string{testFacility()},
-		Plan:           "baremetal_0",
-		OS:             "ubuntu_16_04",
+		Plan:           testPlan,
+		OS:             testOS,
 		ProjectID:      projectID,
 		BillingCycle:   "hourly",
 		ProjectSSHKeys: []string{projectKey.ID},
@@ -988,8 +988,8 @@ func TestAccDeviceCreateFacilities(t *testing.T) {
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Plan:         "baremetal_0",
-		OS:           "ubuntu_16_04",
+		Plan:         testPlan,
+		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		Facility:     facilities,
@@ -1031,8 +1031,8 @@ func TestAccDeviceIPAddresses(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         "baremetal_0",
-		OS:           "ubuntu_16_04",
+		Plan:         testPlan,
+		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		IPAddresses: []IPAddressCreateRequest{

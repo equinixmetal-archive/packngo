@@ -25,10 +25,10 @@ func TestAccBGPSession(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{testFacility()},
-		Plan:         "baremetal_0",
+		Plan:         testPlan,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
-		OS:           "ubuntu_16_04",
+		OS:           testOS,
 	}
 
 	d, _, err := c.Devices.Create(&cr)
