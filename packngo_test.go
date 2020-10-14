@@ -32,7 +32,7 @@ const (
 	testFacilityDefault   = "ny5"
 	testFacilityAlternate = "dc13"
 	testPlan              = "c3.small.x86"
-	testOS                = "ubuntu_16_04"
+	testOS                = "ubuntu_18_04"
 )
 
 func testFacility() string {
