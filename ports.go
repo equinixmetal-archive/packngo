@@ -22,8 +22,8 @@ type DevicePortService interface {
 	PortToLayerTwo(string, string) (*Port, *Response, error)
 	PortToLayerThree(string, string) (*Port, *Response, error)
 	GetPortByName(string, string) (*Port, error)
-	GetOddEthPorts(*Device) (ports, error)
-	GetAllEthPorts(*Device) (ports, error)
+	GetOddEthPorts(*Device) (map[string]*Port, error)
+	GetAllEthPorts(*Device) (map[string]*Port, error)
 	ConvertDevice(*Device, string) error
 }
 
@@ -194,7 +194,7 @@ func (i *DevicePortServiceOp) DeviceNetworkType(deviceID string) (string, error)
 	return d.GetNetworkType(), nil
 }
 
-func (i *DevicePortServiceOp) GetAllEthPorts(d *Device) (ports, error) {
+func (i *DevicePortServiceOp) GetAllEthPorts(d *Device) (map[string]*Port, error) {
 	d, _, err := i.client.Devices.Get(d.ID, nil)
 	if err != nil {
 		return nil, err
@@ -202,7 +202,7 @@ func (i *DevicePortServiceOp) GetAllEthPorts(d *Device) (ports, error) {
 	return d.GetPhysicalPorts(), nil
 }
 
-func (i *DevicePortServiceOp) GetOddEthPorts(d *Device) (ports, error) {
+func (i *DevicePortServiceOp) GetOddEthPorts(d *Device) (map[string]*Port, error) {
 	d, _, err := i.client.Devices.Get(d.ID, nil)
 	if err != nil {
 		return nil, err
