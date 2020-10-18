@@ -15,7 +15,7 @@ func TestAccPort1E(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 
-	// MARK_1
+	// MARK__1
 
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
