@@ -18,7 +18,7 @@ build:
 
 golangci-lint:
 ifeq (, $(shell which golangci-lint))
-	$(GO) go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.24.0
+	$(GO) go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
 endif
 
 golint:
