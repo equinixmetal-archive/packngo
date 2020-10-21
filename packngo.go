@@ -87,6 +87,14 @@ type ListOptions struct {
 	// PerPage is the number of results to return per page for paginated result
 	// sets,
 	PerPage int `url:"per_page,omitempty"`
+
+	// Search is a special API query parameter that, for resources that support
+	// it, will filter results to those with any one of various fields matching
+	// the supplied keyword.  For example, a resource may have a defined search
+	// behavior matches either a name or a fingerprint field, while another
+	// resource may match entirely different fields.  Search is currently
+	// implemented for SSHKeys and uses an exact match.
+	Search string `url:"search,omitempty"`
 }
 
 // GetOptions returns GetOptions from ListOptions (and is nil-receiver safe)
@@ -100,7 +108,8 @@ func (l *ListOptions) GetOptions() *GetOptions {
 }
 
 // SearchOptions are options common to API GET requests that include a
-// multi-field search filter.
+// multi-field search filter. SearchOptions are used in List functions that are
+// known to support `search` but do not offer pagination.
 type SearchOptions struct {
 	// avoid embedding GetOptions (for similar behavior to ListOptions)
 
@@ -200,6 +209,10 @@ func (l *ListOptions) Params() url.Values {
 	}
 	if l.PerPage != 0 {
 		params.Set("per_page", fmt.Sprintf("%d", l.PerPage))
+	}
+
+	if l.Search != "" {
+		params.Set("search", l.Search)
 	}
 
 	return params
