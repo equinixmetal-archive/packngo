@@ -144,24 +144,52 @@ type OptionsGetter interface {
 	GetOptions() *GetOptions
 }
 
-func makeSureGetOptionsInclude(g *GetOptions, s string) *GetOptions {
+// Including ensures that the variadic refs are included in a copy of the
+// options, resulting in expansion of the the referred sub-resources. Unknown
+// values within refs will be silently ignore by the API.
+func (g *GetOptions) Including(refs ...string) *GetOptions {
 	if g == nil {
-		return &GetOptions{Includes: []string{s}}
+		return &GetOptions{Includes: refs}
 	}
-	if !contains(g.Includes, s) {
-		g.Includes = append(g.Includes, s)
+	out := *g
+	for _, v := range refs {
+		if !contains(out.Includes, v) {
+			out.Includes = append(out.Includes, v)
+		}
 	}
-	return g
+	return &out
 }
 
-func makeSureListOptionsInclude(l *ListOptions, s string) *ListOptions {
+// Including ensures that the variadic refs are included in a copy of the
+// options, resulting in expansion of the the referred sub-resources. Unknown
+// values within refs will be silently ignore by the API.
+func (l *ListOptions) Including(refs ...string) *ListOptions {
 	if l == nil {
-		return &ListOptions{Includes: []string{s}}
+		return &ListOptions{Includes: refs}
 	}
-	if !contains(l.Includes, s) {
-		l.Includes = append(l.Includes, s)
+	out := *l
+	for _, v := range refs {
+		if !contains(out.Includes, v) {
+			out.Includes = append(out.Includes, v)
+		}
 	}
-	return l
+	return &out
+}
+
+// Including ensures that the variadic refs are included in a copy of the
+// options, resulting in expansion of the the referred sub-resources. Unknown
+// values within refs will be silently ignore by the API.
+func (s *SearchOptions) Including(refs ...string) *SearchOptions {
+	if s == nil {
+		return &SearchOptions{Includes: refs}
+	}
+	out := *s
+	for _, v := range refs {
+		if !contains(out.Includes, v) {
+			out.Includes = append(out.Includes, v)
+		}
+	}
+	return &out
 }
 
 type paramsReady interface {

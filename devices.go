@@ -322,8 +322,17 @@ type DeviceServiceOp struct {
 }
 
 // List returns devices on a project
+//
+// Regarding ListOptions.Search: The API documentation does not provide guidance
+// on the fields that will be searched using this parameter, so this behavior is
+// undefined and prone to change.
+//
+// As of 2020-10-20, ListOptions.Search will look for matches in the following
+// Device properties: Hostname, Description, Tags, ID, ShortID, Network.Address,
+// Plan.Name, Plan.Slug, Facility.Code, Facility.Name, OS.Name, OS.Slug,
+// HardwareReservation.ID, HardwareReservation.ShortID
 func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices []Device, resp *Response, err error) {
-	listOpt = makeSureListOptionsInclude(listOpt, "facility")
+	listOpt = listOpt.Including("facility")
 	params := urlQuery(listOpt)
 	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, deviceBasePath, params)
 
@@ -351,7 +360,7 @@ func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices 
 
 // Get returns a device by id
 func (s *DeviceServiceOp) Get(deviceID string, getOpt *GetOptions) (*Device, *Response, error) {
-	getOpt = makeSureGetOptionsInclude(getOpt, "facility")
+	getOpt = getOpt.Including("facility")
 	params := urlQuery(getOpt)
 
 	path := fmt.Sprintf("%s/%s?%s", deviceBasePath, deviceID, params)
