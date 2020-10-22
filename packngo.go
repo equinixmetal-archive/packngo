@@ -87,6 +87,14 @@ type ListOptions struct {
 	// PerPage is the number of results to return per page for paginated result
 	// sets,
 	PerPage int `url:"per_page,omitempty"`
+
+	// Search is a special API query parameter that, for resources that support
+	// it, will filter results to those with any one of various fields matching
+	// the supplied keyword.  For example, a resource may have a defined search
+	// behavior matches either a name or a fingerprint field, while another
+	// resource may match entirely different fields.  Search is currently
+	// implemented for SSHKeys and uses an exact match.
+	Search string `url:"search,omitempty"`
 }
 
 // GetOptions returns GetOptions from ListOptions (and is nil-receiver safe)
@@ -100,7 +108,8 @@ func (l *ListOptions) GetOptions() *GetOptions {
 }
 
 // SearchOptions are options common to API GET requests that include a
-// multi-field search filter.
+// multi-field search filter. SearchOptions are used in List functions that are
+// known to support `search` but do not offer pagination.
 type SearchOptions struct {
 	// avoid embedding GetOptions (for similar behavior to ListOptions)
 
@@ -135,24 +144,52 @@ type OptionsGetter interface {
 	GetOptions() *GetOptions
 }
 
-func makeSureGetOptionsInclude(g *GetOptions, s string) *GetOptions {
+// Including ensures that the variadic refs are included in a copy of the
+// options, resulting in expansion of the the referred sub-resources. Unknown
+// values within refs will be silently ignore by the API.
+func (g *GetOptions) Including(refs ...string) *GetOptions {
 	if g == nil {
-		return &GetOptions{Includes: []string{s}}
+		return &GetOptions{Includes: refs}
 	}
-	if !contains(g.Includes, s) {
-		g.Includes = append(g.Includes, s)
+	out := *g
+	for _, v := range refs {
+		if !contains(out.Includes, v) {
+			out.Includes = append(out.Includes, v)
+		}
 	}
-	return g
+	return &out
 }
 
-func makeSureListOptionsInclude(l *ListOptions, s string) *ListOptions {
+// Including ensures that the variadic refs are included in a copy of the
+// options, resulting in expansion of the the referred sub-resources. Unknown
+// values within refs will be silently ignore by the API.
+func (l *ListOptions) Including(refs ...string) *ListOptions {
 	if l == nil {
-		return &ListOptions{Includes: []string{s}}
+		return &ListOptions{Includes: refs}
 	}
-	if !contains(l.Includes, s) {
-		l.Includes = append(l.Includes, s)
+	out := *l
+	for _, v := range refs {
+		if !contains(out.Includes, v) {
+			out.Includes = append(out.Includes, v)
+		}
 	}
-	return l
+	return &out
+}
+
+// Including ensures that the variadic refs are included in a copy of the
+// options, resulting in expansion of the the referred sub-resources. Unknown
+// values within refs will be silently ignore by the API.
+func (s *SearchOptions) Including(refs ...string) *SearchOptions {
+	if s == nil {
+		return &SearchOptions{Includes: refs}
+	}
+	out := *s
+	for _, v := range refs {
+		if !contains(out.Includes, v) {
+			out.Includes = append(out.Includes, v)
+		}
+	}
+	return &out
 }
 
 type paramsReady interface {
@@ -200,6 +237,10 @@ func (l *ListOptions) Params() url.Values {
 	}
 	if l.PerPage != 0 {
 		params.Set("per_page", fmt.Sprintf("%d", l.PerPage))
+	}
+
+	if l.Search != "" {
+		params.Set("search", l.Search)
 	}
 
 	return params
