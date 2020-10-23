@@ -15,8 +15,8 @@ const (
 
 // DeviceService interface defines available device methods
 type DeviceService interface {
-	List(ProjectID string, listOpt *ListOptions) ([]Device, *Response, error)
-	Get(DeviceID string, getOpt *GetOptions) (*Device, *Response, error)
+	List(ProjectID string, opts *ListOptions) ([]Device, *Response, error)
+	Get(DeviceID string, opts *GetOptions) (*Device, *Response, error)
 	Create(*DeviceCreateRequest) (*Device, *Response, error)
 	Update(string, *DeviceUpdateRequest) (*Device, *Response, error)
 	Delete(string, bool) (*Response, error)
@@ -25,9 +25,9 @@ type DeviceService interface {
 	PowerOn(string) (*Response, error)
 	Lock(string) (*Response, error)
 	Unlock(string) (*Response, error)
-	ListBGPSessions(deviceID string, listOpt *ListOptions) ([]BGPSession, *Response, error)
-	ListBGPNeighbors(deviceID string, listOpt *ListOptions) ([]BGPNeighbor, *Response, error)
-	ListEvents(string, *ListOptions) ([]Event, *Response, error)
+	ListBGPSessions(deviceID string, opts *ListOptions) ([]BGPSession, *Response, error)
+	ListBGPNeighbors(deviceID string, opts *ListOptions) ([]BGPNeighbor, *Response, error)
+	ListEvents(deviceID string, opts *ListOptions) ([]Event, *Response, error)
 }
 
 type devicesRoot struct {
@@ -331,10 +331,10 @@ type DeviceServiceOp struct {
 // Device properties: Hostname, Description, Tags, ID, ShortID, Network.Address,
 // Plan.Name, Plan.Slug, Facility.Code, Facility.Name, OS.Name, OS.Slug,
 // HardwareReservation.ID, HardwareReservation.ShortID
-func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices []Device, resp *Response, err error) {
-	listOpt = listOpt.Including("facility")
-	params := urlQuery(listOpt)
-	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, deviceBasePath, params)
+func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []Device, resp *Response, err error) {
+	opts = opts.Including("facility")
+	endpointPath := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, deviceBasePath)
+	path := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(devicesRoot)
@@ -346,11 +346,7 @@ func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices 
 
 		devices = append(devices, subset.Devices...)
 
-		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
-			path = subset.Meta.Next.Href
-			if params != "" {
-				path = fmt.Sprintf("%s&%s", path, params)
-			}
+		if path = nextPage(subset.Meta, opts); path != "" {
 			continue
 		}
 
@@ -359,11 +355,10 @@ func (s *DeviceServiceOp) List(projectID string, listOpt *ListOptions) (devices 
 }
 
 // Get returns a device by id
-func (s *DeviceServiceOp) Get(deviceID string, getOpt *GetOptions) (*Device, *Response, error) {
-	getOpt = getOpt.Including("facility")
-	params := urlQuery(getOpt)
-
-	path := fmt.Sprintf("%s/%s?%s", deviceBasePath, deviceID, params)
+func (s *DeviceServiceOp) Get(deviceID string, opts *GetOptions) (*Device, *Response, error) {
+	opts = opts.Including("facility")
+	endpointPath := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
+	path := opts.WithQuery(endpointPath)
 	device := new(Device)
 	resp, err := s.client.DoRequest("GET", path, nil, device)
 	if err != nil {
@@ -449,10 +444,10 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 	return s.client.DoRequest("PATCH", path, action, nil)
 }
 
-func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, listOpt *ListOptions) ([]BGPNeighbor, *Response, error) {
+func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) ([]BGPNeighbor, *Response, error) {
 	root := new(bgpNeighborsRoot)
-	params := urlQuery(listOpt)
-	path := fmt.Sprintf("%s/%s%s?%s", deviceBasePath, deviceID, bgpNeighborsBasePath, params)
+	endpointPath := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, bgpNeighborsBasePath)
+	path := opts.WithQuery(endpointPath)
 
 	resp, err := s.client.DoRequest("GET", path, nil, root)
 	if err != nil {
@@ -463,9 +458,10 @@ func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, listOpt *ListOptions
 }
 
 // ListBGPSessions returns all BGP Sessions associated with the device
-func (s *DeviceServiceOp) ListBGPSessions(deviceID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
-	params := urlQuery(listOpt)
-	path := fmt.Sprintf("%s/%s%s?%s", deviceBasePath, deviceID, bgpSessionBasePath, params)
+func (s *DeviceServiceOp) ListBGPSessions(deviceID string, opts *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
+
+	endpointPath := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, bgpSessionBasePath)
+	path := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(bgpSessionsRoot)
@@ -477,11 +473,7 @@ func (s *DeviceServiceOp) ListBGPSessions(deviceID string, listOpt *ListOptions)
 
 		bgpSessions = append(bgpSessions, subset.Sessions...)
 
-		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
-			path = subset.Meta.Next.Href
-			if params != "" {
-				path = fmt.Sprintf("%s&%s", path, params)
-			}
+		if path = nextPage(subset.Meta, opts); path != "" {
 			continue
 		}
 		return
@@ -489,8 +481,8 @@ func (s *DeviceServiceOp) ListBGPSessions(deviceID string, listOpt *ListOptions)
 }
 
 // ListEvents returns list of device events
-func (s *DeviceServiceOp) ListEvents(deviceID string, listOpt *ListOptions) ([]Event, *Response, error) {
+func (s *DeviceServiceOp) ListEvents(deviceID string, opts *ListOptions) ([]Event, *Response, error) {
 	path := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, eventBasePath)
 
-	return listEvents(s.client, path, listOpt)
+	return listEvents(s.client, path, opts)
 }
