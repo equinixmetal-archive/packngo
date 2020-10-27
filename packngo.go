@@ -29,9 +29,10 @@ const (
 	mediaType       = "application/json"
 	debugEnvVar     = "PACKNGO_DEBUG"
 
-	headerRateLimit     = "X-RateLimit-Limit"
-	headerRateRemaining = "X-RateLimit-Remaining"
-	headerRateReset     = "X-RateLimit-Reset"
+	headerRateLimit        = "X-RateLimit-Limit"
+	headerRateRemaining    = "X-RateLimit-Remaining"
+	headerRateReset        = "X-RateLimit-Reset"
+	expectedAPIContentType = "application/json; charset=utf-8"
 )
 
 var redirectsErrorRe = regexp.MustCompile(`stopped after \d+ redirects\z`)
@@ -599,9 +600,17 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retry
 	return c, nil
 }
 
+func responseContentType(r *http.Response) string {
+	ct, ctHeaderPresent := r.Header["Content-Type"]
+	if ctHeaderPresent && (len(ct) > 0) {
+		return ct[0]
+	}
+	return ""
+}
+
 func checkResponse(r *http.Response) error {
-	// return if http status code is within 200 range
-	if c := r.StatusCode; c >= 200 && c <= 299 {
+
+	if s := r.StatusCode; s >= 200 && s <= 299 {
 		// response is good, return
 		return nil
 	}
@@ -611,6 +620,12 @@ func checkResponse(r *http.Response) error {
 	// if the response has a body, populate the message in errorResponse
 	if err != nil {
 		return err
+	}
+
+	ct := responseContentType(r)
+	if ct != expectedAPIContentType {
+		errorResponse.SingleError = fmt.Sprintf("Unexpected Content-Type in response: %s", ct)
+		return errorResponse
 	}
 
 	if len(data) > 0 {
