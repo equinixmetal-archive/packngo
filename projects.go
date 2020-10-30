@@ -70,25 +70,20 @@ type ProjectServiceOp struct {
 }
 
 // List returns the user's projects
-func (s *ProjectServiceOp) List(listOpt *ListOptions) (projects []Project, resp *Response, err error) {
-	params := urlQuery(listOpt)
-	root := new(projectsRoot)
-
-	path := fmt.Sprintf("%s?%s", projectBasePath, params)
+func (s *ProjectServiceOp) List(opts *ListOptions) (projects []Project, resp *Response, err error) {
+	path := opts.WithQuery(projectBasePath)
 
 	for {
-		resp, err = s.client.DoRequest("GET", path, nil, root)
+		subset := new(projectsRoot)
+
+		resp, err = s.client.DoRequest("GET", path, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
-		projects = append(projects, root.Projects...)
+		projects = append(projects, subset.Projects...)
 
-		if root.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
-			path = root.Meta.Next.Href
-			if params != "" {
-				path = fmt.Sprintf("%s&%s", path, params)
-			}
+		if path = nextPage(subset.Meta, opts); path != "" {
 			continue
 		}
 
