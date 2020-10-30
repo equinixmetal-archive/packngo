@@ -600,14 +600,6 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retry
 	return c, nil
 }
 
-func responseContentType(r *http.Response) string {
-	ct, ctHeaderPresent := r.Header["Content-Type"]
-	if ctHeaderPresent && (len(ct) > 0) {
-		return ct[0]
-	}
-	return ""
-}
-
 func checkResponse(r *http.Response) error {
 
 	if s := r.StatusCode; s >= 200 && s <= 299 {
@@ -622,9 +614,9 @@ func checkResponse(r *http.Response) error {
 		return err
 	}
 
-	ct := responseContentType(r)
+	ct := r.Header.Get("Content-Type")
 	if ct != expectedAPIContentType {
-		errorResponse.SingleError = fmt.Sprintf("Unexpected Content-Type in response: %s", ct)
+		errorResponse.SingleError = fmt.Sprintf("Unexpected Content-Type %s with status %s", ct, r.Status)
 		return errorResponse
 	}
 
