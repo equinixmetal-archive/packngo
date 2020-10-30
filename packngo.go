@@ -29,10 +29,10 @@ const (
 	mediaType       = "application/json"
 	debugEnvVar     = "PACKNGO_DEBUG"
 
-	headerRateLimit        = "X-RateLimit-Limit"
-	headerRateRemaining    = "X-RateLimit-Remaining"
-	headerRateReset        = "X-RateLimit-Reset"
-	expectedAPIContentType = "application/json; charset=utf-8"
+	headerRateLimit              = "X-RateLimit-Limit"
+	headerRateRemaining          = "X-RateLimit-Remaining"
+	headerRateReset              = "X-RateLimit-Reset"
+	expectedAPIContentTypePrefix = "application/json"
 )
 
 var redirectsErrorRe = regexp.MustCompile(`stopped after \d+ redirects\z`)
@@ -615,7 +615,7 @@ func checkResponse(r *http.Response) error {
 	}
 
 	ct := r.Header.Get("Content-Type")
-	if ct != expectedAPIContentType {
+	if !strings.HasPrefix(ct, expectedAPIContentTypePrefix) {
 		errorResponse.SingleError = fmt.Sprintf("Unexpected Content-Type %s with status %s", ct, r.Status)
 		return errorResponse
 	}
