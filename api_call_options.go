@@ -98,7 +98,7 @@ func (g *GetOptions) GetPage() int { // guaranteed int
 	return g.Page
 }
 
-func (g *GetOptions) GetCopy() *GetOptions {
+func (g *GetOptions) CopyOrNew() *GetOptions {
 	if g == nil {
 		return &GetOptions{}
 	}
@@ -110,7 +110,7 @@ func (g *GetOptions) GetCopy() *GetOptions {
 // options, resulting in expansion of the the referred sub-resources. Unknown
 // values within refs will be silently ignore by the API.
 func (g *GetOptions) Including(refs ...string) *GetOptions {
-	ret := g.GetCopy()
+	ret := g.CopyOrNew()
 	for _, v := range refs {
 		if !contains(ret.Includes, v) {
 			ret.Includes = append(ret.Includes, v)
@@ -128,7 +128,7 @@ func stripQuery(inURL string) string {
 // nextPage is common and extracted from all List functions
 func nextPage(meta meta, opts *GetOptions) (path string) {
 	if meta.Next != nil && (opts.GetPage() == 0) {
-		optsCopy := opts.GetCopy()
+		optsCopy := opts.CopyOrNew()
 		optsCopy.Page = meta.CurrentPageNum + 1
 		return optsCopy.WithQuery(stripQuery(meta.Next.Href))
 	}
