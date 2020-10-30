@@ -2,6 +2,7 @@ package packngo
 
 import (
 	"fmt"
+	"path"
 )
 
 const (
@@ -109,9 +110,12 @@ type VolumeServiceOp struct {
 }
 
 // List returns the volumes for a project
-func (v *VolumeServiceOp) List(projectID string, listOpt *ListOptions) (volumes []Volume, resp *Response, err error) {
-	params := urlQuery(listOpt)
-	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, volumeBasePath, params)
+func (v *VolumeServiceOp) List(projectID string, opts *ListOptions) (volumes []Volume, resp *Response, err error) {
+	//params := urlQuery(listOpt)
+	endpointPath := path.Join(projectBasePath, projectID, volumeBasePath)
+	path := opts.WithQuery(endpointPath)
+
+	//path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, volumeBasePath, params)
 
 	for {
 		subset := new(volumesRoot)
@@ -123,14 +127,9 @@ func (v *VolumeServiceOp) List(projectID string, listOpt *ListOptions) (volumes 
 
 		volumes = append(volumes, subset.Volumes...)
 
-		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
-			path = subset.Meta.Next.Href
-			if params != "" {
-				path = fmt.Sprintf("%s&%s", path, params)
-			}
+		if path = nextPage(subset.Meta, opts); path != "" {
 			continue
 		}
-
 		return
 	}
 }
