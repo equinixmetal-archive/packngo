@@ -2,6 +2,7 @@ package packngo
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/google/go-querystring/query"
 )
@@ -25,7 +26,7 @@ type GetOptions struct {
 	// nested object. Field specifiers can use a dotted notation up to three
 	// references deep. (For example, "memberships.projects" can be used in
 	// ListUsers.)
-	Includes []string `url:"includes,omitempty"`
+	Includes []string `url:"include,omitempty,comma"`
 
 	// Excludes reduce the size of the API response by removing nested objects
 	// that may be returned.
@@ -34,7 +35,7 @@ type GetOptions struct {
 	// API endpoints have an "include" behavior on certain fields. Nested Go
 	// types unmarshalled into an "excluded" field will only have a values in
 	// their `Href` field.
-	Excludes []string `url:"excludes,omitempty"`
+	Excludes []string `url:"exclude,omitempty,comma"`
 
 	// Page is the page of results to retrieve for paginated result sets
 	Page int `url:"page,omitempty"`
@@ -53,6 +54,8 @@ type GetOptions struct {
 
 	SortBy        string            `url:"sort_by,omitempty"`
 	SortDirection ListSortDirection `url:"sort_direction,omitempty"`
+
+	Meta meta `url:"-"`
 }
 
 type ListOptions = GetOptions
@@ -77,6 +80,7 @@ func (g *GetOptions) GetOptions() *GetOptions {
 func (g *GetOptions) WithQuery(path string) string {
 	params := g.Encode()
 	if params != "" {
+		// parse path, take existing vars
 		path = fmt.Sprintf("%s?%s", path, params)
 	}
 	return path
@@ -94,32 +98,53 @@ func (g *GetOptions) GetPage() int { // guaranteed int
 	return g.Page
 }
 
+func (g *GetOptions) GetCopy() *GetOptions {
+	if g == nil {
+		return &GetOptions{}
+	}
+	ret := *g
+	return &ret
+}
+
 // Including ensures that the variadic refs are included in a copy of the
 // options, resulting in expansion of the the referred sub-resources. Unknown
 // values within refs will be silently ignore by the API.
 func (g *GetOptions) Including(refs ...string) *GetOptions {
-	if g == nil {
-		return &GetOptions{Includes: refs}
-	}
-	out := *g
+	ret := g.GetCopy()
 	for _, v := range refs {
-		if !contains(out.Includes, v) {
-			out.Includes = append(out.Includes, v)
+		if !contains(ret.Includes, v) {
+			ret.Includes = append(ret.Includes, v)
 		}
 	}
-	return &out
+	return ret
+}
+
+func stripQuery(inURL string) string {
+	u, _ := url.Parse(inURL)
+	u.RawQuery = ""
+	return u.String()
 }
 
 // nextPage is common and extracted from all List functions
 func nextPage(meta meta, opts *GetOptions) (path string) {
 	if meta.Next != nil && (opts.GetPage() == 0) {
-		return opts.WithQuery(meta.Next.Href)
+		optsCopy := opts.GetCopy()
+		optsCopy.Page = meta.CurrentPageNum + 1
+		return optsCopy.WithQuery(stripQuery(meta.Next.Href))
+	}
+	if opts != nil {
+		opts.Meta = meta
 	}
 	return ""
 }
 
 // Encode generates a URL query string ("?foo=bar")
 func (o *GetOptions) Encode() string {
+	urlValues, _ := query.Values(o)
+	return urlValues.Encode()
+}
+
+func urlQuery(o *GetOptions) string {
 	urlValues, _ := query.Values(o)
 	return urlValues.Encode()
 }
