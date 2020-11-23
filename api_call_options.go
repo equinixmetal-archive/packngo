@@ -77,13 +77,13 @@ func (g *GetOptions) GetOptions() *GetOptions {
 	return &getOpts
 }
 
-func (g *GetOptions) WithQuery(path string) string {
+func (g *GetOptions) WithQuery(apiPath string) string {
 	params := g.Encode()
 	if params != "" {
 		// parse path, take existing vars
-		path = fmt.Sprintf("%s?%s", path, params)
+		return fmt.Sprintf("%s?%s", apiPath, params)
 	}
-	return path
+	return apiPath
 }
 
 // OptionsGetter provides GetOptions
