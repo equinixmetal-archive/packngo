@@ -7,8 +7,6 @@ import (
 
 const (
 	apiKeyBasePath = "/api-keys"
-	//apiKeyUserBasePath    = "/user/api-keys"
-	//apiKeyProjectBasePath = "/projects/%s/api-keys"
 )
 
 // APIKeyService interface defines available device methods
