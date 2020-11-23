@@ -111,18 +111,18 @@ type VolumeServiceOp struct {
 // List returns the volumes for a project
 func (v *VolumeServiceOp) List(projectID string, opts *ListOptions) (volumes []Volume, resp *Response, err error) {
 	endpointPath := path.Join(projectBasePath, projectID, volumeBasePath)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	for {
 		subset := new(volumesRoot)
 
-		resp, err = v.client.DoRequest("GET", path, nil, subset)
+		resp, err = v.client.DoRequest("GET", apiPath, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		volumes = append(volumes, subset.Volumes...)
 
-		if path = nextPage(subset.Meta, opts); path != "" {
+		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
 			continue
 		}
 		return
@@ -132,10 +132,10 @@ func (v *VolumeServiceOp) List(projectID string, opts *ListOptions) (volumes []V
 // Get returns a volume by id
 func (v *VolumeServiceOp) Get(volumeID string, opts *GetOptions) (*Volume, *Response, error) {
 	endpointPath := path.Join(volumeBasePath, volumeID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	volume := new(Volume)
 
-	resp, err := v.client.DoRequest("GET", path, nil, volume)
+	resp, err := v.client.DoRequest("GET", apiPath, nil, volume)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -145,10 +145,10 @@ func (v *VolumeServiceOp) Get(volumeID string, opts *GetOptions) (*Volume, *Resp
 
 // Update updates a volume
 func (v *VolumeServiceOp) Update(id string, updateRequest *VolumeUpdateRequest) (*Volume, *Response, error) {
-	path := path.Join(volumeBasePath, id)
+	apiPath := path.Join(volumeBasePath, id)
 	volume := new(Volume)
 
-	resp, err := v.client.DoRequest("PATCH", path, updateRequest, volume)
+	resp, err := v.client.DoRequest("PATCH", apiPath, updateRequest, volume)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -158,9 +158,9 @@ func (v *VolumeServiceOp) Update(id string, updateRequest *VolumeUpdateRequest) 
 
 // Delete deletes a volume
 func (v *VolumeServiceOp) Delete(volumeID string) (*Response, error) {
-	path := path.Join(volumeBasePath, volumeID)
+	apiPath := path.Join(volumeBasePath, volumeID)
 
-	return v.client.DoRequest("DELETE", path, nil, nil)
+	return v.client.DoRequest("DELETE", apiPath, nil, nil)
 }
 
 // Create creates a new volume for a project
@@ -196,10 +196,10 @@ func (v *VolumeAttachmentServiceOp) Create(volumeID, deviceID string) (*VolumeAt
 // Get gets attachment by id
 func (v *VolumeAttachmentServiceOp) Get(attachmentID string, opts *GetOptions) (*VolumeAttachment, *Response, error) {
 	endpointPath := path.Join(volumeBasePath, attachmentsBasePath, attachmentID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	volumeAttachment := new(VolumeAttachment)
 
-	resp, err := v.client.DoRequest("GET", path, nil, volumeAttachment)
+	resp, err := v.client.DoRequest("GET", apiPath, nil, volumeAttachment)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -209,23 +209,23 @@ func (v *VolumeAttachmentServiceOp) Get(attachmentID string, opts *GetOptions) (
 
 // Delete deletes attachment by id
 func (v *VolumeAttachmentServiceOp) Delete(attachmentID string) (*Response, error) {
-	path := path.Join(volumeBasePath, attachmentsBasePath, attachmentID)
+	apiPath := path.Join(volumeBasePath, attachmentsBasePath, attachmentID)
 
-	return v.client.DoRequest("DELETE", path, nil, nil)
+	return v.client.DoRequest("DELETE", apiPath, nil, nil)
 }
 
 // Lock sets a volume to "locked"
 func (v *VolumeServiceOp) Lock(id string) (*Response, error) {
-	path := path.Join(volumeBasePath, id)
+	apiPath := path.Join(volumeBasePath, id)
 	action := lockType{Locked: true}
 
-	return v.client.DoRequest("PATCH", path, action, nil)
+	return v.client.DoRequest("PATCH", apiPath, action, nil)
 }
 
 // Unlock sets a volume to "unlocked"
 func (v *VolumeServiceOp) Unlock(id string) (*Response, error) {
-	path := path.Join(volumeBasePath, id)
+	apiPath := path.Join(volumeBasePath, id)
 	action := lockType{Locked: false}
 
-	return v.client.DoRequest("PATCH", path, action, nil)
+	return v.client.DoRequest("PATCH", apiPath, action, nil)
 }

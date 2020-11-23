@@ -42,9 +42,9 @@ type FacilityServiceOp struct {
 // List returns all facilities
 func (s *FacilityServiceOp) List(opts *ListOptions) ([]Facility, *Response, error) {
 	root := new(facilityRoot)
-	path := opts.WithQuery(facilityBasePath)
+	apiPath := opts.WithQuery(facilityBasePath)
 
-	resp, err := s.client.DoRequest("GET", path, nil, root)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}

@@ -50,19 +50,19 @@ type UserServiceOp struct {
 
 // Get method gets a user by userID
 func (s *UserServiceOp) List(opts *ListOptions) (users []User, resp *Response, err error) {
-	path := opts.WithQuery(usersBasePath)
+	apiPath := opts.WithQuery(usersBasePath)
 
 	for {
 		subset := new(usersRoot)
 
-		resp, err = s.client.DoRequest("GET", path, nil, subset)
+		resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		users = append(users, subset.Users...)
 
-		if path = nextPage(subset.Meta, opts); path != "" {
+		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
 			continue
 		}
 		return
@@ -83,10 +83,10 @@ func (s *UserServiceOp) Current() (*User, *Response, error) {
 
 func (s *UserServiceOp) Get(userID string, opts *GetOptions) (*User, *Response, error) {
 	endpointPath := path.Join(usersBasePath, userID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	user := new(User)
 
-	resp, err := s.client.DoRequest("GET", path, nil, user)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, user)
 	if err != nil {
 		return nil, resp, err
 	}

@@ -110,9 +110,9 @@ type PlanServiceOp struct {
 // List method returns all available plans
 func (s *PlanServiceOp) List(opts *ListOptions) ([]Plan, *Response, error) {
 	root := new(planRoot)
-	path := opts.WithQuery(planBasePath)
+	apiPath := opts.WithQuery(planBasePath)
 
-	resp, err := s.client.DoRequest("GET", path, nil, root)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}

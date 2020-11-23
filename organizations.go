@@ -84,17 +84,17 @@ type OrganizationServiceOp struct {
 func (s *OrganizationServiceOp) List(opts *ListOptions) (orgs []Organization, resp *Response, err error) {
 	subset := new(organizationsRoot)
 
-	path := opts.WithQuery(organizationBasePath)
+	apiPath := opts.WithQuery(organizationBasePath)
 
 	for {
-		resp, err = s.client.DoRequest("GET", path, nil, subset)
+		resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		orgs = append(orgs, subset.Organizations...)
 
-		if path = nextPage(subset.Meta, opts); path != "" {
+		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
 			continue
 		}
 		return
@@ -104,10 +104,10 @@ func (s *OrganizationServiceOp) List(opts *ListOptions) (orgs []Organization, re
 // Get returns a organization by id
 func (s *OrganizationServiceOp) Get(organizationID string, opts *GetOptions) (*Organization, *Response, error) {
 	endpointPath := path.Join(organizationBasePath, organizationID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	organization := new(Organization)
 
-	resp, err := s.client.DoRequest("GET", path, nil, organization)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, organization)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -129,10 +129,10 @@ func (s *OrganizationServiceOp) Create(createRequest *OrganizationCreateRequest)
 
 // Update updates an organization
 func (s *OrganizationServiceOp) Update(id string, updateRequest *OrganizationUpdateRequest) (*Organization, *Response, error) {
-	path := path.Join(organizationBasePath, id)
+	apiPath := path.Join(organizationBasePath, id)
 	organization := new(Organization)
 
-	resp, err := s.client.DoRequest("PATCH", path, updateRequest, organization)
+	resp, err := s.client.DoRequest("PATCH", apiPath, updateRequest, organization)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -142,17 +142,17 @@ func (s *OrganizationServiceOp) Update(id string, updateRequest *OrganizationUpd
 
 // Delete deletes an organizationID
 func (s *OrganizationServiceOp) Delete(organizationID string) (*Response, error) {
-	path := path.Join(organizationBasePath, organizationID)
+	apiPath := path.Join(organizationBasePath, organizationID)
 
-	return s.client.DoRequest("DELETE", path, nil, nil)
+	return s.client.DoRequest("DELETE", apiPath, nil, nil)
 }
 
 // ListPaymentMethods returns PaymentMethods for an organization
 func (s *OrganizationServiceOp) ListPaymentMethods(organizationID string) ([]PaymentMethod, *Response, error) {
-	path := path.Join(organizationBasePath, organizationID, paymentMethodBasePath)
+	apiPath := path.Join(organizationBasePath, organizationID, paymentMethodBasePath)
 	root := new(paymentMethodsRoot)
 
-	resp, err := s.client.DoRequest("GET", path, nil, root)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -162,7 +162,7 @@ func (s *OrganizationServiceOp) ListPaymentMethods(organizationID string) ([]Pay
 
 // ListEvents returns list of organization events
 func (s *OrganizationServiceOp) ListEvents(organizationID string, listOpt *ListOptions) ([]Event, *Response, error) {
-	path := path.Join(organizationBasePath, organizationID, eventBasePath)
+	apiPath := path.Join(organizationBasePath, organizationID, eventBasePath)
 
-	return listEvents(s.client, path, listOpt)
+	return listEvents(s.client, apiPath, listOpt)
 }

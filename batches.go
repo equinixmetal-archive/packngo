@@ -51,10 +51,10 @@ type BatchServiceOp struct {
 // Get returns batch details
 func (s *BatchServiceOp) Get(batchID string, opts *GetOptions) (*Batch, *Response, error) {
 	endpointPath := path.Join(batchBasePath, batchID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	batch := new(Batch)
 
-	resp, err := s.client.DoRequest("GET", path, nil, batch)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, batch)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -65,9 +65,9 @@ func (s *BatchServiceOp) Get(batchID string, opts *GetOptions) (*Batch, *Respons
 // List returns batches on a project
 func (s *BatchServiceOp) List(projectID string, opts *ListOptions) (batches []Batch, resp *Response, err error) {
 	endpointPath := path.Join(projectBasePath, projectID, batchBasePath)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	subset := new(batchesList)
-	resp, err = s.client.DoRequest("GET", path, nil, subset)
+	resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -78,10 +78,10 @@ func (s *BatchServiceOp) List(projectID string, opts *ListOptions) (batches []Ba
 
 // Create function to create batch of device instances
 func (s *BatchServiceOp) Create(projectID string, request *BatchCreateRequest) ([]Batch, *Response, error) {
-	path := path.Join(projectBasePath, projectID, "devices", "batch")
+	apiPath := path.Join(projectBasePath, projectID, "devices", "batch")
 
 	batches := new(batchesList)
-	resp, err := s.client.DoRequest("POST", path, request, batches)
+	resp, err := s.client.DoRequest("POST", apiPath, request, batches)
 
 	if err != nil {
 		return nil, resp, err
@@ -95,7 +95,7 @@ func (s *BatchServiceOp) Delete(id string, removeDevices bool) (*Response, error
 	// API doc days the remove_associated_instances params shout be in the body
 	// https://metal.equinix.com/developers/api/batches/#delete-the-batch
 	// .. does this even work?
-	path := fmt.Sprintf("%s/%s?remove_associated_instances=%t", batchBasePath, id, removeDevices)
+	apiPath := fmt.Sprintf("%s/%s?remove_associated_instances=%t", batchBasePath, id, removeDevices)
 
-	return s.client.DoRequest("DELETE", path, nil, nil)
+	return s.client.DoRequest("DELETE", apiPath, nil, nil)
 }

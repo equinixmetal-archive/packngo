@@ -91,10 +91,10 @@ func (s *SSHKeyServiceOp) List() ([]SSHKey, *Response, error) {
 // Get returns an ssh key by id
 func (s *SSHKeyServiceOp) Get(sshKeyID string, opts *GetOptions) (*SSHKey, *Response, error) {
 	endpointPath := path.Join(sshKeyBasePath, sshKeyID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	sshKey := new(SSHKey)
 
-	resp, err := s.client.DoRequest("GET", path, nil, sshKey)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, sshKey)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -123,11 +123,11 @@ func (s *SSHKeyServiceOp) Update(id string, updateRequest *SSHKeyUpdateRequest) 
 	if updateRequest.Label == nil && updateRequest.Key == nil {
 		return nil, nil, fmt.Errorf("You must set either Label or Key string for SSH Key update")
 	}
-	path := path.Join(sshKeyBasePath, id)
+	apiPath := path.Join(sshKeyBasePath, id)
 
 	sshKey := new(SSHKey)
 
-	resp, err := s.client.DoRequest("PATCH", path, updateRequest, sshKey)
+	resp, err := s.client.DoRequest("PATCH", apiPath, updateRequest, sshKey)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -137,7 +137,7 @@ func (s *SSHKeyServiceOp) Update(id string, updateRequest *SSHKeyUpdateRequest) 
 
 // Delete deletes an ssh key
 func (s *SSHKeyServiceOp) Delete(sshKeyID string) (*Response, error) {
-	path := path.Join(sshKeyBasePath, sshKeyID)
+	apiPath := path.Join(sshKeyBasePath, sshKeyID)
 
-	return s.client.DoRequest("DELETE", path, nil, nil)
+	return s.client.DoRequest("DELETE", apiPath, nil, nil)
 }

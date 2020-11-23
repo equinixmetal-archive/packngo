@@ -67,10 +67,10 @@ type CreateBGPSessionRequest struct {
 
 // Create function
 func (s *BGPSessionServiceOp) Create(deviceID string, request CreateBGPSessionRequest) (*BGPSession, *Response, error) {
-	path := path.Join(deviceBasePath, deviceID, bgpSessionBasePath)
+	apiPath := path.Join(deviceBasePath, deviceID, bgpSessionBasePath)
 	session := new(BGPSession)
 
-	resp, err := s.client.DoRequest("POST", path, request, session)
+	resp, err := s.client.DoRequest("POST", apiPath, request, session)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -80,17 +80,17 @@ func (s *BGPSessionServiceOp) Create(deviceID string, request CreateBGPSessionRe
 
 // Delete function
 func (s *BGPSessionServiceOp) Delete(id string) (*Response, error) {
-	path := path.Join(bgpSessionBasePath, id)
+	apiPath := path.Join(bgpSessionBasePath, id)
 
-	return s.client.DoRequest("DELETE", path, nil, nil)
+	return s.client.DoRequest("DELETE", apiPath, nil, nil)
 }
 
 // Get function
 func (s *BGPSessionServiceOp) Get(id string, opts *GetOptions) (session *BGPSession, response *Response, err error) {
 	endpointPath := path.Join(bgpSessionBasePath, id)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	session = new(BGPSession)
-	response, err = s.client.DoRequest("GET", path, nil, session)
+	response, err = s.client.DoRequest("GET", apiPath, nil, session)
 	if err != nil {
 		return nil, response, err
 	}

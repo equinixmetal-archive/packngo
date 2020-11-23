@@ -41,25 +41,25 @@ func (s *EventServiceOp) List(listOpt *ListOptions) ([]Event, *Response, error) 
 
 // Get returns an event by ID
 func (s *EventServiceOp) Get(eventID string, getOpt *GetOptions) (*Event, *Response, error) {
-	path := path.Join(eventBasePath, eventID)
-	return get(s.client, path, getOpt)
+	apiPath := path.Join(eventBasePath, eventID)
+	return get(s.client, apiPath, getOpt)
 }
 
 // list helper function for all event functions
 func listEvents(client requestDoer, endpointPath string, opts *ListOptions) (events []Event, resp *Response, err error) {
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(eventsRoot)
 
-		resp, err = client.DoRequest("GET", path, nil, subset)
+		resp, err = client.DoRequest("GET", apiPath, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		events = append(events, subset.Events...)
 
-		if path = nextPage(subset.Meta, opts); path != "" {
+		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
 			continue
 		}
 		return
@@ -70,9 +70,9 @@ func listEvents(client requestDoer, endpointPath string, opts *ListOptions) (eve
 func get(client *Client, endpointPath string, opts *GetOptions) (*Event, *Response, error) {
 	event := new(Event)
 
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 
-	resp, err := client.DoRequest("GET", path, nil, event)
+	resp, err := client.DoRequest("GET", apiPath, nil, event)
 	if err != nil {
 		return nil, resp, err
 	}

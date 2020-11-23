@@ -64,12 +64,12 @@ func roundPlus(f float64, places int) float64 {
 func (s *SpotMarketRequestServiceOp) Create(cr *SpotMarketRequestCreateRequest, pID string) (*SpotMarketRequest, *Response, error) {
 	opts := (&GetOptions{}).Including("devices", "project", "plan")
 	endpointPath := path.Join(projectBasePath, pID, spotMarketRequestBasePath)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 
 	cr.MaxBidPrice = roundPlus(cr.MaxBidPrice, 2)
 	smr := new(SpotMarketRequest)
 
-	resp, err := s.client.DoRequest("POST", path, cr, smr)
+	resp, err := s.client.DoRequest("POST", apiPath, cr, smr)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -83,10 +83,10 @@ func (s *SpotMarketRequestServiceOp) List(pID string, opts *ListOptions) ([]Spot
 	}
 
 	endpointPath := path.Join(projectBasePath, pID, spotMarketRequestBasePath)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	output := new(smrRoot)
 
-	resp, err := s.client.DoRequest("GET", path, nil, output)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, output)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -96,10 +96,10 @@ func (s *SpotMarketRequestServiceOp) List(pID string, opts *ListOptions) ([]Spot
 
 func (s *SpotMarketRequestServiceOp) Get(id string, opts *GetOptions) (*SpotMarketRequest, *Response, error) {
 	endpointPath := path.Join(spotMarketRequestBasePath, id)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	smr := new(SpotMarketRequest)
 
-	resp, err := s.client.DoRequest("GET", path, nil, &smr)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, &smr)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -108,10 +108,10 @@ func (s *SpotMarketRequestServiceOp) Get(id string, opts *GetOptions) (*SpotMark
 }
 
 func (s *SpotMarketRequestServiceOp) Delete(id string, forceDelete bool) (*Response, error) {
-	path := path.Join(spotMarketRequestBasePath, id)
+	apiPath := path.Join(spotMarketRequestBasePath, id)
 	var params *map[string]bool
 	if forceDelete {
 		params = &map[string]bool{"force_termination": true}
 	}
-	return s.client.DoRequest("DELETE", path, params, nil)
+	return s.client.DoRequest("DELETE", apiPath, params, nil)
 }

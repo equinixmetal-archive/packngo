@@ -105,9 +105,9 @@ type AddressStruct struct {
 }
 
 func deleteFromIP(client *Client, resourceID string) (*Response, error) {
-	path := path.Join(ipBasePath, resourceID)
+	apiPath := path.Join(ipBasePath, resourceID)
 
-	return client.DoRequest("DELETE", path, nil, nil)
+	return client.DoRequest("DELETE", apiPath, nil, nil)
 }
 
 func (i IPAddressReservation) String() string {
@@ -133,10 +133,10 @@ func (i *DeviceIPServiceOp) Unassign(assignmentID string) (*Response, error) {
 // Assign assigns an IP address to a device.
 // The IP address must be in one of the IP ranges assigned to the device’s project.
 func (i *DeviceIPServiceOp) Assign(deviceID string, assignRequest *AddressStruct) (*IPAddressAssignment, *Response, error) {
-	path := path.Join(deviceBasePath, deviceID, ipBasePath)
+	apiPath := path.Join(deviceBasePath, deviceID, ipBasePath)
 	ipa := new(IPAddressAssignment)
 
-	resp, err := i.client.DoRequest("POST", path, assignRequest, ipa)
+	resp, err := i.client.DoRequest("POST", apiPath, assignRequest, ipa)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -147,10 +147,10 @@ func (i *DeviceIPServiceOp) Assign(deviceID string, assignRequest *AddressStruct
 // Get returns assignment by ID.
 func (i *DeviceIPServiceOp) Get(assignmentID string, opts *GetOptions) (*IPAddressAssignment, *Response, error) {
 	endpointPath := path.Join(ipBasePath, assignmentID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	ipa := new(IPAddressAssignment)
 
-	resp, err := i.client.DoRequest("GET", path, nil, ipa)
+	resp, err := i.client.DoRequest("GET", apiPath, nil, ipa)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -161,7 +161,7 @@ func (i *DeviceIPServiceOp) Get(assignmentID string, opts *GetOptions) (*IPAddre
 // List list all of the IP address assignments on a device
 func (i *DeviceIPServiceOp) List(deviceID string, opts *ListOptions) ([]IPAddressAssignment, *Response, error) {
 	endpointPath := path.Join(deviceBasePath, deviceID, ipBasePath)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 
 	//ipList represents collection of IP Address reservations
 	type ipList struct {
@@ -170,7 +170,7 @@ func (i *DeviceIPServiceOp) List(deviceID string, opts *ListOptions) ([]IPAddres
 
 	ips := new(ipList)
 
-	resp, err := i.client.DoRequest("GET", path, nil, ips)
+	resp, err := i.client.DoRequest("GET", apiPath, nil, ips)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -186,10 +186,10 @@ type ProjectIPServiceOp struct {
 // Get returns reservation by ID.
 func (i *ProjectIPServiceOp) Get(reservationID string, opts *GetOptions) (*IPAddressReservation, *Response, error) {
 	endpointPath := path.Join(ipBasePath, reservationID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	ipr := new(IPAddressReservation)
 
-	resp, err := i.client.DoRequest("GET", path, nil, ipr)
+	resp, err := i.client.DoRequest("GET", apiPath, nil, ipr)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -200,12 +200,12 @@ func (i *ProjectIPServiceOp) Get(reservationID string, opts *GetOptions) (*IPAdd
 // List provides a list of IP resevations for a single project.
 func (i *ProjectIPServiceOp) List(projectID string, opts *ListOptions) ([]IPAddressReservation, *Response, error) {
 	endpointPath := path.Join(projectBasePath, projectID, ipBasePath)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	reservations := new(struct {
 		Reservations []IPAddressReservation `json:"ip_addresses"`
 	})
 
-	resp, err := i.client.DoRequest("GET", path, nil, reservations)
+	resp, err := i.client.DoRequest("GET", apiPath, nil, reservations)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -214,10 +214,10 @@ func (i *ProjectIPServiceOp) List(projectID string, opts *ListOptions) ([]IPAddr
 
 // Request requests more IP space for a project in order to have additional IP addresses to assign to devices.
 func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error) {
-	path := path.Join(projectBasePath, projectID, ipBasePath)
+	apiPath := path.Join(projectBasePath, projectID, ipBasePath)
 	ipr := new(IPAddressReservation)
 
-	resp, err := i.client.DoRequest("POST", path, ipReservationReq, ipr)
+	resp, err := i.client.DoRequest("POST", apiPath, ipReservationReq, ipr)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -231,10 +231,10 @@ func (i *ProjectIPServiceOp) Remove(ipReservationID string) (*Response, error) {
 
 // AvailableAddresses lists addresses available from a reserved block
 func (i *ProjectIPServiceOp) AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error) {
-	path := fmt.Sprintf("%s/%s/available?cidr=%d", ipBasePath, ipReservationID, r.CIDR)
+	apiPath := fmt.Sprintf("%s/%s/available?cidr=%d", ipBasePath, ipReservationID, r.CIDR)
 	ar := new(AvailableResponse)
 
-	resp, err := i.client.DoRequest("GET", path, r, ar)
+	resp, err := i.client.DoRequest("GET", apiPath, r, ar)
 	if err != nil {
 		return nil, resp, err
 	}

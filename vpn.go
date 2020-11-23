@@ -36,12 +36,12 @@ func (s *VPNServiceOp) Disable() (resp *Response, err error) {
 func (s *VPNServiceOp) Get(code string, opts *GetOptions) (config *VPNConfig, resp *Response, err error) {
 	params := urlQuery(opts)
 	config = &VPNConfig{}
-	path := fmt.Sprintf("%s?code=%s", vpnBasePath, code)
+	apiPath := fmt.Sprintf("%s?code=%s", vpnBasePath, code)
 	if params != "" {
-		path += params
+		apiPath += params
 	}
 
-	resp, err = s.client.DoRequest("GET", path, nil, config)
+	resp, err = s.client.DoRequest("GET", apiPath, nil, config)
 	if err != nil {
 		return nil, resp, err
 	}

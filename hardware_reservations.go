@@ -45,18 +45,18 @@ func (s *HardwareReservationServiceOp) List(projectID string, opts *ListOptions)
 	root := new(hardwareReservationRoot)
 
 	endpointPath := path.Join(projectBasePath, projectID, hardwareReservationBasePath)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(hardwareReservationRoot)
 
-		resp, err = s.client.DoRequest("GET", path, nil, root)
+		resp, err = s.client.DoRequest("GET", apiPath, nil, root)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		reservations = append(reservations, root.HardwareReservations...)
-		if path = nextPage(subset.Meta, opts); path != "" {
+		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
 			continue
 		}
 		return
@@ -68,9 +68,9 @@ func (s *HardwareReservationServiceOp) Get(hardwareReservationdID string, opts *
 	hardwareReservation := new(HardwareReservation)
 
 	endpointPath := path.Join(hardwareReservationBasePath, hardwareReservationdID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 
-	resp, err := s.client.DoRequest("GET", path, nil, hardwareReservation)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, hardwareReservation)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -81,11 +81,11 @@ func (s *HardwareReservationServiceOp) Get(hardwareReservationdID string, opts *
 // Move a hardware reservation to another project
 func (s *HardwareReservationServiceOp) Move(hardwareReservationdID, projectID string) (*HardwareReservation, *Response, error) {
 	hardwareReservation := new(HardwareReservation)
-	path := path.Join(hardwareReservationBasePath, hardwareReservationdID, "move")
+	apiPath := path.Join(hardwareReservationBasePath, hardwareReservationdID, "move")
 	body := map[string]string{}
 	body["project_id"] = projectID
 
-	resp, err := s.client.DoRequest("POST", path, body, hardwareReservation)
+	resp, err := s.client.DoRequest("POST", apiPath, body, hardwareReservation)
 	if err != nil {
 		return nil, resp, err
 	}

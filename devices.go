@@ -335,19 +335,19 @@ type DeviceServiceOp struct {
 func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []Device, resp *Response, err error) {
 	opts = opts.Including("facility")
 	endpointPath := path.Join(projectBasePath, projectID, deviceBasePath)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(devicesRoot)
 
-		resp, err = s.client.DoRequest("GET", path, nil, subset)
+		resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		devices = append(devices, subset.Devices...)
 
-		if path = nextPage(subset.Meta, opts); path != "" {
+		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
 			continue
 		}
 
@@ -359,9 +359,9 @@ func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []D
 func (s *DeviceServiceOp) Get(deviceID string, opts *GetOptions) (*Device, *Response, error) {
 	opts = opts.Including("facility")
 	endpointPath := path.Join(deviceBasePath, deviceID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	device := new(Device)
-	resp, err := s.client.DoRequest("GET", path, nil, device)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, device)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -370,10 +370,10 @@ func (s *DeviceServiceOp) Get(deviceID string, opts *GetOptions) (*Device, *Resp
 
 // Create creates a new device
 func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *Response, error) {
-	path := path.Join(projectBasePath, createRequest.ProjectID, deviceBasePath)
+	apiPath := path.Join(projectBasePath, createRequest.ProjectID, deviceBasePath)
 	device := new(Device)
 
-	resp, err := s.client.DoRequest("POST", path, createRequest, device)
+	resp, err := s.client.DoRequest("POST", apiPath, createRequest, device)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -385,10 +385,10 @@ func (s *DeviceServiceOp) Update(deviceID string, updateRequest *DeviceUpdateReq
 	opts := &GetOptions{}
 	opts = opts.Including("facility")
 	endpointPath := path.Join(deviceBasePath, deviceID)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 	device := new(Device)
 
-	resp, err := s.client.DoRequest("PUT", path, updateRequest, device)
+	resp, err := s.client.DoRequest("PUT", apiPath, updateRequest, device)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -398,34 +398,34 @@ func (s *DeviceServiceOp) Update(deviceID string, updateRequest *DeviceUpdateReq
 
 // Delete deletes a device
 func (s *DeviceServiceOp) Delete(deviceID string, force bool) (*Response, error) {
-	path := path.Join(deviceBasePath, deviceID)
+	apiPath := path.Join(deviceBasePath, deviceID)
 	req := &DeviceDeleteRequest{Force: force}
 
-	return s.client.DoRequest("DELETE", path, req, nil)
+	return s.client.DoRequest("DELETE", apiPath, req, nil)
 }
 
 // Reboot reboots on a device
 func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
-	path := path.Join(deviceBasePath, deviceID, "actions")
+	apiPath := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "reboot"}
 
-	return s.client.DoRequest("POST", path, action, nil)
+	return s.client.DoRequest("POST", apiPath, action, nil)
 }
 
 // PowerOff powers on a device
 func (s *DeviceServiceOp) PowerOff(deviceID string) (*Response, error) {
-	path := path.Join(deviceBasePath, deviceID, "actions")
+	apiPath := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "power_off"}
 
-	return s.client.DoRequest("POST", path, action, nil)
+	return s.client.DoRequest("POST", apiPath, action, nil)
 }
 
 // PowerOn powers on a device
 func (s *DeviceServiceOp) PowerOn(deviceID string) (*Response, error) {
-	path := path.Join(deviceBasePath, deviceID, "actions")
+	apiPath := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "power_on"}
 
-	return s.client.DoRequest("POST", path, action, nil)
+	return s.client.DoRequest("POST", apiPath, action, nil)
 }
 
 type lockType struct {
@@ -434,26 +434,26 @@ type lockType struct {
 
 // Lock sets a device to "locked"
 func (s *DeviceServiceOp) Lock(deviceID string) (*Response, error) {
-	path := path.Join(deviceBasePath, deviceID)
+	apiPath := path.Join(deviceBasePath, deviceID)
 	action := lockType{Locked: true}
 
-	return s.client.DoRequest("PATCH", path, action, nil)
+	return s.client.DoRequest("PATCH", apiPath, action, nil)
 }
 
 // Unlock sets a device to "unlocked"
 func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
-	path := path.Join(deviceBasePath, deviceID)
+	apiPath := path.Join(deviceBasePath, deviceID)
 	action := lockType{Locked: false}
 
-	return s.client.DoRequest("PATCH", path, action, nil)
+	return s.client.DoRequest("PATCH", apiPath, action, nil)
 }
 
 func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) ([]BGPNeighbor, *Response, error) {
 	root := new(bgpNeighborsRoot)
 	endpointPath := path.Join(deviceBasePath, deviceID, bgpNeighborsBasePath)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 
-	resp, err := s.client.DoRequest("GET", path, nil, root)
+	resp, err := s.client.DoRequest("GET", apiPath, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -465,19 +465,19 @@ func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) (
 func (s *DeviceServiceOp) ListBGPSessions(deviceID string, opts *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
 
 	endpointPath := path.Join(deviceBasePath, deviceID, bgpSessionBasePath)
-	path := opts.WithQuery(endpointPath)
+	apiPath := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(bgpSessionsRoot)
 
-		resp, err = s.client.DoRequest("GET", path, nil, subset)
+		resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		bgpSessions = append(bgpSessions, subset.Sessions...)
 
-		if path = nextPage(subset.Meta, opts); path != "" {
+		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
 			continue
 		}
 		return
@@ -486,7 +486,7 @@ func (s *DeviceServiceOp) ListBGPSessions(deviceID string, opts *ListOptions) (b
 
 // ListEvents returns list of device events
 func (s *DeviceServiceOp) ListEvents(deviceID string, opts *ListOptions) ([]Event, *Response, error) {
-	path := path.Join(deviceBasePath, deviceID, eventBasePath)
+	apiPath := path.Join(deviceBasePath, deviceID, eventBasePath)
 
-	return listEvents(s.client, path, opts)
+	return listEvents(s.client, apiPath, opts)
 }
