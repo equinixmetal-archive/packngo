@@ -111,18 +111,18 @@ type VolumeServiceOp struct {
 // List returns the volumes for a project
 func (v *VolumeServiceOp) List(projectID string, opts *ListOptions) (volumes []Volume, resp *Response, err error) {
 	endpointPath := path.Join(projectBasePath, projectID, volumeBasePath)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	for {
 		subset := new(volumesRoot)
 
-		resp, err = v.client.DoRequest("GET", apiPath, nil, subset)
+		resp, err = v.client.DoRequest("GET", apiPathQuery, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		volumes = append(volumes, subset.Volumes...)
 
-		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
 			continue
 		}
 		return
@@ -132,10 +132,10 @@ func (v *VolumeServiceOp) List(projectID string, opts *ListOptions) (volumes []V
 // Get returns a volume by id
 func (v *VolumeServiceOp) Get(volumeID string, opts *GetOptions) (*Volume, *Response, error) {
 	endpointPath := path.Join(volumeBasePath, volumeID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	volume := new(Volume)
 
-	resp, err := v.client.DoRequest("GET", apiPath, nil, volume)
+	resp, err := v.client.DoRequest("GET", apiPathQuery, nil, volume)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -196,10 +196,10 @@ func (v *VolumeAttachmentServiceOp) Create(volumeID, deviceID string) (*VolumeAt
 // Get gets attachment by id
 func (v *VolumeAttachmentServiceOp) Get(attachmentID string, opts *GetOptions) (*VolumeAttachment, *Response, error) {
 	endpointPath := path.Join(volumeBasePath, attachmentsBasePath, attachmentID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	volumeAttachment := new(VolumeAttachment)
 
-	resp, err := v.client.DoRequest("GET", apiPath, nil, volumeAttachment)
+	resp, err := v.client.DoRequest("GET", apiPathQuery, nil, volumeAttachment)
 	if err != nil {
 		return nil, resp, err
 	}

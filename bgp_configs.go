@@ -57,11 +57,11 @@ func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigReq
 // Get function
 func (s *BGPConfigServiceOp) Get(projectID string, opts *GetOptions) (bgpConfig *BGPConfig, resp *Response, err error) {
 	endpointPath := path.Join(projectBasePath, projectID, bgpConfigBasePath)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
 	subset := new(BGPConfig)
 
-	resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
+	resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
 	if err != nil {
 		return nil, resp, err
 	}

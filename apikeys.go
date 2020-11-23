@@ -78,9 +78,9 @@ type APIKeyServiceOp struct {
 
 func (s *APIKeyServiceOp) list(url string, opts *ListOptions) ([]APIKey, *Response, error) {
 	root := new(apiKeyRoot)
-	apiPath := opts.WithQuery(url)
+	apiPathQuery := opts.WithQuery(url)
 
-	resp, err := s.client.DoRequest("GET", apiPath, nil, root)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}

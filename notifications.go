@@ -45,8 +45,8 @@ func (s *NotificationServiceOp) List(listOpt *ListOptions) ([]Notification, *Res
 // Get returns a notification by ID
 func (s *NotificationServiceOp) Get(notificationID string, opts *GetOptions) (*Notification, *Response, error) {
 	endpointPath := path.Join(notificationBasePath, notificationID)
-	apiPath := opts.WithQuery(endpointPath)
-	return getNotifications(s.client, apiPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	return getNotifications(s.client, apiPathQuery)
 }
 
 // Marks notification as read by ID
@@ -59,9 +59,9 @@ func (s *NotificationServiceOp) MarkAsRead(notificationID string) (*Notification
 func listNotifications(client *Client, endpointPath string, opts *ListOptions) ([]Notification, *Response, error) {
 	root := new(notificationsRoot)
 
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
-	resp, err := client.DoRequest("GET", apiPath, nil, root)
+	resp, err := client.DoRequest("GET", apiPathQuery, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}

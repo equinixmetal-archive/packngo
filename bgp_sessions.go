@@ -88,9 +88,9 @@ func (s *BGPSessionServiceOp) Delete(id string) (*Response, error) {
 // Get function
 func (s *BGPSessionServiceOp) Get(id string, opts *GetOptions) (session *BGPSession, response *Response, err error) {
 	endpointPath := path.Join(bgpSessionBasePath, id)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	session = new(BGPSession)
-	response, err = s.client.DoRequest("GET", apiPath, nil, session)
+	response, err = s.client.DoRequest("GET", apiPathQuery, nil, session)
 	if err != nil {
 		return nil, response, err
 	}

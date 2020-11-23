@@ -84,17 +84,17 @@ type OrganizationServiceOp struct {
 func (s *OrganizationServiceOp) List(opts *ListOptions) (orgs []Organization, resp *Response, err error) {
 	subset := new(organizationsRoot)
 
-	apiPath := opts.WithQuery(organizationBasePath)
+	apiPathQuery := opts.WithQuery(organizationBasePath)
 
 	for {
-		resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
+		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		orgs = append(orgs, subset.Organizations...)
 
-		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
 			continue
 		}
 		return
@@ -104,10 +104,10 @@ func (s *OrganizationServiceOp) List(opts *ListOptions) (orgs []Organization, re
 // Get returns a organization by id
 func (s *OrganizationServiceOp) Get(organizationID string, opts *GetOptions) (*Organization, *Response, error) {
 	endpointPath := path.Join(organizationBasePath, organizationID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	organization := new(Organization)
 
-	resp, err := s.client.DoRequest("GET", apiPath, nil, organization)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, organization)
 	if err != nil {
 		return nil, resp, err
 	}

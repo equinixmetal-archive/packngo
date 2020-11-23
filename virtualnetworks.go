@@ -34,10 +34,10 @@ type VirtualNetworkListResponse struct {
 
 func (i *ProjectVirtualNetworkServiceOp) List(projectID string, opts *ListOptions) (*VirtualNetworkListResponse, *Response, error) {
 	endpointPath := path.Join(projectBasePath, projectID, virtualNetworkBasePath)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	output := new(VirtualNetworkListResponse)
 
-	resp, err := i.client.DoRequest("GET", apiPath, nil, output)
+	resp, err := i.client.DoRequest("GET", apiPathQuery, nil, output)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -53,10 +53,10 @@ type VirtualNetworkCreateRequest struct {
 
 func (i *ProjectVirtualNetworkServiceOp) Get(vlanID string, opts *GetOptions) (*VirtualNetwork, *Response, error) {
 	endpointPath := path.Join(virtualNetworkBasePath, vlanID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	vlan := new(VirtualNetwork)
 
-	resp, err := i.client.DoRequest("GET", apiPath, nil, vlan)
+	resp, err := i.client.DoRequest("GET", apiPathQuery, nil, vlan)
 	if err != nil {
 		return nil, resp, err
 	}

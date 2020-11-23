@@ -91,10 +91,10 @@ func (s *SSHKeyServiceOp) List() ([]SSHKey, *Response, error) {
 // Get returns an ssh key by id
 func (s *SSHKeyServiceOp) Get(sshKeyID string, opts *GetOptions) (*SSHKey, *Response, error) {
 	endpointPath := path.Join(sshKeyBasePath, sshKeyID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	sshKey := new(SSHKey)
 
-	resp, err := s.client.DoRequest("GET", apiPath, nil, sshKey)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, sshKey)
 	if err != nil {
 		return nil, resp, err
 	}

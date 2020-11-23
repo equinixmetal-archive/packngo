@@ -47,19 +47,19 @@ func (s *EventServiceOp) Get(eventID string, getOpt *GetOptions) (*Event, *Respo
 
 // list helper function for all event functions
 func listEvents(client requestDoer, endpointPath string, opts *ListOptions) (events []Event, resp *Response, err error) {
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(eventsRoot)
 
-		resp, err = client.DoRequest("GET", apiPath, nil, subset)
+		resp, err = client.DoRequest("GET", apiPathQuery, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		events = append(events, subset.Events...)
 
-		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
 			continue
 		}
 		return
@@ -70,9 +70,9 @@ func listEvents(client requestDoer, endpointPath string, opts *ListOptions) (eve
 func get(client *Client, endpointPath string, opts *GetOptions) (*Event, *Response, error) {
 	event := new(Event)
 
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
-	resp, err := client.DoRequest("GET", apiPath, nil, event)
+	resp, err := client.DoRequest("GET", apiPathQuery, nil, event)
 	if err != nil {
 		return nil, resp, err
 	}

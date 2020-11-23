@@ -45,18 +45,18 @@ func (s *HardwareReservationServiceOp) List(projectID string, opts *ListOptions)
 	root := new(hardwareReservationRoot)
 
 	endpointPath := path.Join(projectBasePath, projectID, hardwareReservationBasePath)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(hardwareReservationRoot)
 
-		resp, err = s.client.DoRequest("GET", apiPath, nil, root)
+		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, root)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		reservations = append(reservations, root.HardwareReservations...)
-		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
 			continue
 		}
 		return
@@ -68,9 +68,9 @@ func (s *HardwareReservationServiceOp) Get(hardwareReservationdID string, opts *
 	hardwareReservation := new(HardwareReservation)
 
 	endpointPath := path.Join(hardwareReservationBasePath, hardwareReservationdID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
-	resp, err := s.client.DoRequest("GET", apiPath, nil, hardwareReservation)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, hardwareReservation)
 	if err != nil {
 		return nil, resp, err
 	}

@@ -40,10 +40,10 @@ type EmailServiceOp struct {
 // Get retrieves an email by id
 func (s *EmailServiceOp) Get(emailID string, opts *GetOptions) (*Email, *Response, error) {
 	endpointPath := path.Join(emailBasePath, emailID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	email := new(Email)
 
-	resp, err := s.client.DoRequest("GET", apiPath, nil, email)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, email)
 	if err != nil {
 		return nil, resp, err
 	}

@@ -51,10 +51,10 @@ type BatchServiceOp struct {
 // Get returns batch details
 func (s *BatchServiceOp) Get(batchID string, opts *GetOptions) (*Batch, *Response, error) {
 	endpointPath := path.Join(batchBasePath, batchID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	batch := new(Batch)
 
-	resp, err := s.client.DoRequest("GET", apiPath, nil, batch)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, batch)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -65,9 +65,9 @@ func (s *BatchServiceOp) Get(batchID string, opts *GetOptions) (*Batch, *Respons
 // List returns batches on a project
 func (s *BatchServiceOp) List(projectID string, opts *ListOptions) (batches []Batch, resp *Response, err error) {
 	endpointPath := path.Join(projectBasePath, projectID, batchBasePath)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	subset := new(batchesList)
-	resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
+	resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
 	if err != nil {
 		return nil, resp, err
 	}

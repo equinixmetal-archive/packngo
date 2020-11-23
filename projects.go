@@ -71,19 +71,19 @@ type ProjectServiceOp struct {
 
 // List returns the user's projects
 func (s *ProjectServiceOp) List(opts *ListOptions) (projects []Project, resp *Response, err error) {
-	apiPath := opts.WithQuery(projectBasePath)
+	apiPathQuery := opts.WithQuery(projectBasePath)
 
 	for {
 		subset := new(projectsRoot)
 
-		resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
+		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		projects = append(projects, subset.Projects...)
 
-		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
 			continue
 		}
 
@@ -94,9 +94,9 @@ func (s *ProjectServiceOp) List(opts *ListOptions) (projects []Project, resp *Re
 // Get returns a project by id
 func (s *ProjectServiceOp) Get(projectID string, opts *GetOptions) (*Project, *Response, error) {
 	endpointPath := path.Join(projectBasePath, projectID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	project := new(Project)
-	resp, err := s.client.DoRequest("GET", apiPath, nil, project)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, project)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -138,18 +138,18 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 // ListBGPSessions returns all BGP Sessions associated with the project
 func (s *ProjectServiceOp) ListBGPSessions(projectID string, opts *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
 	endpointPath := path.Join(projectBasePath, projectID, bgpSessionBasePath)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(bgpSessionsRoot)
 
-		resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
+		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		bgpSessions = append(bgpSessions, subset.Sessions...)
-		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
 			continue
 		}
 		return
@@ -160,11 +160,11 @@ func (s *ProjectServiceOp) ListBGPSessions(projectID string, opts *ListOptions) 
 func (s *ProjectServiceOp) ListSSHKeys(projectID string, opts *SearchOptions) (sshKeys []SSHKey, resp *Response, err error) {
 
 	endpointPath := path.Join(projectBasePath, projectID, sshKeyBasePath)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
 	subset := new(sshKeyRoot)
 
-	resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
+	resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
 	if err != nil {
 		return nil, resp, err
 	}

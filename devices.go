@@ -335,19 +335,19 @@ type DeviceServiceOp struct {
 func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []Device, resp *Response, err error) {
 	opts = opts.Including("facility")
 	endpointPath := path.Join(projectBasePath, projectID, deviceBasePath)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(devicesRoot)
 
-		resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
+		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		devices = append(devices, subset.Devices...)
 
-		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
 			continue
 		}
 
@@ -359,9 +359,9 @@ func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []D
 func (s *DeviceServiceOp) Get(deviceID string, opts *GetOptions) (*Device, *Response, error) {
 	opts = opts.Including("facility")
 	endpointPath := path.Join(deviceBasePath, deviceID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	device := new(Device)
-	resp, err := s.client.DoRequest("GET", apiPath, nil, device)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, device)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -385,10 +385,10 @@ func (s *DeviceServiceOp) Update(deviceID string, updateRequest *DeviceUpdateReq
 	opts := &GetOptions{}
 	opts = opts.Including("facility")
 	endpointPath := path.Join(deviceBasePath, deviceID)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	device := new(Device)
 
-	resp, err := s.client.DoRequest("PUT", apiPath, updateRequest, device)
+	resp, err := s.client.DoRequest("PUT", apiPathQuery, updateRequest, device)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -451,9 +451,9 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) ([]BGPNeighbor, *Response, error) {
 	root := new(bgpNeighborsRoot)
 	endpointPath := path.Join(deviceBasePath, deviceID, bgpNeighborsBasePath)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
-	resp, err := s.client.DoRequest("GET", apiPath, nil, root)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -465,19 +465,19 @@ func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) (
 func (s *DeviceServiceOp) ListBGPSessions(deviceID string, opts *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
 
 	endpointPath := path.Join(deviceBasePath, deviceID, bgpSessionBasePath)
-	apiPath := opts.WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(bgpSessionsRoot)
 
-		resp, err = s.client.DoRequest("GET", apiPath, nil, subset)
+		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
 		bgpSessions = append(bgpSessions, subset.Sessions...)
 
-		if apiPath = nextPage(subset.Meta, opts); apiPath != "" {
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
 			continue
 		}
 		return
