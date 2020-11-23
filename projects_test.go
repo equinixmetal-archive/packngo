@@ -294,7 +294,7 @@ func TestAccProjectListEvents(t *testing.T) {
 	}
 
 	vcr := VolumeCreateRequest{
-		Size:             10,
+		Size:             100,
 		BillingCycle:     "hourly",
 		PlanID:           "storage_1",
 		FacilityID:       testFacility(),

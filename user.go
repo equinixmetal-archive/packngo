@@ -1,6 +1,6 @@
 package packngo
 
-import "fmt"
+import "path"
 
 const usersBasePath = "/users"
 const userBasePath = "/user"
@@ -49,9 +49,8 @@ type UserServiceOp struct {
 }
 
 // Get method gets a user by userID
-func (s *UserServiceOp) List(listOpt *ListOptions) (users []User, resp *Response, err error) {
-	params := urlQuery(listOpt)
-	path := fmt.Sprintf("%s?%s", usersBasePath, params)
+func (s *UserServiceOp) List(opts *ListOptions) (users []User, resp *Response, err error) {
+	path := opts.WithQuery(usersBasePath)
 
 	for {
 		subset := new(usersRoot)
@@ -63,11 +62,7 @@ func (s *UserServiceOp) List(listOpt *ListOptions) (users []User, resp *Response
 
 		users = append(users, subset.Users...)
 
-		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
-			path = subset.Meta.Next.Href
-			if params != "" {
-				path = fmt.Sprintf("%s&%s", path, params)
-			}
+		if path = nextPage(subset.Meta, opts); path != "" {
 			continue
 		}
 		return
@@ -86,9 +81,9 @@ func (s *UserServiceOp) Current() (*User, *Response, error) {
 	return user, resp, err
 }
 
-func (s *UserServiceOp) Get(userID string, getOpt *GetOptions) (*User, *Response, error) {
-	params := urlQuery(getOpt)
-	path := fmt.Sprintf("%s/%s?%s", usersBasePath, userID, params)
+func (s *UserServiceOp) Get(userID string, opts *GetOptions) (*User, *Response, error) {
+	endpointPath := path.Join(usersBasePath, userID)
+	path := opts.WithQuery(endpointPath)
 	user := new(User)
 
 	resp, err := s.client.DoRequest("GET", path, nil, user)

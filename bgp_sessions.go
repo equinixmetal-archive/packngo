@@ -1,6 +1,8 @@
 package packngo
 
-import "fmt"
+import (
+	"path"
+)
 
 var bgpSessionBasePath = "/bgp/sessions"
 var bgpNeighborsBasePath = "/bgp/neighbors"
@@ -65,7 +67,7 @@ type CreateBGPSessionRequest struct {
 
 // Create function
 func (s *BGPSessionServiceOp) Create(deviceID string, request CreateBGPSessionRequest) (*BGPSession, *Response, error) {
-	path := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, bgpSessionBasePath)
+	path := path.Join(deviceBasePath, deviceID, bgpSessionBasePath)
 	session := new(BGPSession)
 
 	resp, err := s.client.DoRequest("POST", path, request, session)
@@ -78,15 +80,15 @@ func (s *BGPSessionServiceOp) Create(deviceID string, request CreateBGPSessionRe
 
 // Delete function
 func (s *BGPSessionServiceOp) Delete(id string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", bgpSessionBasePath, id)
+	path := path.Join(bgpSessionBasePath, id)
 
 	return s.client.DoRequest("DELETE", path, nil, nil)
 }
 
 // Get function
-func (s *BGPSessionServiceOp) Get(id string, getOpt *GetOptions) (session *BGPSession, response *Response, err error) {
-	params := urlQuery(getOpt)
-	path := fmt.Sprintf("%s/%s?%s", bgpSessionBasePath, id, params)
+func (s *BGPSessionServiceOp) Get(id string, opts *GetOptions) (session *BGPSession, response *Response, err error) {
+	endpointPath := path.Join(bgpSessionBasePath, id)
+	path := opts.WithQuery(endpointPath)
 	session = new(BGPSession)
 	response, err = s.client.DoRequest("GET", path, nil, session)
 	if err != nil {

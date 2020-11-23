@@ -1,6 +1,8 @@
 package packngo
 
-import "fmt"
+import (
+	"path"
+)
 
 var bgpConfigBasePath = "/bgp-config"
 
@@ -42,7 +44,7 @@ type BGPConfig struct {
 
 // Create function
 func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigRequest) (*Response, error) {
-	path := fmt.Sprintf("%s/%s%ss", projectBasePath, projectID, bgpConfigBasePath)
+	path := path.Join(projectBasePath, projectID, bgpConfigBasePath)
 
 	resp, err := s.client.DoRequest("POST", path, request, nil)
 	if err != nil {
@@ -53,10 +55,9 @@ func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigReq
 }
 
 // Get function
-func (s *BGPConfigServiceOp) Get(projectID string, getOpt *GetOptions) (bgpConfig *BGPConfig, resp *Response, err error) {
-	params := urlQuery(getOpt)
-
-	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, bgpConfigBasePath, params)
+func (s *BGPConfigServiceOp) Get(projectID string, opts *GetOptions) (bgpConfig *BGPConfig, resp *Response, err error) {
+	endpointPath := path.Join(projectBasePath, projectID, bgpConfigBasePath)
+	path := opts.WithQuery(endpointPath)
 
 	subset := new(BGPConfig)
 

@@ -1,6 +1,8 @@
 package packngo
 
-import "fmt"
+import (
+	"path"
+)
 
 const emailBasePath = "/emails"
 
@@ -36,9 +38,9 @@ type EmailServiceOp struct {
 }
 
 // Get retrieves an email by id
-func (s *EmailServiceOp) Get(emailID string, getOpt *GetOptions) (*Email, *Response, error) {
-	params := urlQuery(getOpt)
-	path := fmt.Sprintf("%s/%s?%s", emailBasePath, emailID, params)
+func (s *EmailServiceOp) Get(emailID string, opts *GetOptions) (*Email, *Response, error) {
+	endpointPath := path.Join(emailBasePath, emailID)
+	path := opts.WithQuery(endpointPath)
 	email := new(Email)
 
 	resp, err := s.client.DoRequest("GET", path, nil, email)
@@ -63,7 +65,7 @@ func (s *EmailServiceOp) Create(request *EmailRequest) (*Email, *Response, error
 
 // Delete removes the email addres from the current user account
 func (s *EmailServiceOp) Delete(emailID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", emailBasePath, emailID)
+	path := path.Join(emailBasePath, emailID)
 
 	resp, err := s.client.DoRequest("DELETE", path, nil, nil)
 	if err != nil {
@@ -76,7 +78,7 @@ func (s *EmailServiceOp) Delete(emailID string) (*Response, error) {
 // Update email parameters
 func (s *EmailServiceOp) Update(emailID string, request *EmailRequest) (*Email, *Response, error) {
 	email := new(Email)
-	path := fmt.Sprintf("%s/%s", emailBasePath, emailID)
+	path := path.Join(emailBasePath, emailID)
 
 	resp, err := s.client.DoRequest("PUT", path, request, email)
 	if err != nil {

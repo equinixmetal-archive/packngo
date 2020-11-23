@@ -1,8 +1,8 @@
 package packngo
 
 import (
-	"fmt"
 	"math"
+	"path"
 )
 
 const spotMarketRequestBasePath = "/spot-market-requests"
@@ -62,7 +62,10 @@ func roundPlus(f float64, places int) float64 {
 }
 
 func (s *SpotMarketRequestServiceOp) Create(cr *SpotMarketRequestCreateRequest, pID string) (*SpotMarketRequest, *Response, error) {
-	path := fmt.Sprintf("%s/%s%s?include=devices,project,plan", projectBasePath, pID, spotMarketRequestBasePath)
+	opts := (&GetOptions{}).Including("devices", "project", "plan")
+	endpointPath := path.Join(projectBasePath, pID, spotMarketRequestBasePath)
+	path := opts.WithQuery(endpointPath)
+
 	cr.MaxBidPrice = roundPlus(cr.MaxBidPrice, 2)
 	smr := new(SpotMarketRequest)
 
@@ -74,13 +77,13 @@ func (s *SpotMarketRequestServiceOp) Create(cr *SpotMarketRequestCreateRequest, 
 	return smr, resp, err
 }
 
-func (s *SpotMarketRequestServiceOp) List(pID string, listOpt *ListOptions) ([]SpotMarketRequest, *Response, error) {
+func (s *SpotMarketRequestServiceOp) List(pID string, opts *ListOptions) ([]SpotMarketRequest, *Response, error) {
 	type smrRoot struct {
 		SMRs []SpotMarketRequest `json:"spot_market_requests"`
 	}
 
-	params := urlQuery(listOpt)
-	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, pID, spotMarketRequestBasePath, params)
+	endpointPath := path.Join(projectBasePath, pID, spotMarketRequestBasePath)
+	path := opts.WithQuery(endpointPath)
 	output := new(smrRoot)
 
 	resp, err := s.client.DoRequest("GET", path, nil, output)
@@ -91,9 +94,9 @@ func (s *SpotMarketRequestServiceOp) List(pID string, listOpt *ListOptions) ([]S
 	return output.SMRs, resp, nil
 }
 
-func (s *SpotMarketRequestServiceOp) Get(id string, getOpt *GetOptions) (*SpotMarketRequest, *Response, error) {
-	params := urlQuery(getOpt)
-	path := fmt.Sprintf("%s/%s?%s", spotMarketRequestBasePath, id, params)
+func (s *SpotMarketRequestServiceOp) Get(id string, opts *GetOptions) (*SpotMarketRequest, *Response, error) {
+	endpointPath := path.Join(spotMarketRequestBasePath, id)
+	path := opts.WithQuery(endpointPath)
 	smr := new(SpotMarketRequest)
 
 	resp, err := s.client.DoRequest("GET", path, nil, &smr)
@@ -105,7 +108,7 @@ func (s *SpotMarketRequestServiceOp) Get(id string, getOpt *GetOptions) (*SpotMa
 }
 
 func (s *SpotMarketRequestServiceOp) Delete(id string, forceDelete bool) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", spotMarketRequestBasePath, id)
+	path := path.Join(spotMarketRequestBasePath, id)
 	var params *map[string]bool
 	if forceDelete {
 		params = &map[string]bool{"force_termination": true}

@@ -2,6 +2,7 @@ package packngo
 
 import (
 	"fmt"
+	"path"
 )
 
 const deviceBasePath = "/devices"
@@ -333,7 +334,7 @@ type DeviceServiceOp struct {
 // HardwareReservation.ID, HardwareReservation.ShortID
 func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []Device, resp *Response, err error) {
 	opts = opts.Including("facility")
-	endpointPath := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, deviceBasePath)
+	endpointPath := path.Join(projectBasePath, projectID, deviceBasePath)
 	path := opts.WithQuery(endpointPath)
 
 	for {
@@ -357,7 +358,7 @@ func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []D
 // Get returns a device by id
 func (s *DeviceServiceOp) Get(deviceID string, opts *GetOptions) (*Device, *Response, error) {
 	opts = opts.Including("facility")
-	endpointPath := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
+	endpointPath := path.Join(deviceBasePath, deviceID)
 	path := opts.WithQuery(endpointPath)
 	device := new(Device)
 	resp, err := s.client.DoRequest("GET", path, nil, device)
@@ -369,7 +370,7 @@ func (s *DeviceServiceOp) Get(deviceID string, opts *GetOptions) (*Device, *Resp
 
 // Create creates a new device
 func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s%s", projectBasePath, createRequest.ProjectID, deviceBasePath)
+	path := path.Join(projectBasePath, createRequest.ProjectID, deviceBasePath)
 	device := new(Device)
 
 	resp, err := s.client.DoRequest("POST", path, createRequest, device)
@@ -381,7 +382,10 @@ func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *
 
 // Update updates an existing device
 func (s *DeviceServiceOp) Update(deviceID string, updateRequest *DeviceUpdateRequest) (*Device, *Response, error) {
-	path := fmt.Sprintf("%s/%s?include=facility", deviceBasePath, deviceID)
+	opts := &GetOptions{}
+	opts = opts.Including("facility")
+	endpointPath := path.Join(deviceBasePath, deviceID)
+	path := opts.WithQuery(endpointPath)
 	device := new(Device)
 
 	resp, err := s.client.DoRequest("PUT", path, updateRequest, device)
@@ -394,7 +398,7 @@ func (s *DeviceServiceOp) Update(deviceID string, updateRequest *DeviceUpdateReq
 
 // Delete deletes a device
 func (s *DeviceServiceOp) Delete(deviceID string, force bool) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
+	path := path.Join(deviceBasePath, deviceID)
 	req := &DeviceDeleteRequest{Force: force}
 
 	return s.client.DoRequest("DELETE", path, req, nil)
@@ -402,7 +406,7 @@ func (s *DeviceServiceOp) Delete(deviceID string, force bool) (*Response, error)
 
 // Reboot reboots on a device
 func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
+	path := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "reboot"}
 
 	return s.client.DoRequest("POST", path, action, nil)
@@ -410,7 +414,7 @@ func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
 
 // PowerOff powers on a device
 func (s *DeviceServiceOp) PowerOff(deviceID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
+	path := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "power_off"}
 
 	return s.client.DoRequest("POST", path, action, nil)
@@ -418,7 +422,7 @@ func (s *DeviceServiceOp) PowerOff(deviceID string) (*Response, error) {
 
 // PowerOn powers on a device
 func (s *DeviceServiceOp) PowerOn(deviceID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
+	path := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "power_on"}
 
 	return s.client.DoRequest("POST", path, action, nil)
@@ -430,7 +434,7 @@ type lockType struct {
 
 // Lock sets a device to "locked"
 func (s *DeviceServiceOp) Lock(deviceID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
+	path := path.Join(deviceBasePath, deviceID)
 	action := lockType{Locked: true}
 
 	return s.client.DoRequest("PATCH", path, action, nil)
@@ -438,7 +442,7 @@ func (s *DeviceServiceOp) Lock(deviceID string) (*Response, error) {
 
 // Unlock sets a device to "unlocked"
 func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", deviceBasePath, deviceID)
+	path := path.Join(deviceBasePath, deviceID)
 	action := lockType{Locked: false}
 
 	return s.client.DoRequest("PATCH", path, action, nil)
@@ -446,7 +450,7 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 
 func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) ([]BGPNeighbor, *Response, error) {
 	root := new(bgpNeighborsRoot)
-	endpointPath := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, bgpNeighborsBasePath)
+	endpointPath := path.Join(deviceBasePath, deviceID, bgpNeighborsBasePath)
 	path := opts.WithQuery(endpointPath)
 
 	resp, err := s.client.DoRequest("GET", path, nil, root)
@@ -460,7 +464,7 @@ func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) (
 // ListBGPSessions returns all BGP Sessions associated with the device
 func (s *DeviceServiceOp) ListBGPSessions(deviceID string, opts *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
 
-	endpointPath := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, bgpSessionBasePath)
+	endpointPath := path.Join(deviceBasePath, deviceID, bgpSessionBasePath)
 	path := opts.WithQuery(endpointPath)
 
 	for {
@@ -482,7 +486,7 @@ func (s *DeviceServiceOp) ListBGPSessions(deviceID string, opts *ListOptions) (b
 
 // ListEvents returns list of device events
 func (s *DeviceServiceOp) ListEvents(deviceID string, opts *ListOptions) ([]Event, *Response, error) {
-	path := fmt.Sprintf("%s/%s%s", deviceBasePath, deviceID, eventBasePath)
+	path := path.Join(deviceBasePath, deviceID, eventBasePath)
 
 	return listEvents(s.client, path, opts)
 }

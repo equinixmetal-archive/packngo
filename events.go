@@ -1,6 +1,8 @@
 package packngo
 
-import "fmt"
+import (
+	"path"
+)
 
 const eventBasePath = "/events"
 
@@ -39,14 +41,13 @@ func (s *EventServiceOp) List(listOpt *ListOptions) ([]Event, *Response, error) 
 
 // Get returns an event by ID
 func (s *EventServiceOp) Get(eventID string, getOpt *GetOptions) (*Event, *Response, error) {
-	path := fmt.Sprintf("%s/%s", eventBasePath, eventID)
+	path := path.Join(eventBasePath, eventID)
 	return get(s.client, path, getOpt)
 }
 
 // list helper function for all event functions
-func listEvents(client requestDoer, path string, listOpt *ListOptions) (events []Event, resp *Response, err error) {
-	params := urlQuery(listOpt)
-	path = fmt.Sprintf("%s?%s", path, params)
+func listEvents(client requestDoer, endpointPath string, opts *ListOptions) (events []Event, resp *Response, err error) {
+	path := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(eventsRoot)
@@ -58,42 +59,18 @@ func listEvents(client requestDoer, path string, listOpt *ListOptions) (events [
 
 		events = append(events, subset.Events...)
 
-		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
-			path = subset.Meta.Next.Href
-			if params != "" {
-				path = fmt.Sprintf("%s&%s", path, params)
-			}
+		if path = nextPage(subset.Meta, opts); path != "" {
 			continue
 		}
-
 		return
 	}
 
 }
 
-// list helper function for all event functions
-/*
-func listEvents(client *Client, path string, listOpt *ListOptions) ([]Event, *Response, error) {
-	params := urlQuery(listOpt)
-	root := new(eventsRoot)
-
-	path = fmt.Sprintf("%s?%s", path, params)
-
-	resp, err := client.DoRequest("GET", path, nil, root)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return root.Events, resp, err
-}
-*/
-
-func get(client *Client, path string, getOpt *GetOptions) (*Event, *Response, error) {
-	params := urlQuery(getOpt)
-
+func get(client *Client, endpointPath string, opts *GetOptions) (*Event, *Response, error) {
 	event := new(Event)
 
-	path = fmt.Sprintf("%s?%s", path, params)
+	path := opts.WithQuery(endpointPath)
 
 	resp, err := client.DoRequest("GET", path, nil, event)
 	if err != nil {

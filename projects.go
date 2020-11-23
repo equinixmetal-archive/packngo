@@ -1,7 +1,7 @@
 package packngo
 
 import (
-	"fmt"
+	"path"
 )
 
 const projectBasePath = "/projects"
@@ -92,9 +92,9 @@ func (s *ProjectServiceOp) List(opts *ListOptions) (projects []Project, resp *Re
 }
 
 // Get returns a project by id
-func (s *ProjectServiceOp) Get(projectID string, getOpt *GetOptions) (*Project, *Response, error) {
-	params := urlQuery(getOpt)
-	path := fmt.Sprintf("%s/%s?%s", projectBasePath, projectID, params)
+func (s *ProjectServiceOp) Get(projectID string, opts *GetOptions) (*Project, *Response, error) {
+	endpointPath := path.Join(projectBasePath, projectID)
+	path := opts.WithQuery(endpointPath)
 	project := new(Project)
 	resp, err := s.client.DoRequest("GET", path, nil, project)
 	if err != nil {
@@ -117,7 +117,7 @@ func (s *ProjectServiceOp) Create(createRequest *ProjectCreateRequest) (*Project
 
 // Update updates a project
 func (s *ProjectServiceOp) Update(id string, updateRequest *ProjectUpdateRequest) (*Project, *Response, error) {
-	path := fmt.Sprintf("%s/%s", projectBasePath, id)
+	path := path.Join(projectBasePath, id)
 	project := new(Project)
 
 	resp, err := s.client.DoRequest("PATCH", path, updateRequest, project)
@@ -130,15 +130,15 @@ func (s *ProjectServiceOp) Update(id string, updateRequest *ProjectUpdateRequest
 
 // Delete deletes a project
 func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", projectBasePath, projectID)
+	path := path.Join(projectBasePath, projectID)
 
 	return s.client.DoRequest("DELETE", path, nil, nil)
 }
 
 // ListBGPSessions returns all BGP Sessions associated with the project
-func (s *ProjectServiceOp) ListBGPSessions(projectID string, listOpt *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
-	params := urlQuery(listOpt)
-	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, bgpSessionBasePath, params)
+func (s *ProjectServiceOp) ListBGPSessions(projectID string, opts *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
+	endpointPath := path.Join(projectBasePath, projectID, bgpSessionBasePath)
+	path := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(bgpSessionsRoot)
@@ -149,23 +149,18 @@ func (s *ProjectServiceOp) ListBGPSessions(projectID string, listOpt *ListOption
 		}
 
 		bgpSessions = append(bgpSessions, subset.Sessions...)
-
-		if subset.Meta.Next != nil && (listOpt == nil || listOpt.Page == 0) {
-			path = subset.Meta.Next.Href
-			if params != "" {
-				path = fmt.Sprintf("%s&%s", path, params)
-			}
+		if path = nextPage(subset.Meta, opts); path != "" {
 			continue
 		}
-
 		return
 	}
 }
 
 // ListSSHKeys returns all SSH Keys associated with the project
-func (s *ProjectServiceOp) ListSSHKeys(projectID string, searchOpt *SearchOptions) (sshKeys []SSHKey, resp *Response, err error) {
-	params := urlQuery(searchOpt)
-	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, sshKeyBasePath, params)
+func (s *ProjectServiceOp) ListSSHKeys(projectID string, opts *SearchOptions) (sshKeys []SSHKey, resp *Response, err error) {
+
+	endpointPath := path.Join(projectBasePath, projectID, sshKeyBasePath)
+	path := opts.WithQuery(endpointPath)
 
 	subset := new(sshKeyRoot)
 
@@ -181,7 +176,7 @@ func (s *ProjectServiceOp) ListSSHKeys(projectID string, searchOpt *SearchOption
 
 // ListEvents returns list of project events
 func (s *ProjectServiceOp) ListEvents(projectID string, listOpt *ListOptions) ([]Event, *Response, error) {
-	path := fmt.Sprintf("%s/%s%s", projectBasePath, projectID, eventBasePath)
+	path := path.Join(projectBasePath, projectID, eventBasePath)
 
 	return listEvents(s.client, path, listOpt)
 }
