@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+func deleteSpotMarketRequest(t *testing.T, c *Client, id string, force bool) {
+	if _, err := c.SpotMarketRequests.Delete(id, force); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestAccSpotMarketRequestBasic(t *testing.T) {
 	// This test is only going to create the spot market request with
 	// max bid price set to half of current spot price, so that the devices
@@ -21,13 +27,13 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 
 	ps := SpotMarketRequestInstanceParameters{
 		BillingCycle:    "hourly",
-		Plan:            testPlan,
-		OperatingSystem: "rancher",
+		Plan:            testPlan(),
+		OperatingSystem: testOS,
 		Hostname:        fmt.Sprintf("%s{{index}}", hn),
 	}
 
 	prices, _, err := c.SpotMarket.Prices()
-	pri := prices[fac][testPlan]
+	pri := prices[fac][testPlan()]
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +51,7 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteSpotMarketRequest(t, c, smr.ID, true)
+	deleteSpotMarketRequest(t, c, smr.ID, true)
 
 	if smr.Project.ID != projectID {
 		t.Fatal("Strange project ID in SpotMarketReuqest:", smr.Project.ID)
@@ -60,8 +66,8 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 		t.Fatal("there should be only one SpotMarketRequest")
 	}
 
-	if smrs[0].Plan.Slug != testPlan {
-		t.Fatalf("Plan should be reported as %s", testPlan)
+	if smrs[0].Plan.Slug != testPlan() {
+		t.Fatalf("Plan should be reported as %s", testPlan())
 	}
 
 	smr2, _, err := c.SpotMarketRequests.Get(smr.ID, nil)
@@ -72,6 +78,10 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 		t.Fatal("mismatch in the created SpotMarketRequest")
 	}
 }
+
+// I am not sure if spot-market-requests work in the new DCs. The test works with baremetal_0 in ewr1 i.e.:
+//
+// PACKNGO_TEST_PLAN=baremetal_0 PACKNGO_TEST_FACILITY=ewr1 PACKNGO_DEBUG=1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout=20m -run=TestAccSpotMarketRequestPriceAware
 
 func TestAccSpotMarketRequestPriceAware(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
@@ -85,18 +95,18 @@ func TestAccSpotMarketRequestPriceAware(t *testing.T) {
 	}
 
 	fac := testFacility()
-	pri := prices[fac][testPlan]
-	thr := pri * 2.0
+	pri := prices[fac][testPlan()]
+	thr := pri * 1.2
 	hn := randString8()
 
 	ps := SpotMarketRequestInstanceParameters{
 		BillingCycle:    "hourly",
-		Plan:            testPlan,
-		OperatingSystem: "rancher",
+		Plan:            testPlan(),
+		OperatingSystem: testOS,
 		Hostname:        fmt.Sprintf("%s{{index}}", hn),
 	}
 
-	nDevices := 3
+	nDevices := 2
 
 	cr := SpotMarketRequestCreateRequest{
 		DevicesMax:  nDevices,
@@ -132,7 +142,7 @@ out:
 		}
 	}
 	log.Println("all devices active")
-	defer deleteSpotMarketRequest(t, c, smr.ID, true)
+	deleteSpotMarketRequest(t, c, smr.ID, true)
 out2:
 	// wait for devices to disappear .. takes ~5 minutes
 	for {

@@ -64,12 +64,6 @@ func deleteDevice(t *testing.T, c *Client, id string, force bool) {
 	}
 }
 
-func deleteSpotMarketRequest(t *testing.T, c *Client, id string, force bool) {
-	if _, err := c.SpotMarketRequests.Delete(id, force); err != nil {
-		t.Fatal(err)
-	}
-}
-
 func deleteSSHKey(t *testing.T, c *Client, id string) {
 	if _, err := c.SSHKeys.Delete(id); err != nil {
 		t.Fatal(err)
@@ -113,7 +107,7 @@ func TestAccDeviceUpdate(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -163,7 +157,7 @@ func TestAccDeviceBasic(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -237,7 +231,7 @@ func TestAccDevicePXE(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:      "pxe-" + hn,
 		Facility:      []string{fac},
-		Plan:          testPlan,
+		Plan:          testPlan(),
 		ProjectID:     projectID,
 		BillingCycle:  "hourly",
 		OS:            "custom_ipxe",
@@ -302,7 +296,7 @@ func TestAccDeviceAssignGlobalIP(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		OS:           testOS,
@@ -429,7 +423,7 @@ func TestAccDeviceCreateWithReservedIP(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		OS:           testOS,
@@ -472,7 +466,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		OS:           testOS,
@@ -602,7 +596,7 @@ func TestAccDeviceAttachVolumeForceDelete(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		OS:           testOS,
@@ -668,7 +662,7 @@ func TestAccDeviceAttachVolume(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		OS:           testOS,
@@ -749,7 +743,7 @@ func TestAccDeviceSpotInstance(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:        hn,
 		Facility:        []string{fac},
-		Plan:            testPlan,
+		Plan:            testPlan(),
 		OS:              "coreos_stable",
 		ProjectID:       projectID,
 		BillingCycle:    "hourly",
@@ -795,7 +789,7 @@ func TestAccDeviceCustomData(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -870,7 +864,7 @@ func TestAccListDeviceEvents(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -909,7 +903,7 @@ func TestAccDeviceSSHKeys(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{testFacility()},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -960,7 +954,7 @@ func TestAccDeviceListedSSHKeys(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:       hn,
 		Facility:       []string{testFacility()},
-		Plan:           testPlan,
+		Plan:           testPlan(),
 		OS:             testOS,
 		ProjectID:      projectID,
 		BillingCycle:   "hourly",
@@ -1016,7 +1010,7 @@ func TestAccDeviceCreateFacilities(t *testing.T) {
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -1059,7 +1053,7 @@ func TestAccDeviceIPAddresses(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{fac},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",

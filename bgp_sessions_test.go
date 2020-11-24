@@ -25,7 +25,7 @@ func TestAccBGPSession(t *testing.T) {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{testFacility()},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		OS:           testOS,
