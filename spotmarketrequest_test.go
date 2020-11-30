@@ -51,7 +51,7 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	deleteSpotMarketRequest(t, c, smr.ID, true)
+	defer deleteSpotMarketRequest(t, c, smr.ID, true)
 
 	if smr.Project.ID != projectID {
 		t.Fatal("Strange project ID in SpotMarketReuqest:", smr.Project.ID)
@@ -67,7 +67,7 @@ func TestAccSpotMarketRequestBasic(t *testing.T) {
 	}
 
 	if smrs[0].Plan.Slug != testPlan() {
-		t.Fatalf("Plan should be reported as %s", testPlan())
+		t.Fatalf("Plan should be reported as %s, was %s", testPlan(), smrs[0].Plan.Slug)
 	}
 
 	smr2, _, err := c.SpotMarketRequests.Get(smr.ID, nil)
