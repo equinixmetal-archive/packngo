@@ -36,6 +36,7 @@ type SpotMarketRequest struct {
 
 type SpotMarketRequestInstanceParameters struct {
 	AlwaysPXE       bool       `json:"always_pxe,omitempty"`
+	IPXEScriptURL   string     `json:"ipxe_script_url,omitempty"`
 	BillingCycle    string     `json:"billing_cycle"`
 	CustomData      string     `json:"customdata,omitempty"`
 	Description     string     `json:"description,omitempty"`
