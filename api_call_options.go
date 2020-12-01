@@ -139,8 +139,8 @@ func nextPage(meta meta, opts *GetOptions) (path string) {
 }
 
 // Encode generates a URL query string ("?foo=bar")
-func (o *GetOptions) Encode() string {
-	urlValues, _ := query.Values(o)
+func (g *GetOptions) Encode() string {
+	urlValues, _ := query.Values(g)
 	return urlValues.Encode()
 }
 
