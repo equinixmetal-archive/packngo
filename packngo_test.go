@@ -20,6 +20,7 @@ const (
 	packngoAccTestVar = "PACKNGO_TEST_ACTUAL_API"
 	testProjectPrefix = "PACKNGO_TEST_DELME_2d768716_"
 	testFacilityVar   = "PACKNGO_TEST_FACILITY"
+	testPlanVar       = "PACKNGO_TEST_PLAN"
 	testRecorderEnv   = "PACKNGO_TEST_RECORDER"
 
 	testRecorderRecord   = "record"
@@ -31,9 +32,17 @@ const (
 	// defaults should be available to most users
 	testFacilityDefault   = "ny5"
 	testFacilityAlternate = "dc13"
-	testPlan              = "c3.small.x86"
+	testPlanDefault       = "c3.small.x86"
 	testOS                = "ubuntu_18_04"
 )
+
+func testPlan() string {
+	envPlan := os.Getenv(testPlanVar)
+	if envPlan != "" {
+		return envPlan
+	}
+	return testPlanDefault
+}
 
 func testFacility() string {
 	envFac := os.Getenv(testFacilityVar)

@@ -11,7 +11,7 @@ func createBGPDevice(t *testing.T, c *Client, projectID string) *Device {
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
 		Facility:     []string{testFacility()},
-		Plan:         testPlan,
+		Plan:         testPlan(),
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 		OS:           testOS,

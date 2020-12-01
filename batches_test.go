@@ -16,7 +16,7 @@ func TestAccInstanceBatches(t *testing.T) {
 			{
 				DeviceCreateRequest: DeviceCreateRequest{
 					Hostname:     "test1",
-					Plan:         testPlan,
+					Plan:         testPlan(),
 					OS:           testOS,
 					Facility:     []string{testFacility()},
 					BillingCycle: "hourly",
