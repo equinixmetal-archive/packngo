@@ -87,12 +87,12 @@ type IPAddressAssignment struct {
 
 // IPReservationRequest represents the body of a reservation request.
 type IPReservationRequest struct {
-	Type        string                 `json:"type"`
-	Quantity    int                    `json:"quantity"`
-	Description string                 `json:"details,omitempty"`
-	Facility    *string                `json:"facility,omitempty"`
-	Tags        []string               `json:"tags,omitempty"`
-	CustomData  map[string]interface{} `json:"customdata,omitempty"`
+	Type        string   `json:"type"`
+	Quantity    int      `json:"quantity"`
+	Description string   `json:"details,omitempty"`
+	Facility    *string  `json:"facility,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+	CustomData  *string  `json:"customdata,omitempty"`
 	// FailOnApprovalRequired if the IP request cannot be approved automatically, rather than sending to
 	// the longer Equinix Metal approval process, fail immediately with a 422 error
 	FailOnApprovalRequired bool `json:"fail_on_approval_required,omitempty"`
