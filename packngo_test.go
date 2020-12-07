@@ -3,6 +3,7 @@ package packngo
 import (
 	"fmt"
 	"math/rand"
+	"net/http"
 	"os"
 	"path"
 	"regexp"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
-	"github.com/hashicorp/go-retryablehttp"
 )
 
 const (
@@ -71,8 +71,8 @@ func randString8() string {
 
 // MockClient makes it simpler to test the Client
 type MockClient struct {
-	fnNewRequest          func(method, path string, body interface{}) (*retryablehttp.Request, error)
-	fnDo                  func(req *retryablehttp.Request, v interface{}) (*Response, error)
+	fnNewRequest          func(method, path string, body interface{}) (*http.Request, error)
+	fnDo                  func(req *http.Request, v interface{}) (*Response, error)
 	fnDoRequest           func(method, path string, body, v interface{}) (*Response, error)
 	fnDoRequestWithHeader func(method string, headers map[string]string, path string, body, v interface{}) (*Response, error)
 }
@@ -80,12 +80,12 @@ type MockClient struct {
 var _ requestDoer = &MockClient{}
 
 // NewRequest uses the mock NewRequest function
-func (mc *MockClient) NewRequest(method, path string, body interface{}) (*retryablehttp.Request, error) {
+func (mc *MockClient) NewRequest(method, path string, body interface{}) (*http.Request, error) {
 	return mc.fnNewRequest(method, path, body)
 }
 
 // Do uses the mock Do function
-func (mc *MockClient) Do(req *retryablehttp.Request, v interface{}) (*Response, error) {
+func (mc *MockClient) Do(req *http.Request, v interface{}) (*Response, error) {
 	return mc.fnDo(req, v)
 }
 
@@ -178,8 +178,8 @@ func setup(t *testing.T) (*Client, func()) {
 		apiURL = baseURL
 	}
 	r, stopRecord := testRecorder(t, name, mode)
-	httpClient := retryablehttp.NewClient()
-	httpClient.HTTPClient.Transport = r
+	httpClient := http.DefaultClient
+	httpClient.Transport = r
 	c, err := NewClientWithBaseURL("packngo test", apiToken, httpClient, apiURL)
 	if err != nil {
 		t.Fatal(err)
