@@ -452,6 +452,7 @@ func dumpResponse(resp *http.Response) {
 
 func dumpRequest(req *http.Request) {
 	r := req.Clone(context.TODO())
+	r.Body, _ = req.GetBody()
 	h := r.Header
 	if len(h.Get("X-Auth-Token")) != 0 {
 		h.Set("X-Auth-Token", "**REDACTED**")
