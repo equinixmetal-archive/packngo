@@ -27,12 +27,15 @@ func TestAccPublicIPReservation(t *testing.T) {
 	}
 
 	customData := map[string]interface{}{"custom1": "data", "custom2": map[string]interface{}{"nested": "data"}}
+	tags := []string{"Tag1", "Tag2"}
 
 	req := IPReservationRequest{
-		Type:       PublicIPv4,
-		Quantity:   quantity,
-		Facility:   &testFac,
-		CustomData: customData,
+		Type:                   PublicIPv4,
+		Quantity:               quantity,
+		Facility:               &testFac,
+		CustomData:             &customData,
+		Tags:                   tags,
+		FailOnApprovalRequired: true,
 	}
 
 	res, _, err := c.ProjectIPs.Request(projectID, &req)
@@ -61,8 +64,12 @@ func TestAccPublicIPReservation(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(customData, res.CustomData) {
+		t.Fatalf("CustomData of new reservation should be %+v, was %+v", customData, res.CustomData)
+	}
+
+	if !reflect.DeepEqual(tags, res.Tags) {
 		t.Fatalf(
-			"CustomData of new reservation should be %+v, was %+v", customData, res.CustomData)
+			"Tags of new reservation should be %+v, was %+v", tags, res.Tags)
 	}
 
 	ipList, _, err = c.ProjectIPs.List(projectID, &ListOptions{})
@@ -199,7 +206,7 @@ func TestAccGlobalIPReservation(t *testing.T) {
 	}
 }
 
-func TestPublicIPReservationFailFast(t *testing.T) {
+func TestAccPublicIPReservationFailFast(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
 	c, projectID, teardown := setupWithProject(t)
@@ -215,7 +222,7 @@ func TestPublicIPReservationFailFast(t *testing.T) {
 		Type:                   PublicIPv4,
 		Quantity:               quantity,
 		Facility:               &testFac,
-		CustomData:             customData,
+		CustomData:             &customData,
 		FailOnApprovalRequired: true,
 	}
 
