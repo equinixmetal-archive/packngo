@@ -17,8 +17,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/hashicorp/go-retryablehttp"
 )
 
 const (
@@ -310,7 +308,7 @@ func (r *ErrorResponse) Error() string {
 
 // Client is the base API Client
 type Client struct {
-	client *retryablehttp.Client
+	client *http.Client
 	debug  bool
 
 	BaseURL *url.URL
@@ -357,14 +355,14 @@ type Client struct {
 // This interface is used in *ServiceOp as a mockable alternative to a full
 // Client object.
 type requestDoer interface {
-	NewRequest(method, path string, body interface{}) (*retryablehttp.Request, error)
-	Do(req *retryablehttp.Request, v interface{}) (*Response, error)
+	NewRequest(method, path string, body interface{}) (*http.Request, error)
+	Do(req *http.Request, v interface{}) (*Response, error)
 	DoRequest(method, path string, body, v interface{}) (*Response, error)
 	DoRequestWithHeader(method string, headers map[string]string, path string, body, v interface{}) (*Response, error)
 }
 
 // NewRequest inits a new http request with the proper headers
-func (c *Client) NewRequest(method, path string, body interface{}) (*retryablehttp.Request, error) {
+func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
 	// relative path to append to the endpoint url, no leading slash please
 	if path[0] == '/' {
 		path = path[1:]
@@ -385,7 +383,7 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*retryableht
 		}
 	}
 
-	req, err := retryablehttp.NewRequest(method, u.String(), buf)
+	req, err := http.NewRequest(method, u.String(), buf)
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +400,7 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*retryableht
 }
 
 // Do executes the http request
-func (c *Client) Do(req *retryablehttp.Request, v interface{}) (*Response, error) {
+func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
@@ -452,16 +450,20 @@ func dumpResponse(resp *http.Response) {
 	log.Printf("\n=======[RESPONSE]============\n%s\n\n", strResp)
 }
 
-func dumpRequest(req *retryablehttp.Request) {
-	o, _ := httputil.DumpRequestOut(req.Request, false)
-	strReq := string(o)
-	reg, _ := regexp.Compile(`X-Auth-Token: (\w*)`)
-	reMatches := reg.FindStringSubmatch(strReq)
-	if len(reMatches) == 2 {
-		strReq = strings.Replace(strReq, reMatches[1], strings.Repeat("-", len(reMatches[1])), 1)
+func dumpRequest(req *http.Request) {
+	r := req.Clone(context.TODO())
+	r.Body, _ = req.GetBody()
+	h := r.Header
+	if len(h.Get("X-Auth-Token")) != 0 {
+		h.Set("X-Auth-Token", "**REDACTED**")
 	}
-	bbs, _ := req.BodyBytes()
-	log.Printf("\n=======[REQUEST]=============\n%s%s\n", strReq, string(bbs))
+	defer r.Body.Close()
+
+	o, _ := httputil.DumpRequestOut(r, false)
+	bbs, _ := ioutil.ReadAll(r.Body)
+
+	strReq := string(o)
+	log.Printf("\n=======[REQUEST]=============\n%s%s\n", string(strReq), string(bbs))
 }
 
 // DoRequest is a convenience method, it calls NewRequest followed by Do
@@ -508,12 +510,16 @@ func NewClient() (*Client, error) {
 // N.B.: Equinix Metal's API certificate requires Go 1.5+ to successfully parse. If you are using
 // an older version of Go, pass in a custom http.Client with a custom TLS configuration
 // that sets "InsecureSkipVerify" to "true"
-func NewClientWithAuth(consumerToken string, apiKey string, httpClient *retryablehttp.Client) *Client {
+func NewClientWithAuth(consumerToken string, apiKey string, httpClient *http.Client) *Client {
 	client, _ := NewClientWithBaseURL(consumerToken, apiKey, httpClient, baseURL)
 	return client
 }
 
-// RetryPolicy determines if the supplied http Response and error can be safely retried
+// RetryPolicy determines if the supplied http Response and error can be safely
+// retried (for use with github.com/hashicorp/go-retryablehttp clients)
+//
+//    retryClient := retryablehttp.NewClient()
+//    retryClient.CheckRetry = packngo.RetryPolicy
 func RetryPolicy(ctx context.Context, resp *http.Response, err error) (bool, error) {
 	// do not retry on context.Canceled or context.DeadlineExceeded
 	if ctx.Err() != nil {
@@ -550,16 +556,9 @@ func RetryPolicy(ctx context.Context, resp *http.Response, err error) (bool, err
 
 // NewClientWithBaseURL returns a Client pointing to nonstandard API URL, e.g.
 // for mocking the remote API
-func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *retryablehttp.Client, apiBaseURL string) (*Client, error) {
+func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.Client, apiBaseURL string) (*Client, error) {
 	if httpClient == nil {
-		// Don't fall back on http.DefaultClient as it's not nice to adjust state
-		// implicitly. If the client wants to use http.DefaultClient, they can
-		// pass it in explicitly.
-		httpClient = retryablehttp.NewClient()
-		httpClient.RetryWaitMin = time.Second
-		httpClient.RetryWaitMax = 30 * time.Second
-		httpClient.RetryMax = 10
-		httpClient.CheckRetry = RetryPolicy
+		httpClient = http.DefaultClient
 	}
 
 	u, err := url.Parse(apiBaseURL)
