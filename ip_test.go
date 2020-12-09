@@ -1,7 +1,6 @@
 package packngo
 
 import (
-	"encoding/json"
 	"path"
 	"reflect"
 	"testing"
@@ -27,7 +26,7 @@ func TestAccPublicIPReservation(t *testing.T) {
 		t.Fatalf("There should be no reservations a new project, existing list: %s", ipList)
 	}
 
-	customData := `{"custom1":"data","custom2":{"nested":"data"}}`
+	customData := map[string]interface{}{"custom1": "data", "custom2": map[string]interface{}{"nested": "data"}}
 	tags := []string{"Tag1", "Tag2"}
 
 	req := IPReservationRequest{
@@ -64,15 +63,8 @@ func TestAccPublicIPReservation(t *testing.T) {
 			res.Facility.Code)
 	}
 
-	bytesCustomData, err := json.Marshal(res.CustomData)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	responseCustomData := string(bytesCustomData)
-
-	if customData != responseCustomData {
-		t.Fatalf("CustomData of new reservation should be %+v, was %+v", customData, responseCustomData)
+	if !reflect.DeepEqual(customData, res.CustomData) {
+		t.Fatalf("CustomData of new reservation should be %+v, was %+v", customData, res.CustomData)
 	}
 
 	if !reflect.DeepEqual(tags, res.Tags) {
@@ -224,7 +216,7 @@ func TestAccPublicIPReservationFailFast(t *testing.T) {
 	// this should be an absurdly high number
 	quantity := 256
 
-	customData := `{"custom1":"data","custom2":{"nested":"data"}}`
+	customData := map[string]interface{}{"custom1": "data", "custom2": map[string]interface{}{"nested": "data"}}
 
 	req := IPReservationRequest{
 		Type:                   PublicIPv4,
