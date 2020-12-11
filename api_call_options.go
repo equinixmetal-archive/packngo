@@ -140,11 +140,14 @@ func nextPage(meta meta, opts *GetOptions) (path string) {
 
 // Encode generates a URL query string ("?foo=bar")
 func (g *GetOptions) Encode() string {
+	if g == nil {
+		return ""
+	}
 	v := url.Values{}
-	if len(g.Includes) > 0 {
+	if g.Includes != nil && len(g.Includes) > 0 {
 		v.Add("include", strings.Join(g.Includes, ","))
 	}
-	if len(g.Excludes) > 0 {
+	if g.Excludes != nil && len(g.Excludes) > 0 {
 		v.Add("exclude", strings.Join(g.Excludes, ","))
 	}
 	if g.Page != 0 {
