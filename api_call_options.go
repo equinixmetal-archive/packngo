@@ -3,8 +3,8 @@ package packngo
 import (
 	"fmt"
 	"net/url"
-
-	"github.com/google/go-querystring/query"
+	"strconv"
+	"strings"
 )
 
 type ListSortDirection string
@@ -140,11 +140,38 @@ func nextPage(meta meta, opts *GetOptions) (path string) {
 
 // Encode generates a URL query string ("?foo=bar")
 func (g *GetOptions) Encode() string {
+	v := url.Values{}
+	if len(g.Includes) > 0 {
+		v.Add("include", strings.Join(g.Includes, ","))
+	}
+	if len(g.Excludes) > 0 {
+		v.Add("exclude", strings.Join(g.Excludes, ","))
+	}
+	if g.Page != 0 {
+		v.Add("page", strconv.Itoa(g.Page))
+	}
+	if g.PerPage != 0 {
+		v.Add("per_page", strconv.Itoa(g.PerPage))
+	}
+	if g.Search != "" {
+		v.Add("search", g.Search)
+	}
+	if g.SortBy != "" {
+		v.Add("sort_by", g.SortBy)
+	}
+	if g.SortDirection != "" {
+		v.Add("sort_direction", string(g.SortDirection))
+	}
+	return v.Encode()
+}
+
+/*
+// Encode generates a URL query string ("?foo=bar")
+func (g *GetOptions) Encode() string {
 	urlValues, _ := query.Values(g)
 	return urlValues.Encode()
 }
-
+*/
 func urlQuery(o *GetOptions) string {
-	urlValues, _ := query.Values(o)
-	return urlValues.Encode()
+	return o.Encode()
 }
