@@ -1,4 +1,4 @@
-IMG ?= golang:1.14
+IMG ?= golang:1.15
 
 # enable go modules, disabled CGO
 
