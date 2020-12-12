@@ -3,6 +3,7 @@ package packngo
 import (
 	"context"
 	"fmt"
+	"path"
 	"strings"
 	"time"
 )
@@ -85,20 +86,20 @@ func (i *DevicePortServiceOp) GetPortByName(deviceID, name string) (*Port, error
 }
 
 func (i *DevicePortServiceOp) Assign(par *PortAssignRequest) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/assign", portBasePath, par.PortID)
-	return i.portAction(path, par)
+	apiPath := path.Join(portBasePath, par.PortID, "assign")
+	return i.portAction(apiPath, par)
 }
 
 func (i *DevicePortServiceOp) AssignNative(par *PortAssignRequest) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/native-vlan", portBasePath, par.PortID)
-	return i.portAction(path, par)
+	apiPath := path.Join(portBasePath, par.PortID, "native-vlan")
+	return i.portAction(apiPath, par)
 }
 
 func (i *DevicePortServiceOp) UnassignNative(portID string) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/native-vlan", portBasePath, portID)
+	apiPath := path.Join(portBasePath, portID, "native-vlan")
 	port := new(Port)
 
-	resp, err := i.client.DoRequest("DELETE", path, nil, port)
+	resp, err := i.client.DoRequest("DELETE", apiPath, nil, port)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -107,8 +108,8 @@ func (i *DevicePortServiceOp) UnassignNative(portID string) (*Port, *Response, e
 }
 
 func (i *DevicePortServiceOp) Unassign(par *PortAssignRequest) (*Port, *Response, error) {
-	path := fmt.Sprintf("%s/%s/unassign", portBasePath, par.PortID)
-	return i.portAction(path, par)
+	apiPath := path.Join(portBasePath, par.PortID, "unassign")
+	return i.portAction(apiPath, par)
 }
 
 func (i *DevicePortServiceOp) Bond(p *Port, be bool) (*Port, *Response, error) {
@@ -116,8 +117,8 @@ func (i *DevicePortServiceOp) Bond(p *Port, be bool) (*Port, *Response, error) {
 		return p, nil, nil
 	}
 	br := &BondRequest{PortID: p.ID, BulkEnable: be}
-	path := fmt.Sprintf("%s/%s/bond", portBasePath, br.PortID)
-	return i.portAction(path, br)
+	apiPath := path.Join(portBasePath, br.PortID, "bond")
+	return i.portAction(apiPath, br)
 }
 
 func (i *DevicePortServiceOp) Disbond(p *Port, bd bool) (*Port, *Response, error) {
@@ -125,14 +126,14 @@ func (i *DevicePortServiceOp) Disbond(p *Port, bd bool) (*Port, *Response, error
 		return p, nil, nil
 	}
 	dr := &DisbondRequest{PortID: p.ID, BulkDisable: bd}
-	path := fmt.Sprintf("%s/%s/disbond", portBasePath, dr.PortID)
-	return i.portAction(path, dr)
+	apiPath := path.Join(portBasePath, dr.PortID, "disbond")
+	return i.portAction(apiPath, dr)
 }
 
-func (i *DevicePortServiceOp) portAction(path string, req interface{}) (*Port, *Response, error) {
+func (i *DevicePortServiceOp) portAction(apiPath string, req interface{}) (*Port, *Response, error) {
 	port := new(Port)
 
-	resp, err := i.client.DoRequest("POST", path, req, port)
+	resp, err := i.client.DoRequest("POST", apiPath, req, port)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -148,10 +149,10 @@ func (i *DevicePortServiceOp) PortToLayerTwo(deviceID, portName string) (*Port, 
 	if strings.HasPrefix(p.NetworkType, "layer2") {
 		return p, nil, nil
 	}
-	path := fmt.Sprintf("%s/%s/convert/layer-2", portBasePath, p.ID)
+	apiPath := path.Join(portBasePath, p.ID, "convert", "layer-2")
 	port := new(Port)
 
-	resp, err := i.client.DoRequest("POST", path, nil, port)
+	resp, err := i.client.DoRequest("POST", apiPath, nil, port)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -167,7 +168,7 @@ func (i *DevicePortServiceOp) PortToLayerThree(deviceID, portName string) (*Port
 	if (p.NetworkType == NetworkTypeL3) || (p.NetworkType == NetworkTypeHybrid) {
 		return p, nil, nil
 	}
-	path := fmt.Sprintf("%s/%s/convert/layer-3", portBasePath, p.ID)
+	apiPath := path.Join(portBasePath, p.ID, "convert", "layer-3")
 	port := new(Port)
 
 	req := BackToL3Request{
@@ -178,7 +179,7 @@ func (i *DevicePortServiceOp) PortToLayerThree(deviceID, portName string) (*Port
 		},
 	}
 
-	resp, err := i.client.DoRequest("POST", path, &req, port)
+	resp, err := i.client.DoRequest("POST", apiPath, &req, port)
 	if err != nil {
 		return nil, resp, err
 	}

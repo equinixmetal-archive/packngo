@@ -1,9 +1,5 @@
 package packngo
 
-import (
-	"fmt"
-)
-
 const planBasePath = "/plans"
 
 // PlanService interface defines available plan methods
@@ -112,12 +108,11 @@ type PlanServiceOp struct {
 }
 
 // List method returns all available plans
-func (s *PlanServiceOp) List(listOpt *ListOptions) ([]Plan, *Response, error) {
+func (s *PlanServiceOp) List(opts *ListOptions) ([]Plan, *Response, error) {
 	root := new(planRoot)
-	params := urlQuery(listOpt)
-	path := fmt.Sprintf("%s?%s", planBasePath, params)
+	apiPathQuery := opts.WithQuery(planBasePath)
 
-	resp, err := s.client.DoRequest("GET", path, nil, root)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}

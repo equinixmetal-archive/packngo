@@ -1,14 +1,14 @@
 package packngo
 
 import (
-	"fmt"
+	"path"
 )
 
 const virtualNetworkBasePath = "/virtual-networks"
 
 // DevicePortService handles operations on a port which belongs to a particular device
 type ProjectVirtualNetworkService interface {
-	List(projectID string, listOpt *ListOptions) (*VirtualNetworkListResponse, *Response, error)
+	List(projectID string, opts *ListOptions) (*VirtualNetworkListResponse, *Response, error)
 	Create(*VirtualNetworkCreateRequest) (*VirtualNetwork, *Response, error)
 	Get(string, *GetOptions) (*VirtualNetwork, *Response, error)
 	Delete(virtualNetworkID string) (*Response, error)
@@ -32,13 +32,12 @@ type VirtualNetworkListResponse struct {
 	VirtualNetworks []VirtualNetwork `json:"virtual_networks"`
 }
 
-func (i *ProjectVirtualNetworkServiceOp) List(projectID string, listOpt *ListOptions) (*VirtualNetworkListResponse, *Response, error) {
-
-	params := urlQuery(listOpt)
-	path := fmt.Sprintf("%s/%s%s?%s", projectBasePath, projectID, virtualNetworkBasePath, params)
+func (i *ProjectVirtualNetworkServiceOp) List(projectID string, opts *ListOptions) (*VirtualNetworkListResponse, *Response, error) {
+	endpointPath := path.Join(projectBasePath, projectID, virtualNetworkBasePath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	output := new(VirtualNetworkListResponse)
 
-	resp, err := i.client.DoRequest("GET", path, nil, output)
+	resp, err := i.client.DoRequest("GET", apiPathQuery, nil, output)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -52,12 +51,12 @@ type VirtualNetworkCreateRequest struct {
 	Facility    string `json:"facility"`
 }
 
-func (i *ProjectVirtualNetworkServiceOp) Get(vlanID string, getOpt *GetOptions) (*VirtualNetwork, *Response, error) {
-	params := urlQuery(getOpt)
-	path := fmt.Sprintf("%s/%s?%s", virtualNetworkBasePath, vlanID, params)
+func (i *ProjectVirtualNetworkServiceOp) Get(vlanID string, opts *GetOptions) (*VirtualNetwork, *Response, error) {
+	endpointPath := path.Join(virtualNetworkBasePath, vlanID)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	vlan := new(VirtualNetwork)
 
-	resp, err := i.client.DoRequest("GET", path, nil, vlan)
+	resp, err := i.client.DoRequest("GET", apiPathQuery, nil, vlan)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -69,10 +68,10 @@ func (i *ProjectVirtualNetworkServiceOp) Create(input *VirtualNetworkCreateReque
 	// TODO: May need to add timestamp to output from 'post' request
 	// for the 'created_at' attribute of VirtualNetwork struct since
 	// API response doesn't include it
-	path := fmt.Sprintf("%s/%s%s", projectBasePath, input.ProjectID, virtualNetworkBasePath)
+	apiPath := path.Join(projectBasePath, input.ProjectID, virtualNetworkBasePath)
 	output := new(VirtualNetwork)
 
-	resp, err := i.client.DoRequest("POST", path, input, output)
+	resp, err := i.client.DoRequest("POST", apiPath, input, output)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -81,9 +80,9 @@ func (i *ProjectVirtualNetworkServiceOp) Create(input *VirtualNetworkCreateReque
 }
 
 func (i *ProjectVirtualNetworkServiceOp) Delete(virtualNetworkID string) (*Response, error) {
-	path := fmt.Sprintf("%s/%s", virtualNetworkBasePath, virtualNetworkID)
+	apiPath := path.Join(virtualNetworkBasePath, virtualNetworkID)
 
-	resp, err := i.client.DoRequest("DELETE", path, nil, nil)
+	resp, err := i.client.DoRequest("DELETE", apiPath, nil, nil)
 	if err != nil {
 		return nil, err
 	}

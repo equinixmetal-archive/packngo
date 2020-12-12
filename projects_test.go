@@ -254,17 +254,27 @@ func TestAccProjectListPagination(t *testing.T) {
 		t.Fatalf("exactly 3 projects should have been fetched: %v", err)
 	}
 
+	pgNum, perPage := 2, 1
+
 	listOpts = &ListOptions{
-		Page:    2,
-		PerPage: 1,
+		Page:    pgNum,
+		PerPage: perPage,
 	}
 
 	projects, _, err = c.Projects.List(listOpts)
 	if err != nil {
 		t.Fatalf("failed to get list of projects: %v", err)
 	}
-	if len(projects) != 1 {
-		t.Fatalf("only 1 project should have been fetched: %v", err)
+	if len(projects) != perPage {
+		t.Fatalf("only %d project should have been fetched: %v", perPage, err)
+	}
+	lmPgNum := listOpts.Meta.CurrentPageNum
+	if listOpts.Meta.CurrentPageNum != lmPgNum {
+		t.Fatalf("Wrong page fetched, was %d, should be %d", lmPgNum, pgNum)
+	}
+	lmLastPage := listOpts.Meta.LastPageNum
+	if lmLastPage < 3 {
+		t.Fatalf("With 1 project per page, there should be at least 3 pages for project listing. Was %d", lmLastPage)
 	}
 
 }
@@ -284,7 +294,7 @@ func TestAccProjectListEvents(t *testing.T) {
 	}
 
 	vcr := VolumeCreateRequest{
-		Size:             10,
+		Size:             100,
 		BillingCycle:     "hourly",
 		PlanID:           "storage_1",
 		FacilityID:       testFacility(),
