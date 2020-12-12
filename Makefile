@@ -1,4 +1,4 @@
-IMG ?= golang:1.14
+IMG ?= golang:1.15
 
 # enable go modules, disabled CGO
 
@@ -18,7 +18,7 @@ build:
 
 golangci-lint:
 ifeq (, $(shell which golangci-lint))
-	$(GO) go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.27.0
+	$(GO) go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.33.0
 endif
 
 golint:
@@ -27,7 +27,7 @@ ifeq (, $(shell which golint))
 endif
 
 lint: golint golangci-lint
-	$(GO) golangci-lint run --disable-all --enable=golint ./...
+	$(GO) golangci-lint run ./...
 	$(GO) go vet ./...
 	$(GO) gofmt -d .
 
