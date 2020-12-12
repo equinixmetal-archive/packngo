@@ -67,10 +67,16 @@ type Device struct {
 	SpotPriceMax        float64                `json:"spot_price_max,omitempty"`
 	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
 	NetworkPorts        []Port                 `json:"network_ports,omitempty"`
-	CustomData          map[string]interface{} `json:"customdata,omitempty"`
 	SSHKeys             []SSHKey               `json:"ssh_keys,omitempty"`
 	ShortID             string                 `json:"short_id,omitempty"`
 	SwitchUUID          string                 `json:"switch_uuid,omitempty"`
+
+	// CustomData, as handled by the API, can be any JSON scalar or struct
+	// value. This value can be used to store arbitrary notes or data relevant
+	// to the device.  CustomData is made available to the device, via the
+	// metadata service, as a `customdata` JSON field at
+	// https://metadata.platformequinix.com/metadata.
+	CustomData interface{} `json:"customdata,omitempty"`
 }
 
 type NetworkInfo struct {

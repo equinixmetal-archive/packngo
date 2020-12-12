@@ -40,23 +40,27 @@ type ProjectIPService interface {
 }
 
 type IpAddressCommon struct { //nolint:golint
-	ID            string      `json:"id"`
-	Address       string      `json:"address"`
-	Gateway       string      `json:"gateway"`
-	Network       string      `json:"network"`
-	AddressFamily int         `json:"address_family"`
-	Netmask       string      `json:"netmask"`
-	Public        bool        `json:"public"`
-	CIDR          int         `json:"cidr"`
-	Created       string      `json:"created_at,omitempty"`
-	Updated       string      `json:"updated_at,omitempty"`
-	Href          string      `json:"href"`
-	Management    bool        `json:"management"`
-	Manageable    bool        `json:"manageable"`
-	Project       Href        `json:"project"`
-	Global        *bool       `json:"global_ip"`
-	Tags          []string    `json:"tags,omitempty"`
-	CustomData    interface{} `json:"customdata,omitempty"`
+	ID            string   `json:"id"`
+	Address       string   `json:"address"`
+	Gateway       string   `json:"gateway"`
+	Network       string   `json:"network"`
+	AddressFamily int      `json:"address_family"`
+	Netmask       string   `json:"netmask"`
+	Public        bool     `json:"public"`
+	CIDR          int      `json:"cidr"`
+	Created       string   `json:"created_at,omitempty"`
+	Updated       string   `json:"updated_at,omitempty"`
+	Href          string   `json:"href"`
+	Management    bool     `json:"management"`
+	Manageable    bool     `json:"manageable"`
+	Project       Href     `json:"project"`
+	Global        *bool    `json:"global_ip"`
+	Tags          []string `json:"tags,omitempty"`
+
+	// CustomData, as handled by the API, can be any JSON scalar or struct
+	// value. This value can be used to store arbitrary notes or data relevant
+	// to the IP.
+	CustomData interface{} `json:"customdata,omitempty"`
 }
 
 // IPAddressReservation is created when user sends IP reservation request for a project (considering it's within quota).
