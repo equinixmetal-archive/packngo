@@ -20,7 +20,7 @@ import "github.com/packethost/packngo"
 Reference a particular version with:
 
 ```sh
-go get github.com/packethost/packngo@v0.2.0
+go get github.com/packethost/packngo@v0.6.0
 ```
 
 ## Stability and Compatibility

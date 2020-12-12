@@ -21,7 +21,7 @@ import (
 
 const (
 	authTokenEnvVar = "PACKET_AUTH_TOKEN"
-	libraryVersion  = "0.5.1"
+	libraryVersion  = "0.6.0"
 	baseURL         = "https://api.equinix.com/metal/v1/"
 	userAgent       = "packngo/" + libraryVersion
 	mediaType       = "application/json"
