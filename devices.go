@@ -212,10 +212,17 @@ func (d *Device) GetNetworkType() string {
 }
 
 type IPAddressCreateRequest struct {
-	AddressFamily int      `json:"address_family"`
-	Public        bool     `json:"public"`
-	CIDR          int      `json:"cidr,omitempty"`
-	Reservations  []string `json:"ip_reservations,omitempty"`
+	// Address Family for IP Address
+	AddressFamily int `json:"address_family"`
+
+	// Address Type for IP Address
+	Public bool `json:"public"`
+
+	// CIDR Size for the IP Block created. Valid values depends on the operating system provisioned.
+	CIDR int `json:"cidr,omitempty"`
+
+	// Reservations are UUIDs of any IP reservations to use when assigning IPs
+	Reservations []string `json:"ip_reservations,omitempty"`
 }
 
 // CPR is a struct for custom partitioning and RAID

@@ -140,7 +140,7 @@ func (i *DevicePortServiceOp) portAction(apiPath string, req interface{}) (*Port
 }
 
 func (i *DevicePortServiceOp) PortToLayerTwo(deviceID, portName string) (*Port, *Response, error) {
-	p, err := i.client.DevicePorts.GetPortByName(deviceID, portName)
+	p, err := i.GetPortByName(deviceID, portName)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -159,7 +159,7 @@ func (i *DevicePortServiceOp) PortToLayerTwo(deviceID, portName string) (*Port, 
 }
 
 func (i *DevicePortServiceOp) PortToLayerThree(deviceID, portName string) (*Port, *Response, error) {
-	p, err := i.client.DevicePorts.GetPortByName(deviceID, portName)
+	p, err := i.GetPortByName(deviceID, portName)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -228,21 +228,21 @@ func (i *DevicePortServiceOp) ConvertDevice(d *Device, targetType string) error 
 	if targetType == NetworkTypeL3 {
 		// TODO: remove vlans from all the ports
 		for _, p := range bondPorts {
-			_, _, err := i.client.DevicePorts.Bond(p, false)
+			_, _, err := i.Bond(p, false)
 			if err != nil {
 				return err
 			}
 		}
-		_, _, err := i.client.DevicePorts.PortToLayerThree(d.ID, "bond0")
+		_, _, err := i.PortToLayerThree(d.ID, "bond0")
 		if err != nil {
 			return err
 		}
-		allEthPorts, err := i.client.DevicePorts.GetAllEthPorts(d)
+		allEthPorts, err := i.GetAllEthPorts(d)
 		if err != nil {
 			return err
 		}
 		for _, p := range allEthPorts {
-			_, _, err := i.client.DevicePorts.Bond(p, false)
+			_, _, err := i.Bond(p, false)
 			if err != nil {
 				return err
 			}
@@ -250,37 +250,37 @@ func (i *DevicePortServiceOp) ConvertDevice(d *Device, targetType string) error 
 	}
 	if targetType == NetworkTypeHybrid {
 		for _, p := range bondPorts {
-			_, _, err := i.client.DevicePorts.Bond(p, false)
+			_, _, err := i.Bond(p, false)
 			if err != nil {
 				return err
 			}
 		}
 
-		_, _, err := i.client.DevicePorts.PortToLayerThree(d.ID, "bond0")
+		_, _, err := i.PortToLayerThree(d.ID, "bond0")
 		if err != nil {
 			return err
 		}
 
 		// ports need to be refreshed before bonding/disbonding
-		oddEthPorts, err := i.client.DevicePorts.GetOddEthPorts(d)
+		oddEthPorts, err := i.GetOddEthPorts(d)
 		if err != nil {
 			return err
 		}
 
 		for _, p := range oddEthPorts {
-			_, _, err := i.client.DevicePorts.Disbond(p, false)
+			_, _, err := i.Disbond(p, false)
 			if err != nil {
 				return err
 			}
 		}
 	}
 	if targetType == NetworkTypeL2Individual {
-		_, _, err := i.client.DevicePorts.PortToLayerTwo(d.ID, "bond0")
+		_, _, err := i.PortToLayerTwo(d.ID, "bond0")
 		if err != nil {
 			return err
 		}
 		for _, p := range bondPorts {
-			_, _, err = i.client.DevicePorts.Disbond(p, true)
+			_, _, err = i.Disbond(p, true)
 			if err != nil {
 				return err
 			}
@@ -289,17 +289,17 @@ func (i *DevicePortServiceOp) ConvertDevice(d *Device, targetType string) error 
 	if targetType == NetworkTypeL2Bonded {
 
 		for _, p := range bondPorts {
-			_, _, err := i.client.DevicePorts.PortToLayerTwo(d.ID, p.Name)
+			_, _, err := i.PortToLayerTwo(d.ID, p.Name)
 			if err != nil {
 				return err
 			}
 		}
-		allEthPorts, err := i.client.DevicePorts.GetAllEthPorts(d)
+		allEthPorts, err := i.GetAllEthPorts(d)
 		if err != nil {
 			return err
 		}
 		for _, p := range allEthPorts {
-			_, _, err := i.client.DevicePorts.Bond(p, false)
+			_, _, err := i.Bond(p, false)
 			if err != nil {
 				return err
 			}
@@ -309,7 +309,6 @@ func (i *DevicePortServiceOp) ConvertDevice(d *Device, targetType string) error 
 }
 
 func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, targetType string) (*Device, error) {
-
 	d, _, err := i.client.Devices.Get(deviceID, nil)
 	if err != nil {
 		return nil, err
@@ -320,13 +319,13 @@ func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, targetType st
 	if curType == targetType {
 		return nil, fmt.Errorf("Device already is in state %s", targetType)
 	}
-	err = i.client.DevicePorts.ConvertDevice(d, targetType)
+	err = i.ConvertDevice(d, targetType)
 	if err != nil {
 		return nil, err
 	}
 
 	d, _, err = i.client.Devices.Get(deviceID, nil)
-	//d, err = waitDeviceNetworkType(deviceID, targetType, i.client)
+
 	if err != nil {
 		return nil, err
 	}
