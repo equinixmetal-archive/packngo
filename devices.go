@@ -262,24 +262,24 @@ type CPR struct {
 
 // DeviceCreateRequest type used to create an Equinix Metal device
 type DeviceCreateRequest struct {
-	Hostname              string     `json:"hostname"`
-	Plan                  string     `json:"plan"`
-	Facility              []string   `json:"facility"`
-	OS                    string     `json:"operating_system"`
-	BillingCycle          string     `json:"billing_cycle"`
-	ProjectID             string     `json:"project_id"`
-	UserData              string     `json:"userdata"`
-	Storage               *CPR       `json:"storage,omitempty"`
-	Tags                  []string   `json:"tags"`
-	Description           string     `json:"description,omitempty"`
-	IPXEScriptURL         string     `json:"ipxe_script_url,omitempty"`
-	PublicIPv4SubnetSize  int        `json:"public_ipv4_subnet_size,omitempty"`
-	AlwaysPXE             bool       `json:"always_pxe,omitempty"`
-	HardwareReservationID string     `json:"hardware_reservation_id,omitempty"`
-	SpotInstance          bool       `json:"spot_instance,omitempty"`
-	SpotPriceMax          float64    `json:"spot_price_max,omitempty,string"`
-	TerminationTime       *Timestamp `json:"termination_time,omitempty"`
-	CustomData            string     `json:"customdata,omitempty"`
+	Hostname              string      `json:"hostname"`
+	Plan                  string      `json:"plan"`
+	Facility              []string    `json:"facility"`
+	OS                    string      `json:"operating_system"`
+	BillingCycle          string      `json:"billing_cycle"`
+	ProjectID             string      `json:"project_id"`
+	UserData              string      `json:"userdata"`
+	Storage               *CPR        `json:"storage,omitempty"`
+	Tags                  []string    `json:"tags"`
+	Description           string      `json:"description,omitempty"`
+	IPXEScriptURL         string      `json:"ipxe_script_url,omitempty"`
+	PublicIPv4SubnetSize  int         `json:"public_ipv4_subnet_size,omitempty"`
+	AlwaysPXE             bool        `json:"always_pxe,omitempty"`
+	HardwareReservationID string      `json:"hardware_reservation_id,omitempty"`
+	SpotInstance          bool        `json:"spot_instance,omitempty"`
+	SpotPriceMax          float64     `json:"spot_price_max,omitempty,string"`
+	TerminationTime       *Timestamp  `json:"termination_time,omitempty"`
+	CustomData            interface{} `json:"customdata,omitempty"`
 	// UserSSHKeys is a list of user UUIDs - essentialy a list of
 	// collaborators. The users must be a collaborator in the same project
 	// where the device is created. The user's SSH keys then go to the
@@ -296,14 +296,14 @@ type DeviceCreateRequest struct {
 
 // DeviceUpdateRequest type used to update an Equinix Metal device
 type DeviceUpdateRequest struct {
-	Hostname      *string   `json:"hostname,omitempty"`
-	Description   *string   `json:"description,omitempty"`
-	UserData      *string   `json:"userdata,omitempty"`
-	Locked        *bool     `json:"locked,omitempty"`
-	Tags          *[]string `json:"tags,omitempty"`
-	AlwaysPXE     *bool     `json:"always_pxe,omitempty"`
-	IPXEScriptURL *string   `json:"ipxe_script_url,omitempty"`
-	CustomData    *string   `json:"customdata,omitempty"`
+	Hostname      *string     `json:"hostname,omitempty"`
+	Description   *string     `json:"description,omitempty"`
+	UserData      *string     `json:"userdata,omitempty"`
+	Locked        *bool       `json:"locked,omitempty"`
+	Tags          *[]string   `json:"tags,omitempty"`
+	AlwaysPXE     *bool       `json:"always_pxe,omitempty"`
+	IPXEScriptURL *string     `json:"ipxe_script_url,omitempty"`
+	CustomData    interface{} `json:"customdata,omitempty"`
 }
 
 func (d DeviceCreateRequest) String() string {
