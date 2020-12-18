@@ -104,6 +104,7 @@ type Client struct {
 	BGPSessions            BGPSessionService
 	Batches                BatchService
 	CapacityService        CapacityService
+	Connections            ConnectionService
 	DeviceIPs              DeviceIPService
 	DevicePorts            DevicePortService
 	Devices                DeviceService
@@ -351,6 +352,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.BGPSessions = &BGPSessionServiceOp{client: c}
 	c.Batches = &BatchServiceOp{client: c}
 	c.CapacityService = &CapacityServiceOp{client: c}
+	c.Connections = &ConnectionServiceOp{client: c}
 	c.DeviceIPs = &DeviceIPServiceOp{client: c}
 	c.DevicePorts = &DevicePortServiceOp{client: c}
 	c.Devices = &DeviceServiceOp{client: c}
