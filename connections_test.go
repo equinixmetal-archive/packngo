@@ -26,7 +26,7 @@ func TestAccConnectionProject(t *testing.T) {
 
 	createdConnID := conn.ID
 
-	log.Printf("%#v\n", conn)
+	log.Printf("Test Connection:\n%#v\n", conn)
 
 	conn, _, err = c.Connections.Get(conn.ID, nil)
 	if err != nil {
@@ -54,18 +54,25 @@ func TestAccConnectionProject(t *testing.T) {
 		t.Fatalf("Mismatch when getting Conenction Port, ID should be %s, was %s", ports[0].ID, port.ID)
 	}
 
+	_, _, err = c.Connections.PortEvents(conn.ID, port.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	vcs, _, err := c.Connections.VirtualCircuits(conn.ID, port.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Printf("%#v\n", vcs)
 
 	if len(vcs) > 0 {
 		vc, _, err := c.Connections.VirtualCircuit(vcs[0].ID, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
-		log.Printf("VC::: %#v\n", vc)
+		_, _, err = c.Connections.VirtualCircuitEvents(vc.ID, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
 		/*
 			        fails with "Virtual Circuits on shared connections may not be deleted."
 					_, err = c.Connections.DeleteVirtualCircuit(vc.ID)

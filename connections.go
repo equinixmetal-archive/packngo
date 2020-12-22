@@ -24,6 +24,8 @@ type ConnectionService interface {
 	Delete(string) (*Response, error)
 	Get(string, *GetOptions) (*Connection, *Response, error)
 	Events(string, *GetOptions) ([]Event, *Response, error)
+	PortEvents(string, string, *GetOptions) ([]Event, *Response, error)
+	VirtualCircuitEvents(string, *GetOptions) ([]Event, *Response, error)
 	Ports(string, *GetOptions) ([]ConnectionPort, *Response, error)
 	Port(string, string, *GetOptions) (*ConnectionPort, *Response, error)
 	VirtualCircuits(string, string, *GetOptions) ([]ConnectionVirtualCircuit, *Response, error)
@@ -192,6 +194,16 @@ func (s *ConnectionServiceOp) Ports(connID string, opts *GetOptions) ([]Connecti
 
 func (s *ConnectionServiceOp) Events(id string, opts *GetOptions) ([]Event, *Response, error) {
 	apiPath := path.Join(connectionBasePath, id, eventBasePath)
+	return listEvents(s.client, apiPath, opts)
+}
+
+func (s *ConnectionServiceOp) PortEvents(connID, portID string, opts *GetOptions) ([]Event, *Response, error) {
+	apiPath := path.Join(connectionBasePath, connID, portBasePath, portID, eventBasePath)
+	return listEvents(s.client, apiPath, opts)
+}
+
+func (s *ConnectionServiceOp) VirtualCircuitEvents(id string, opts *GetOptions) ([]Event, *Response, error) {
+	apiPath := path.Join(virtualCircuitsBasePath, id, eventBasePath)
 	return listEvents(s.client, apiPath, opts)
 }
 
