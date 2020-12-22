@@ -13,34 +13,113 @@ func TestAccConnectionProject(t *testing.T) {
 
 	connReq := ConnectionCreateRequest{
 		Name:       "testconn",
-		Redundancy: "test",
-		Facility:   "ewr1",
-		Type:       "testtype",
+		Redundancy: ConnectionRedundant,
+		Facility:   "ny5",
+		Type:       ConnectionShared,
+		Project:    projectID,
 	}
-
-	log.Println("hear")
 
 	conn, _, err := c.Connections.ProjectCreate(projectID, &connReq)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	log.Printf("%#v", conn)
+	createdConnID := conn.ID
+
+	log.Printf("%#v\n", conn)
+
+	conn, _, err = c.Connections.Get(conn.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if conn.ID != createdConnID {
+		t.Fatalf("connection obtained over GET has different ID than created connection (%s vs %s)", conn.ID, createdConnID)
+	}
+
+	ports, _, err := c.Connections.Ports(conn.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ports) == 0 {
+		t.Fatal("New connections should have nonzero ports")
+	}
+
+	port, _, err := c.Connections.Port(conn.ID, ports[0].ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if port.ID != ports[0].ID {
+		t.Fatalf("Mismatch when getting Conenction Port, ID should be %s, was %s", ports[0].ID, port.ID)
+	}
+
+	vcs, _, err := c.Connections.VirtualCircuits(conn.ID, port.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Printf("%#v\n", vcs)
+
+	if len(vcs) > 0 {
+		vc, _, err := c.Connections.VirtualCircuit(vcs[0].ID, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		log.Printf("VC::: %#v\n", vc)
+		/*
+			        fails with "Virtual Circuits on shared connections may not be deleted."
+					_, err = c.Connections.DeleteVirtualCircuit(vc.ID)
+					if err != nil {
+						t.Fatal(err)
+					}
+		*/
+	}
+
+	conns, _, err := c.Connections.ProjectList(projectID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	found := false
+
+	for _, c := range conns {
+		if c.ID == conn.ID {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		t.Fatalf("The test Project Connection with ID %s was not created", conn.ID)
+	}
+
+	connEvents, _, err := c.Connections.Events(conn.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(connEvents) == 0 {
+		t.Fatal("There should be some events for the test connection")
+	}
+
+	_, err = c.Connections.Delete(conn.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestAccConnectionOrganization(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
-	c, stopRecord := setup(t)
-	defer stopRecord()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
 
 	connReq := ConnectionCreateRequest{
 		Name:       "testconn",
-		Redundancy: "test",
-		Facility:   "ewr1",
-		Type:       "testtype",
+		Redundancy: ConnectionRedundant,
+		Facility:   "ny5",
+		Type:       ConnectionShared,
+		Project:    projectID,
 	}
-
 	user, _, err := c.Users.Current()
 
 	if err != nil {
@@ -52,5 +131,28 @@ func TestAccConnectionOrganization(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	log.Printf("%#v", conn)
+	log.Printf("%#v\n", conn)
+
+	conns, _, err := c.Connections.OrganizationList(user.DefaultOrganizationID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	found := false
+
+	for _, c := range conns {
+		if c.ID == conn.ID {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		t.Fatalf("The test Organization Connection with ID %s was not created", conn.ID)
+	}
+
+	_, err = c.Connections.Delete(conn.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
