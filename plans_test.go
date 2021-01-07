@@ -63,6 +63,9 @@ func TestAccPlansOrganization(t *testing.T) {
 	defer stopRecord()
 
 	user, _, err := c.Users.Current()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	l, _, err := c.Plans.OrganizationList(user.DefaultOrganizationID, &ListOptions{Includes: []string{"available_in"}})
 	if err != nil {
