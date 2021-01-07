@@ -16,20 +16,8 @@ endif
 build:
 	$(GO) go build -i -v ./...
 
-golangci-lint:
-ifeq (, $(shell which golangci-lint))
-	$(GO) go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.33.0
-endif
-
-golint:
-ifeq (, $(shell which golint))
-	$(GO) go get -u golang.org/x/lint/golint
-endif
-
-lint: golint golangci-lint
-	$(GO) golangci-lint run ./...
-	$(GO) go vet ./...
-	$(GO) gofmt -d .
+lint:
+	@docker run --rm -v $(CURDIR):/app -w /app golangci/golangci-lint:v1.34.1 golangci-lint run -v
 
 test:
 	$(GO) test ./...
