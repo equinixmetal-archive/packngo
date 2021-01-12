@@ -19,7 +19,7 @@ func plansInFacilities(t *testing.T, plans []Plan) {
 			}
 		}
 		if p.Pricing.Hour < 0.0 {
-			t.Fatalf("strange pricing for %s %s", p.Name, p.Slug)
+			t.Fatalf("Strange pricing for %s %s", p.Name, p.Slug)
 		}
 	}
 
