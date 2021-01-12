@@ -8,12 +8,11 @@ type ConnectionRedundancy string
 type ConnectionType string
 
 const (
-	connectionBasePath                           = "/connections"
-	virtualCircuitsBasePath                      = "/virtual-circuits"
-	ConnectionShared        ConnectionType       = "shared"
-	ConnectionDedicated     ConnectionType       = "dedicated"
-	ConnectionRedundant     ConnectionRedundancy = "redundant"
-	ConnectionPrimary       ConnectionRedundancy = "primary"
+	connectionBasePath                       = "/connections"
+	ConnectionShared    ConnectionType       = "shared"
+	ConnectionDedicated ConnectionType       = "dedicated"
+	ConnectionRedundant ConnectionRedundancy = "redundant"
+	ConnectionPrimary   ConnectionRedundancy = "primary"
 )
 
 type ConnectionService interface {
@@ -25,12 +24,9 @@ type ConnectionService interface {
 	Get(string, *GetOptions) (*Connection, *Response, error)
 	Events(string, *GetOptions) ([]Event, *Response, error)
 	PortEvents(string, string, *GetOptions) ([]Event, *Response, error)
-	VirtualCircuitEvents(string, *GetOptions) ([]Event, *Response, error)
 	Ports(string, *GetOptions) ([]ConnectionPort, *Response, error)
 	Port(string, string, *GetOptions) (*ConnectionPort, *Response, error)
-	VirtualCircuits(string, string, *GetOptions) ([]ConnectionVirtualCircuit, *Response, error)
-	VirtualCircuit(string, *GetOptions) (*ConnectionVirtualCircuit, *Response, error)
-	DeleteVirtualCircuit(string) (*Response, error)
+	VirtualCircuits(string, string, *GetOptions) ([]VirtualCircuit, *Response, error)
 }
 
 type ConnectionServiceOp struct {
@@ -41,37 +37,21 @@ type connectionPortsRoot struct {
 	Ports []ConnectionPort `json:"ports"`
 }
 
-type virtualCircuitsRoot struct {
-	VirtualCircuits []ConnectionVirtualCircuit `json:"virtual_circuits"`
-	Meta            meta                       `json:"meta"`
-}
-
 type connectionsRoot struct {
 	Connections []Connection `json:"interconnections"`
 	Meta        meta         `json:"meta"`
 }
 
-type ConnectionVirtualCircuit struct {
-	ID      string          `json:"id"`
-	Name    string          `json:"name,omitempty"`
-	Status  string          `json:"status,omitempty"`
-	VNID    string          `json:"vnid,omitempty"`
-	NniVNID string          `json:"nni_vnid,omitempty"`
-	NniVLAN string          `json:"nni_vlan,omitempty"`
-	Project *Project        `json:"project,omitempty"`
-	Port    *ConnectionPort `json:"port,omitempty"`
-}
-
 type ConnectionPort struct {
-	ID              string                     `json:"id"`
-	Name            string                     `json:"name,omitempty"`
-	Status          string                     `json:"status,omitempty"`
-	Role            string                     `json:"role,omitempty"`
-	Speed           string                     `json:"speed,omitempty"`
-	Organization    *Organization              `json:"organization,omitempty"`
-	VirtualCircuits []ConnectionVirtualCircuit `json:"virtual_circuits,omitempty"`
-	LinkStatus      string                     `json:"link_status,omitempty"`
-	Href            string                     `json:"href,omitempty"`
+	ID              string           `json:"id"`
+	Name            string           `json:"name,omitempty"`
+	Status          string           `json:"status,omitempty"`
+	Role            string           `json:"role,omitempty"`
+	Speed           int              `json:"speed,omitempty"`
+	Organization    *Organization    `json:"organization,omitempty"`
+	VirtualCircuits []VirtualCircuit `json:"virtual_circuits,omitempty"`
+	LinkStatus      string           `json:"link_status,omitempty"`
+	Href            string           `json:"href,omitempty"`
 }
 
 type Connection struct {
@@ -84,7 +64,7 @@ type Connection struct {
 	Description  string               `json:"description,omitempty"`
 	Project      *Project             `json:"project,omitempty"`
 	Organization *Organization        `json:"organization,omitempty"`
-	Speed        string               `json:"speed,omitempty"`
+	Speed        int                  `json:"speed,omitempty"`
 	Token        string               `json:"token,omitempty"`
 	Tags         []string             `json:"tags,omitempty"`
 	Ports        []ConnectionPort     `json:"ports,omitempty"`
@@ -97,7 +77,7 @@ type ConnectionCreateRequest struct {
 	Type        ConnectionType       `json:"type,omitempty"`
 	Description *string              `json:"description,omitempty"`
 	Project     string               `json:"project,omitempty"`
-	Speed       string               `json:"speed,omitempty"`
+	Speed       int                  `json:"speed,omitempty"`
 	Tags        []string             `json:"tags,omitempty"`
 }
 
@@ -202,13 +182,8 @@ func (s *ConnectionServiceOp) PortEvents(connID, portID string, opts *GetOptions
 	return listEvents(s.client, apiPath, opts)
 }
 
-func (s *ConnectionServiceOp) VirtualCircuitEvents(id string, opts *GetOptions) ([]Event, *Response, error) {
-	apiPath := path.Join(virtualCircuitsBasePath, id, eventBasePath)
-	return listEvents(s.client, apiPath, opts)
-}
-
-func (s *ConnectionServiceOp) VirtualCircuits(connID, portID string, opts *GetOptions) (vcs []ConnectionVirtualCircuit, resp *Response, err error) {
-	endpointPath := path.Join(connectionBasePath, connID, portBasePath, portID, virtualCircuitsBasePath)
+func (s *ConnectionServiceOp) VirtualCircuits(connID, portID string, opts *GetOptions) (vcs []VirtualCircuit, resp *Response, err error) {
+	endpointPath := path.Join(connectionBasePath, connID, portBasePath, portID, virtualCircuitBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	for {
 		subset := new(virtualCircuitsRoot)
@@ -226,20 +201,4 @@ func (s *ConnectionServiceOp) VirtualCircuits(connID, portID string, opts *GetOp
 
 		return
 	}
-}
-
-func (s *ConnectionServiceOp) VirtualCircuit(id string, opts *GetOptions) (*ConnectionVirtualCircuit, *Response, error) {
-	endpointPath := path.Join(virtualCircuitsBasePath, id)
-	apiPathQuery := opts.WithQuery(endpointPath)
-	vc := new(ConnectionVirtualCircuit)
-	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, vc)
-	if err != nil {
-		return nil, resp, err
-	}
-	return vc, resp, err
-}
-
-func (s *ConnectionServiceOp) DeleteVirtualCircuit(id string) (*Response, error) {
-	apiPath := path.Join(virtualCircuitsBasePath, id)
-	return s.client.DoRequest("DELETE", apiPath, nil, nil)
 }

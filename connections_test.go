@@ -65,11 +65,11 @@ func TestAccConnectionProject(t *testing.T) {
 	}
 
 	if len(vcs) > 0 {
-		vc, _, err := c.Connections.VirtualCircuit(vcs[0].ID, nil)
+		vc, _, err := c.VirtualCircuits.Get(vcs[0].ID, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, _, err = c.Connections.VirtualCircuitEvents(vc.ID, nil)
+		_, _, err = c.VirtualCircuits.Events(vc.ID, nil)
 		if err != nil {
 			t.Fatal(err)
 		}

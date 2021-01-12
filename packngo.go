@@ -125,6 +125,7 @@ type Client struct {
 	TwoFactorAuth          TwoFactorAuthService
 	Users                  UserService
 	VPN                    VPNService
+	VirtualCircuits        VirtualCircuitService
 	VolumeAttachments      VolumeAttachmentService
 	Volumes                VolumeService
 }
@@ -372,6 +373,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
 	c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
 	c.Users = &UserServiceOp{client: c}
+	c.VirtualCircuits = &VirtualCircuitServiceOp{client: c}
 	c.VPN = &VPNServiceOp{client: c}
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
 	c.Volumes = &VolumeServiceOp{client: c}
