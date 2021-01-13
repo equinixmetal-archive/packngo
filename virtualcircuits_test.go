@@ -7,21 +7,133 @@ import (
 	"time"
 )
 
-func waitVirtualCircuitStatus(t *testing.T, c *Client, id, status string) *VirtualCircuit {
+func removeVirtualNetwork(t *testing.T, c *Client, id string) {
+	_, err := c.ProjectVirtualNetworks.Delete(id)
+	if err != nil {
+		t.Log("Err when removing testing VLAN:", err)
+	}
+}
+
+func waitVirtualCircuitStatus(t *testing.T, c *Client, id, status string, errStati []string) (*VirtualCircuit, error) {
 	// 15 minutes = 180 * 5sec-retry
 	for i := 0; i < 180; i++ {
 		<-time.After(5 * time.Second)
 		vc, _, err := c.VirtualCircuits.Get(id, nil)
 		if err != nil {
-			t.Fatal(err)
-			return nil
+			return nil, err
 		}
 		if vc.Status == status {
-			return vc
+			return vc, nil
+		}
+		if contains(errStati, vc.Status) {
+			return nil, fmt.Errorf("VirtualCircuit %s ended up in status %s", vc.ID, vc.Status)
 		}
 	}
-	t.Fatal(fmt.Errorf("Virtual Circuit %s is still not %s after timeout", id, status))
-	return nil
+	return nil, fmt.Errorf("Virtual Circuit %s is still not %s after timeout", id, status)
+}
+
+// this test needs an existing Dedicated Connection. Pass the ID in env var
+// "PACKNGO_TEST_CONNECTION"
+func TestAccVirtualCircuitDedicated(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+	testConnectionEnvVar := "PACKNGO_TEST_CONNECTION"
+
+	cid := os.Getenv(testConnectionEnvVar)
+	if cid == "" {
+		t.Skipf("%s is not set", testConnectionEnvVar)
+	}
+
+	conn, _, err := c.Connections.Get(cid, &GetOptions{Includes: []string{"facility"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fac := conn.Facility.Code
+
+	vncr := VirtualNetworkCreateRequest{
+		ProjectID:   projectID,
+		Description: "VLAN for VirtualCircuit test",
+		Facility:    fac,
+	}
+	vlan, _, err := c.ProjectVirtualNetworks.Create(&vncr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer removeVirtualNetwork(t, c, vlan.ID)
+
+	vncr2 := VirtualNetworkCreateRequest{
+		ProjectID:   projectID,
+		Description: "VLAN for VirtualCircuit test2",
+		Facility:    fac,
+	}
+	vlan2, _, err := c.ProjectVirtualNetworks.Create(&vncr2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer removeVirtualNetwork(t, c, vlan2.ID)
+
+	primaryPort := conn.PortByRole(ConnectionPortPrimary)
+
+	cr := VCCreateRequest{
+		VirtualNetworkID: vlan.ID,
+		NniVLAN:          889,
+		Name:             "TestDedicatedConn1",
+	}
+
+	vc, _, err := c.VirtualCircuits.Create(projectID, conn.ID, primaryPort.ID, &cr, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.VirtualCircuits.Delete(vc.ID)
+
+	_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusActive,
+		[]string{vcStatusActivationFailed})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cr2 := VCCreateRequest{
+		VirtualNetworkID: vlan2.ID,
+		NniVLAN:          891,
+		Name:             "TestDedicatedConn2",
+	}
+
+	vc2, _, err := c.VirtualCircuits.Create(projectID, conn.ID, primaryPort.ID, &cr2, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer c.VirtualCircuits.Delete(vc2.ID)
+
+	_, err = waitVirtualCircuitStatus(t, c, vc2.ID, vcStatusActive,
+		[]string{vcStatusActivationFailed})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, _, err = c.VirtualCircuits.RemoveVLAN(vc.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _, err = c.VirtualCircuits.RemoveVLAN(vc2.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusWaiting,
+		[]string{vcStatusDeactivationFailed})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = waitVirtualCircuitStatus(t, c, vc2.ID, vcStatusWaiting,
+		[]string{vcStatusDeactivationFailed})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }
 
 // this test needs an existing Shared Connection. Pass the ID in env var
@@ -51,7 +163,11 @@ func TestAccVirtualCircuitShared(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		waitVirtualCircuitStatus(t, c, vc.ID, vcStatusWaiting)
+		_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusWaiting,
+			[]string{vcStatusDeactivationFailed})
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	fac := conn.Facility.Code
@@ -67,19 +183,18 @@ func TestAccVirtualCircuitShared(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() {
-		_, err := c.ProjectVirtualNetworks.Delete(vlan.ID)
-		if err != nil {
-			t.Log("Err when removing testing VLAN:", err)
-		}
-	}()
+	defer removeVirtualNetwork(t, c, vlan.ID)
 
 	vc, _, err = c.VirtualCircuits.ConnectVLAN(vc.ID, vlan.ID,
 		&GetOptions{Includes: []string{"virtual_network"}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	waitVirtualCircuitStatus(t, c, vc.ID, vcStatusActive)
+	_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusActive,
+		[]string{vcStatusActivationFailed})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	vc, _, err = c.VirtualCircuits.Get(vc.ID,
 		&GetOptions{Includes: []string{"virtual_network,project"}})

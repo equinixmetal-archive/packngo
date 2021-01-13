@@ -3,14 +3,17 @@ package packngo
 import "path"
 
 const (
-	virtualCircuitBasePath = "/virtual-circuits"
-	vcStatusActive         = "active"
-	vcStatusWaiting        = "waiting_on_customer_vlan"
-	//vcStatusActivating     = "activating"
-	//vcStatusDeactivating   = "deactivating"
+	virtualCircuitBasePath     = "/virtual-circuits"
+	vcStatusActive             = "active"
+	vcStatusWaiting            = "waiting_on_customer_vlan"
+	vcStatusActivating         = "activating"
+	vcStatusDeactivating       = "deactivating"
+	vcStatusActivationFailed   = "activation_failed"
+	vcStatusDeactivationFailed = "dactivation_failed"
 )
 
 type VirtualCircuitService interface {
+	Create(string, string, string, *VCCreateRequest, *GetOptions) (*VirtualCircuit, *Response, error)
 	Get(string, *GetOptions) (*VirtualCircuit, *Response, error)
 	Events(string, *GetOptions) ([]Event, *Response, error)
 	Delete(string) (*Response, error)
@@ -20,6 +23,12 @@ type VirtualCircuitService interface {
 
 type VCUpdateRequest struct {
 	VirtualNetworkID *string `json:"vnid"`
+}
+
+type VCCreateRequest struct {
+	VirtualNetworkID string `json:"vnid"`
+	NniVLAN          int    `json:"nni_vlan,omitempty"`
+	Name             string `json:"name,omitempty"`
 }
 
 type VirtualCircuitServiceOp struct {
@@ -42,28 +51,28 @@ type VirtualCircuit struct {
 	VirtualNetwork *VirtualNetwork `json:"virtual_network,omitempty"`
 }
 
-func (s *VirtualCircuitServiceOp) ConnectVLAN(vcID, vlanID string, opts *GetOptions) (*VirtualCircuit, *Response, error) {
-	endpointPath := path.Join(virtualCircuitBasePath, vcID)
-	apiPathQuery := opts.WithQuery(endpointPath)
+func (s *VirtualCircuitServiceOp) do(method, apiPathQuery string, req interface{}) (*VirtualCircuit, *Response, error) {
 	vc := new(VirtualCircuit)
-	updateReq := VCUpdateRequest{VirtualNetworkID: &vlanID}
-	resp, err := s.client.DoRequest("PUT", apiPathQuery, updateReq, vc)
+	resp, err := s.client.DoRequest(method, apiPathQuery, req, vc)
 	if err != nil {
 		return nil, resp, err
 	}
 	return vc, resp, err
+
+}
+
+func (s *VirtualCircuitServiceOp) ConnectVLAN(vcID, vlanID string, opts *GetOptions) (*VirtualCircuit, *Response, error) {
+	endpointPath := path.Join(virtualCircuitBasePath, vcID)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	updateReq := VCUpdateRequest{VirtualNetworkID: &vlanID}
+	return s.do("PUT", apiPathQuery, updateReq)
 }
 
 func (s *VirtualCircuitServiceOp) RemoveVLAN(vcID string, opts *GetOptions) (*VirtualCircuit, *Response, error) {
 	endpointPath := path.Join(virtualCircuitBasePath, vcID)
 	apiPathQuery := opts.WithQuery(endpointPath)
-	vc := new(VirtualCircuit)
 	updateReq := VCUpdateRequest{VirtualNetworkID: nil}
-	resp, err := s.client.DoRequest("PUT", apiPathQuery, updateReq, vc)
-	if err != nil {
-		return nil, resp, err
-	}
-	return vc, resp, err
+	return s.do("PUT", apiPathQuery, updateReq)
 }
 
 func (s *VirtualCircuitServiceOp) Events(id string, opts *GetOptions) ([]Event, *Response, error) {
@@ -74,15 +83,16 @@ func (s *VirtualCircuitServiceOp) Events(id string, opts *GetOptions) ([]Event, 
 func (s *VirtualCircuitServiceOp) Get(id string, opts *GetOptions) (*VirtualCircuit, *Response, error) {
 	endpointPath := path.Join(virtualCircuitBasePath, id)
 	apiPathQuery := opts.WithQuery(endpointPath)
-	vc := new(VirtualCircuit)
-	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, vc)
-	if err != nil {
-		return nil, resp, err
-	}
-	return vc, resp, err
+	return s.do("GET", apiPathQuery, nil)
 }
 
 func (s *VirtualCircuitServiceOp) Delete(id string) (*Response, error) {
 	apiPath := path.Join(virtualCircuitBasePath, id)
 	return s.client.DoRequest("DELETE", apiPath, nil, nil)
+}
+
+func (s *VirtualCircuitServiceOp) Create(projectID, connID, portID string, request *VCCreateRequest, opts *GetOptions) (*VirtualCircuit, *Response, error) {
+	endpointPath := path.Join(projectBasePath, projectID, connectionBasePath, connID, portBasePath, portID, virtualCircuitBasePath)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	return s.do("POST", apiPathQuery, request)
 }

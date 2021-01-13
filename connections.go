@@ -6,13 +6,16 @@ import (
 
 type ConnectionRedundancy string
 type ConnectionType string
+type ConnectionPortRole string
 
 const (
-	connectionBasePath                       = "/connections"
-	ConnectionShared    ConnectionType       = "shared"
-	ConnectionDedicated ConnectionType       = "dedicated"
-	ConnectionRedundant ConnectionRedundancy = "redundant"
-	ConnectionPrimary   ConnectionRedundancy = "primary"
+	connectionBasePath                           = "/connections"
+	ConnectionShared        ConnectionType       = "shared"
+	ConnectionDedicated     ConnectionType       = "dedicated"
+	ConnectionRedundant     ConnectionRedundancy = "redundant"
+	ConnectionPrimary       ConnectionRedundancy = "primary"
+	ConnectionPortPrimary   ConnectionPortRole   = "primary"
+	ConnectionPortSecondary ConnectionPortRole   = "secondary"
 )
 
 type ConnectionService interface {
@@ -43,15 +46,15 @@ type connectionsRoot struct {
 }
 
 type ConnectionPort struct {
-	ID              string           `json:"id"`
-	Name            string           `json:"name,omitempty"`
-	Status          string           `json:"status,omitempty"`
-	Role            string           `json:"role,omitempty"`
-	Speed           int              `json:"speed,omitempty"`
-	Organization    *Organization    `json:"organization,omitempty"`
-	VirtualCircuits []VirtualCircuit `json:"virtual_circuits,omitempty"`
-	LinkStatus      string           `json:"link_status,omitempty"`
-	Href            string           `json:"href,omitempty"`
+	ID              string             `json:"id"`
+	Name            string             `json:"name,omitempty"`
+	Status          string             `json:"status,omitempty"`
+	Role            ConnectionPortRole `json:"role,omitempty"`
+	Speed           int                `json:"speed,omitempty"`
+	Organization    *Organization      `json:"organization,omitempty"`
+	VirtualCircuits []VirtualCircuit   `json:"virtual_circuits,omitempty"`
+	LinkStatus      string             `json:"link_status,omitempty"`
+	Href            string             `json:"href,omitempty"`
 }
 
 type Connection struct {
@@ -79,6 +82,15 @@ type ConnectionCreateRequest struct {
 	Project     string               `json:"project,omitempty"`
 	Speed       int                  `json:"speed,omitempty"`
 	Tags        []string             `json:"tags,omitempty"`
+}
+
+func (c *Connection) PortByRole(r ConnectionPortRole) *ConnectionPort {
+	for _, p := range c.Ports {
+		if p.Role == r {
+			return &p
+		}
+	}
+	return nil
 }
 
 func (s *ConnectionServiceOp) create(apiUrl string, createRequest *ConnectionCreateRequest) (*Connection, *Response, error) {
