@@ -1,10 +1,14 @@
 package packngo
 
+import "path"
+
 const planBasePath = "/plans"
 
 // PlanService interface defines available plan methods
 type PlanService interface {
 	List(*ListOptions) ([]Plan, *Response, error)
+	ProjectList(string, *ListOptions) ([]Plan, *Response, error)
+	OrganizationList(string, *ListOptions) ([]Plan, *Response, error)
 }
 
 type planRoot struct {
@@ -18,6 +22,7 @@ type Plan struct {
 	Name            string     `json:"name,omitempty"`
 	Description     string     `json:"description,omitempty"`
 	Line            string     `json:"line,omitempty"`
+	Legacy          bool       `json:"legacy,omitempty"`
 	Specs           *Specs     `json:"specs,omitempty"`
 	Pricing         *Pricing   `json:"pricing,omitempty"`
 	DeploymentTypes []string   `json:"deployment_types"`
@@ -107,15 +112,31 @@ type PlanServiceOp struct {
 	client *Client
 }
 
-// List method returns all available plans
-func (s *PlanServiceOp) List(opts *ListOptions) ([]Plan, *Response, error) {
+func planList(c *Client, apiPath string, opts *ListOptions) ([]Plan, *Response, error) {
 	root := new(planRoot)
-	apiPathQuery := opts.WithQuery(planBasePath)
+	apiPathQuery := opts.WithQuery(apiPath)
 
-	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, root)
+	resp, err := c.DoRequest("GET", apiPathQuery, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}
 
 	return root.Plans, resp, err
+
+}
+
+// List method returns all available plans
+func (s *PlanServiceOp) List(opts *ListOptions) ([]Plan, *Response, error) {
+	return planList(s.client, planBasePath, opts)
+
+}
+
+// ProjectList method returns plans available in a project
+func (s *PlanServiceOp) ProjectList(projectID string, opts *ListOptions) ([]Plan, *Response, error) {
+	return planList(s.client, path.Join(projectBasePath, projectID, planBasePath), opts)
+}
+
+// OrganizationList method returns plans available in an organization
+func (s *PlanServiceOp) OrganizationList(organizationID string, opts *ListOptions) ([]Plan, *Response, error) {
+	return planList(s.client, path.Join(organizationBasePath, organizationID, planBasePath), opts)
 }
