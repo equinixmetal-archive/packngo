@@ -3,11 +3,11 @@ package packngo
 import "path"
 
 const (
-	virtualCircuitBasePath     = "/virtual-circuits"
-	vcStatusActive             = "active"
-	vcStatusWaiting            = "waiting_on_customer_vlan"
-	vcStatusActivating         = "activating"
-	vcStatusDeactivating       = "deactivating"
+	virtualCircuitBasePath = "/virtual-circuits"
+	vcStatusActive         = "active"
+	vcStatusWaiting        = "waiting_on_customer_vlan"
+	//vcStatusActivating         = "activating"
+	//vcStatusDeactivating       = "deactivating"
 	vcStatusActivationFailed   = "activation_failed"
 	vcStatusDeactivationFailed = "dactivation_failed"
 )

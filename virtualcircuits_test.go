@@ -15,6 +15,13 @@ func removeVirtualNetwork(t *testing.T, c *Client, id string) {
 	}
 }
 
+func removeVirtualCircuit(t *testing.T, c *Client, id string) {
+	_, err := c.VirtualCircuits.Delete(id)
+	if err != nil {
+		t.Log("Err when removing testing VirtualCircuit:", err)
+	}
+}
+
 func waitVirtualCircuitStatus(t *testing.T, c *Client, id, status string, errStati []string) (*VirtualCircuit, error) {
 	// 15 minutes = 180 * 5sec-retry
 	for i := 0; i < 180; i++ {
@@ -87,7 +94,7 @@ func TestAccVirtualCircuitDedicated(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.VirtualCircuits.Delete(vc.ID)
+	defer removeVirtualCircuit(t, c, vc.ID)
 
 	_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusActive,
 		[]string{vcStatusActivationFailed})
@@ -106,7 +113,7 @@ func TestAccVirtualCircuitDedicated(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	defer c.VirtualCircuits.Delete(vc2.ID)
+	defer removeVirtualCircuit(t, c, vc2.ID)
 
 	_, err = waitVirtualCircuitStatus(t, c, vc2.ID, vcStatusActive,
 		[]string{vcStatusActivationFailed})
