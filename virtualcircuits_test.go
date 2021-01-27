@@ -2,6 +2,7 @@ package packngo
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -113,11 +114,11 @@ func TestAccVirtualCircuitDedicated(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, _, err = c.VirtualCircuits.RemoveVLAN(vc.ID, nil)
+	_, _, err = c.VirtualCircuits.Update(vc.ID, &VCUpdateRequest{VirtualNetworkID: nil}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, _, err = c.VirtualCircuits.RemoveVLAN(vc2.ID, nil)
+	_, _, err = c.VirtualCircuits.Update(vc2.ID, &VCUpdateRequest{VirtualNetworkID: nil}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,7 +160,11 @@ func TestAccVirtualCircuitShared(t *testing.T) {
 		t.Fatal(err)
 	}
 	if vc.Status == vcStatusActive {
-		vc, _, err = c.VirtualCircuits.RemoveVLAN(vc.ID, &GetOptions{Includes: []string{"project"}})
+		vc, _, err = c.VirtualCircuits.Update(
+			vc.ID,
+			&VCUpdateRequest{VirtualNetworkID: nil},
+			&GetOptions{Includes: []string{"project"}},
+		)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -175,7 +180,7 @@ func TestAccVirtualCircuitShared(t *testing.T) {
 
 	cr := VirtualNetworkCreateRequest{
 		ProjectID:   projectID,
-		Description: "VLAN for VirtualCircuiti test",
+		Description: "VLAN for VirtualCircuit test",
 		Facility:    fac,
 	}
 
@@ -185,8 +190,11 @@ func TestAccVirtualCircuitShared(t *testing.T) {
 	}
 	defer removeVirtualNetwork(t, c, vlan.ID)
 
-	vc, _, err = c.VirtualCircuits.ConnectVLAN(vc.ID, vlan.ID,
-		&GetOptions{Includes: []string{"virtual_network"}})
+	vc, _, err = c.VirtualCircuits.Update(
+		vc.ID,
+		&VCUpdateRequest{VirtualNetworkID: &(vlan.ID)},
+		&GetOptions{Includes: []string{"virtual_network"}},
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -211,7 +219,13 @@ func TestAccVirtualCircuitShared(t *testing.T) {
 		t.Fatalf("Numerical ID of assigned vlan from the virtual circuit should be %d, was %d",
 			vlan.VXLAN, vc.VNID)
 	}
-	_, _, err = c.VirtualCircuits.RemoveVLAN(vc.ID, nil)
+	_, _, err = c.VirtualCircuits.Update(vc.ID, &VCUpdateRequest{VirtualNetworkID: nil}, nil)
+	log.Println(vc.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusWaiting,
+		[]string{vcStatusDeactivationFailed})
 	if err != nil {
 		t.Fatal(err)
 	}

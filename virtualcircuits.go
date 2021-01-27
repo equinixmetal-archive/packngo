@@ -17,8 +17,7 @@ type VirtualCircuitService interface {
 	Get(string, *GetOptions) (*VirtualCircuit, *Response, error)
 	Events(string, *GetOptions) ([]Event, *Response, error)
 	Delete(string) (*Response, error)
-	ConnectVLAN(string, string, *GetOptions) (*VirtualCircuit, *Response, error)
-	RemoveVLAN(string, *GetOptions) (*VirtualCircuit, *Response, error)
+	Update(string, *VCUpdateRequest, *GetOptions) (*VirtualCircuit, *Response, error)
 }
 
 type VCUpdateRequest struct {
@@ -61,18 +60,10 @@ func (s *VirtualCircuitServiceOp) do(method, apiPathQuery string, req interface{
 
 }
 
-func (s *VirtualCircuitServiceOp) ConnectVLAN(vcID, vlanID string, opts *GetOptions) (*VirtualCircuit, *Response, error) {
+func (s *VirtualCircuitServiceOp) Update(vcID string, req *VCUpdateRequest, opts *GetOptions) (*VirtualCircuit, *Response, error) {
 	endpointPath := path.Join(virtualCircuitBasePath, vcID)
 	apiPathQuery := opts.WithQuery(endpointPath)
-	updateReq := VCUpdateRequest{VirtualNetworkID: &vlanID}
-	return s.do("PUT", apiPathQuery, updateReq)
-}
-
-func (s *VirtualCircuitServiceOp) RemoveVLAN(vcID string, opts *GetOptions) (*VirtualCircuit, *Response, error) {
-	endpointPath := path.Join(virtualCircuitBasePath, vcID)
-	apiPathQuery := opts.WithQuery(endpointPath)
-	updateReq := VCUpdateRequest{VirtualNetworkID: nil}
-	return s.do("PUT", apiPathQuery, updateReq)
+	return s.do("PUT", apiPathQuery, req)
 }
 
 func (s *VirtualCircuitServiceOp) Events(id string, opts *GetOptions) ([]Event, *Response, error) {
