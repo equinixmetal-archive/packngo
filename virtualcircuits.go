@@ -57,7 +57,6 @@ func (s *VirtualCircuitServiceOp) do(method, apiPathQuery string, req interface{
 		return nil, resp, err
 	}
 	return vc, resp, err
-
 }
 
 func (s *VirtualCircuitServiceOp) Update(vcID string, req *VCUpdateRequest, opts *GetOptions) (*VirtualCircuit, *Response, error) {
