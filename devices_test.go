@@ -1,9 +1,9 @@
 package packngo
 
 import (
-	"errors"
 	"fmt"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -783,8 +783,9 @@ func TestAccDeviceCustomData(t *testing.T) {
 
 	hn := randString8()
 
-	initialCustomData := `{"hello":"world"}`
 	fac := testFacility()
+
+	customData := map[string]interface{}{"custom1": "data", "custom2": map[string]interface{}{"nested": "data"}}
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
@@ -793,7 +794,7 @@ func TestAccDeviceCustomData(t *testing.T) {
 		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
-		CustomData:   initialCustomData,
+		CustomData:   &customData,
 	}
 
 	d, _, err := c.Devices.Create(&cr)
@@ -811,11 +812,11 @@ func TestAccDeviceCustomData(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if device.CustomData["hello"] != "world" {
-		t.Fatal(errors.New("Did not properly set custom data when creating device"))
+	if !reflect.DeepEqual(customData, device.CustomData) {
+		t.Fatalf("CustomData of new device should be %+v, was %+v", customData, device.CustomData)
 	}
 
-	updateCustomData := `{"hi":"earth"}`
+	updateCustomData := map[string]interface{}{"hi": "earth"}
 	_, _, err = c.Devices.Update(dID, &DeviceUpdateRequest{
 		CustomData: &updateCustomData,
 	})
@@ -828,25 +829,28 @@ func TestAccDeviceCustomData(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if device.CustomData["hi"] != "earth" {
-		t.Fatal(errors.New("Did not properly update custom data"))
+	if !reflect.DeepEqual(updateCustomData, device.CustomData) {
+		t.Fatalf("CustomData of updated device should be %+v, was %+v", updateCustomData, device.CustomData)
 	}
 
-	updateCustomData = ""
+	updateCustomData = map[string]interface{}{}
 	_, _, err = c.Devices.Update(dID, &DeviceUpdateRequest{
 		CustomData: &updateCustomData,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	device, _, err = c.Devices.Get(dID, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(device.CustomData) != 0 {
-		t.Fatal(errors.New("Did not properly erase custom data"))
-	}
+	// It's not possible to unset customdata:
+	// https://github.com/packethost/packngo/pull/225#issuecomment-744331937
+	/*
+		device, _, err = c.Devices.Get(dID, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if device.CustomData != nil {
+			t.Fatalf("CustomData of updated device should be erased to %+v, was %+v", updateCustomData, device.CustomData)
+		}
+	*/
 }
 
 func TestAccListDeviceEvents(t *testing.T) {

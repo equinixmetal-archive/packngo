@@ -67,10 +67,16 @@ type Device struct {
 	SpotPriceMax        float64                `json:"spot_price_max,omitempty"`
 	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
 	NetworkPorts        []Port                 `json:"network_ports,omitempty"`
-	CustomData          map[string]interface{} `json:"customdata,omitempty"`
 	SSHKeys             []SSHKey               `json:"ssh_keys,omitempty"`
 	ShortID             string                 `json:"short_id,omitempty"`
 	SwitchUUID          string                 `json:"switch_uuid,omitempty"`
+
+	// CustomData, as handled by the API, can be any JSON scalar or struct
+	// value. This value can be used to store arbitrary notes or data relevant
+	// to the device.  CustomData is made available to the device, via the
+	// metadata service, as a `customdata` JSON field at
+	// https://metadata.platformequinix.com/metadata.
+	CustomData interface{} `json:"customdata,omitempty"`
 }
 
 type NetworkInfo struct {
@@ -263,24 +269,24 @@ type CPR struct {
 
 // DeviceCreateRequest type used to create an Equinix Metal device
 type DeviceCreateRequest struct {
-	Hostname              string     `json:"hostname"`
-	Plan                  string     `json:"plan"`
-	Facility              []string   `json:"facility"`
-	OS                    string     `json:"operating_system"`
-	BillingCycle          string     `json:"billing_cycle"`
-	ProjectID             string     `json:"project_id"`
-	UserData              string     `json:"userdata"`
-	Storage               *CPR       `json:"storage,omitempty"`
-	Tags                  []string   `json:"tags"`
-	Description           string     `json:"description,omitempty"`
-	IPXEScriptURL         string     `json:"ipxe_script_url,omitempty"`
-	PublicIPv4SubnetSize  int        `json:"public_ipv4_subnet_size,omitempty"`
-	AlwaysPXE             bool       `json:"always_pxe,omitempty"`
-	HardwareReservationID string     `json:"hardware_reservation_id,omitempty"`
-	SpotInstance          bool       `json:"spot_instance,omitempty"`
-	SpotPriceMax          float64    `json:"spot_price_max,omitempty,string"`
-	TerminationTime       *Timestamp `json:"termination_time,omitempty"`
-	CustomData            string     `json:"customdata,omitempty"`
+	Hostname              string      `json:"hostname"`
+	Plan                  string      `json:"plan"`
+	Facility              []string    `json:"facility"`
+	OS                    string      `json:"operating_system"`
+	BillingCycle          string      `json:"billing_cycle"`
+	ProjectID             string      `json:"project_id"`
+	UserData              string      `json:"userdata"`
+	Storage               *CPR        `json:"storage,omitempty"`
+	Tags                  []string    `json:"tags"`
+	Description           string      `json:"description,omitempty"`
+	IPXEScriptURL         string      `json:"ipxe_script_url,omitempty"`
+	PublicIPv4SubnetSize  int         `json:"public_ipv4_subnet_size,omitempty"`
+	AlwaysPXE             bool        `json:"always_pxe,omitempty"`
+	HardwareReservationID string      `json:"hardware_reservation_id,omitempty"`
+	SpotInstance          bool        `json:"spot_instance,omitempty"`
+	SpotPriceMax          float64     `json:"spot_price_max,omitempty,string"`
+	TerminationTime       *Timestamp  `json:"termination_time,omitempty"`
+	CustomData            interface{} `json:"customdata,omitempty"`
 	// UserSSHKeys is a list of user UUIDs - essentialy a list of
 	// collaborators. The users must be a collaborator in the same project
 	// where the device is created. The user's SSH keys then go to the
@@ -297,14 +303,14 @@ type DeviceCreateRequest struct {
 
 // DeviceUpdateRequest type used to update an Equinix Metal device
 type DeviceUpdateRequest struct {
-	Hostname      *string   `json:"hostname,omitempty"`
-	Description   *string   `json:"description,omitempty"`
-	UserData      *string   `json:"userdata,omitempty"`
-	Locked        *bool     `json:"locked,omitempty"`
-	Tags          *[]string `json:"tags,omitempty"`
-	AlwaysPXE     *bool     `json:"always_pxe,omitempty"`
-	IPXEScriptURL *string   `json:"ipxe_script_url,omitempty"`
-	CustomData    *string   `json:"customdata,omitempty"`
+	Hostname      *string     `json:"hostname,omitempty"`
+	Description   *string     `json:"description,omitempty"`
+	UserData      *string     `json:"userdata,omitempty"`
+	Locked        *bool       `json:"locked,omitempty"`
+	Tags          *[]string   `json:"tags,omitempty"`
+	AlwaysPXE     *bool       `json:"always_pxe,omitempty"`
+	IPXEScriptURL *string     `json:"ipxe_script_url,omitempty"`
+	CustomData    interface{} `json:"customdata,omitempty"`
 }
 
 func (d DeviceCreateRequest) String() string {
