@@ -2,7 +2,6 @@ package packngo
 
 import (
 	"fmt"
-	"path"
 	"strings"
 )
 
@@ -32,19 +31,41 @@ type PortData struct {
 }
 
 type BondData struct {
-	ID   string `json:"id"`
+	ID string `json:"id"`
+
+	// Name of the port interface for the bond ("bond0")
 	Name string `json:"name"`
 }
 
+// Port is a hardware port associated with a reserved or instanciated hardware
+// device.
 type Port struct {
-	ID                      string           `json:"id"`
-	Type                    string           `json:"type"`
-	Name                    string           `json:"name"`
-	Data                    PortData         `json:"data"`
-	NetworkType             string           `json:"network_type,omitempty"`
-	NativeVirtualNetwork    *VirtualNetwork  `json:"native_virtual_network"`
+	ID string `json:"id"`
+
+	// Type is either "NetworkBondPort" for bond ports or "NetworkPort" for
+	// bondable ethernet ports
+	Type string `json:"type"`
+
+	// Name of the interface for this port (such as "bond0" or "eth0")
+	Name string `json:"name"`
+
+	Data PortData `json:"data"`
+
+	// Indicates whether or not the bond can be broken on the port (when applicable).
+	DisbondOperationSupported bool `json:"disbond_operation_supported,omitempty"`
+
+	// NetworkType is either of layer2-bonded, layer2-individual, layer3,
+	// hybrid, hybrid-bonded
+	NetworkType string `json:"network_type,omitempty"`
+
+	// The Native VLAN attached to the port
+	// <https://metal.equinix.com/developers/docs/layer2-networking/native-vlan>
+	NativeVirtualNetwork *VirtualNetwork `json:"native_virtual_network"`
+
+	// VLANs attached to the port
 	AttachedVirtualNetworks []VirtualNetwork `json:"virtual_networks"`
-	Bond                    *BondData        `json:"bond"`
+
+	Bond *BondData `json:"bond"`
 }
 
 type AddressRequest struct {
@@ -84,59 +105,34 @@ func (i *DevicePortServiceOp) GetPortByName(deviceID, name string) (*Port, error
 }
 
 func (i *DevicePortServiceOp) Assign(par *PortAssignRequest) (*Port, *Response, error) {
-	apiPath := path.Join(portBasePath, par.PortID, "assign")
-	return i.portAction(apiPath, par)
+	return i.client.Ports.Assign(par)
 }
 
 func (i *DevicePortServiceOp) AssignNative(par *PortAssignRequest) (*Port, *Response, error) {
-	apiPath := path.Join(portBasePath, par.PortID, "native-vlan")
-	return i.portAction(apiPath, par)
+	return i.client.Ports.AssignNative(par)
 }
 
 func (i *DevicePortServiceOp) UnassignNative(portID string) (*Port, *Response, error) {
-	apiPath := path.Join(portBasePath, portID, "native-vlan")
-	port := new(Port)
-
-	resp, err := i.client.DoRequest("DELETE", apiPath, nil, port)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return port, resp, err
+	return i.client.Ports.UnassignNative(portID)
 }
 
 func (i *DevicePortServiceOp) Unassign(par *PortAssignRequest) (*Port, *Response, error) {
-	apiPath := path.Join(portBasePath, par.PortID, "unassign")
-	return i.portAction(apiPath, par)
+	return i.client.Ports.Unassign(par)
 }
 
 func (i *DevicePortServiceOp) Bond(p *Port, be bool) (*Port, *Response, error) {
 	if p.Data.Bonded {
 		return p, nil, nil
 	}
-	br := &BondRequest{PortID: p.ID, BulkEnable: be}
-	apiPath := path.Join(portBasePath, br.PortID, "bond")
-	return i.portAction(apiPath, br)
+
+	return i.client.Ports.Bond(p.ID, be)
 }
 
 func (i *DevicePortServiceOp) Disbond(p *Port, bd bool) (*Port, *Response, error) {
 	if !p.Data.Bonded {
 		return p, nil, nil
 	}
-	dr := &DisbondRequest{PortID: p.ID, BulkDisable: bd}
-	apiPath := path.Join(portBasePath, dr.PortID, "disbond")
-	return i.portAction(apiPath, dr)
-}
-
-func (i *DevicePortServiceOp) portAction(apiPath string, req interface{}) (*Port, *Response, error) {
-	port := new(Port)
-
-	resp, err := i.client.DoRequest("POST", apiPath, req, port)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return port, resp, err
+	return i.client.Ports.Disbond(p.ID, bd)
 }
 
 func (i *DevicePortServiceOp) PortToLayerTwo(deviceID, portName string) (*Port, *Response, error) {
@@ -147,15 +143,8 @@ func (i *DevicePortServiceOp) PortToLayerTwo(deviceID, portName string) (*Port, 
 	if strings.HasPrefix(p.NetworkType, "layer2") {
 		return p, nil, nil
 	}
-	apiPath := path.Join(portBasePath, p.ID, "convert", "layer-2")
-	port := new(Port)
 
-	resp, err := i.client.DoRequest("POST", apiPath, nil, port)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return port, resp, err
+	return i.client.Ports.ConvertToLayerTwo(p.ID, "")
 }
 
 func (i *DevicePortServiceOp) PortToLayerThree(deviceID, portName string) (*Port, *Response, error) {
@@ -166,23 +155,14 @@ func (i *DevicePortServiceOp) PortToLayerThree(deviceID, portName string) (*Port
 	if (p.NetworkType == NetworkTypeL3) || (p.NetworkType == NetworkTypeHybrid) {
 		return p, nil, nil
 	}
-	apiPath := path.Join(portBasePath, p.ID, "convert", "layer-3")
-	port := new(Port)
 
-	req := BackToL3Request{
-		RequestIPs: []AddressRequest{
-			{AddressFamily: 4, Public: true},
-			{AddressFamily: 4, Public: false},
-			{AddressFamily: 6, Public: true},
-		},
+	ips := []AddressRequest{
+		{AddressFamily: 4, Public: true},
+		{AddressFamily: 4, Public: false},
+		{AddressFamily: 6, Public: true},
 	}
 
-	resp, err := i.client.DoRequest("POST", apiPath, &req, port)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return port, resp, err
+	return i.client.Ports.ConvertToLayerThree(p.ID, ips)
 }
 
 func (i *DevicePortServiceOp) DeviceNetworkType(deviceID string) (string, error) {

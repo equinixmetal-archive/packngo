@@ -116,6 +116,7 @@ type Client struct {
 	OperatingSystems       OSService
 	Organizations          OrganizationService
 	Plans                  PlanService
+	Ports                  PortService
 	ProjectIPs             ProjectIPService
 	ProjectVirtualNetworks ProjectVirtualNetworkService
 	Projects               ProjectService
@@ -365,6 +366,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.OperatingSystems = &OSServiceOp{client: c}
 	c.Organizations = &OrganizationServiceOp{client: c}
 	c.Plans = &PlanServiceOp{client: c}
+	c.Ports = &PortServiceOp{client: c}
 	c.ProjectIPs = &ProjectIPServiceOp{client: c}
 	c.ProjectVirtualNetworks = &ProjectVirtualNetworkServiceOp{client: c}
 	c.Projects = &ProjectServiceOp{client: c}
