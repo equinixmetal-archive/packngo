@@ -8,10 +8,10 @@ import (
 )
 
 // run this test as
-// PACKNGO_TEST_FACILITY=atl1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccPort1E
+// PACKNGO_TEST_FACILITY=atl1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccDevicePort1E
 // .. you can choose another facility, but there must be Type 1E available
 
-func TestAccPort1E(t *testing.T) {
+func TestAccDevicePort1E(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 
@@ -115,24 +115,24 @@ func TestAccPort1E(t *testing.T) {
 	}
 }
 
-func TestAccPortL2HybridL3ConvertTypeC1LA(t *testing.T) {
-	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 30m -run=TestAccPortL2HybridL3ConvertType2A
+func TestAccDevicePortL2HybridL3ConvertTypeC1LA(t *testing.T) {
+	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 30m -run=TestAccDevicePortL2HybridL3ConvertType2A
 	testL2HybridL3Convert(t, "c1.large.arm")
 }
 
-func TestAccPortL2HybridL3ConvertType2(t *testing.T) {
+func TestAccDevicePortL2HybridL3ConvertType2(t *testing.T) {
 	testL2HybridL3Convert(t, "baremetal_2")
 }
 
-func TestAccPortL2HybridL3ConvertType3(t *testing.T) {
+func TestAccDevicePortL2HybridL3ConvertType3(t *testing.T) {
 	testL2HybridL3Convert(t, "baremetal_3")
 }
 
-func TestAccPortL2HybridL3ConvertTypeS(t *testing.T) {
+func TestAccDevicePortL2HybridL3ConvertTypeS(t *testing.T) {
 	testL2HybridL3Convert(t, "baremetal_s")
 }
 
-func TestAccPortL2HybridL3ConvertN2(t *testing.T) {
+func TestAccDevicePortL2HybridL3ConvertN2(t *testing.T) {
 	testL2HybridL3Convert(t, "n2.xlarge.x86")
 }
 
@@ -271,26 +271,26 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 
 }
 
-func TestAccPortL2L3ConvertType2A(t *testing.T) {
+func TestAccDevicePortL2L3ConvertType2A(t *testing.T) {
 	// run possible as:
-	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 20m -run=TestAccPort2A
+	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 20m -run=TestAccDevicePort2A
 	testL2L3Convert(t, "baremetal_2a")
 }
 
-func TestAccPortL2L3ConvertType2(t *testing.T) {
-	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccPort2
+func TestAccDevicePortL2L3ConvertType2(t *testing.T) {
+	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccDevicePort2
 	testL2L3Convert(t, "baremetal_2")
 }
 
-func TestAccPortL2L3ConvertType3(t *testing.T) {
+func TestAccDevicePortL2L3ConvertType3(t *testing.T) {
 	testL2L3Convert(t, "baremetal_3")
 }
 
-func TestAccPortL2L3ConvertTypeS(t *testing.T) {
+func TestAccDevicePortL2L3ConvertTypeS(t *testing.T) {
 	testL2L3Convert(t, "baremetal_s")
 }
 
-func TestAccPortL2L3ConvertN2(t *testing.T) {
+func TestAccDevicePortL2L3ConvertN2(t *testing.T) {
 	testL2L3Convert(t, "n2.xlarge.x86")
 }
 
@@ -465,7 +465,7 @@ defer stopRecord()
 }
 */
 
-func TestAccPortNetworkStateTransitions(t *testing.T) {
+func TestAccDevicePortNetworkStateTransitions(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 	c, projectID, teardown := setupWithProject(t)
@@ -516,7 +516,7 @@ func TestAccPortNetworkStateTransitions(t *testing.T) {
 	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Bonded)
 }
 
-func TestAccPortNativeVlan(t *testing.T) {
+func TestAccDevicePortNativeVlan(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
 	c, projectID, teardown := setupWithProject(t)
