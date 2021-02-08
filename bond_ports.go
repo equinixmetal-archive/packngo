@@ -45,7 +45,7 @@ func (i *DevicePortServiceOp) BondToNetworkType(deviceID, bondPortName, targetTy
 	curType := d.GetBondNetworkType(bondPortName)
 
 	if !BondStateTransitionNecessary(curType, targetType) {
-		return nil, fmt.Errorf("Bond doesn't need to be converted from %s to %s", curType, targetType)
+		return d, nil
 	}
 
 	err = i.ConvertDeviceBond(d, bondPortName, targetType)
