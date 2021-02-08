@@ -24,6 +24,8 @@ type DevicePortService interface {
 	GetOddEthPorts(*Device) (map[string]*Port, error)
 	GetAllEthPorts(*Device) (map[string]*Port, error)
 	ConvertDevice(*Device, string) error
+	BondToNetworkType(string, string, string) (*Device, error)
+	ConvertDeviceBond(*Device, string, string) error
 }
 
 type PortData struct {
