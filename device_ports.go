@@ -144,7 +144,7 @@ func (i *DevicePortServiceOp) PortToLayerTwo(deviceID, portName string) (*Port, 
 		return p, nil, nil
 	}
 
-	return i.client.Ports.ConvertToLayerTwo(p.ID, "")
+	return i.client.Ports.ConvertToLayerTwo(p.ID)
 }
 
 func (i *DevicePortServiceOp) PortToLayerThree(deviceID, portName string) (*Port, *Response, error) {

@@ -5,7 +5,7 @@ import (
 )
 
 type PortServiceOp struct {
-	client *Client
+	client requestDoer
 }
 
 // PortService handles operations on a port
@@ -16,7 +16,7 @@ type PortService interface {
 	UnassignNative(string) (*Port, *Response, error)
 	Bond(string, bool) (*Port, *Response, error)
 	Disbond(string, bool) (*Port, *Response, error)
-	ConvertToLayerTwo(string, string) (*Port, *Response, error)
+	ConvertToLayerTwo(string) (*Port, *Response, error)
 	ConvertToLayerThree(string, []AddressRequest) (*Port, *Response, error)
 	Get(string, *GetOptions) (*Port, *Response, error)
 }
@@ -80,7 +80,9 @@ func (i *PortServiceOp) portAction(apiPath string, req interface{}) (*Port, *Res
 }
 
 // ConvertToLayerTwo converts a bond port to Layer 2. IP assignments of the port will be removed.
-func (i *PortServiceOp) ConvertToLayerTwo(portID, portName string) (*Port, *Response, error) {
+//
+// portID is the UUID of a Bonding Port
+func (i *PortServiceOp) ConvertToLayerTwo(portID string) (*Port, *Response, error) {
 	apiPath := path.Join(portBasePath, portID, "convert", "layer-2")
 	port := new(Port)
 
