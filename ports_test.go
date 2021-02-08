@@ -53,6 +53,48 @@ func testPort(id string) *Port {
 	return v
 }
 
+func TestAccPortServiceOp_Get(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	fac := testFacility()
+	plan := testPlan()
+
+	cr := DeviceCreateRequest{
+		Hostname:     "test-portget",
+		Facility:     []string{fac},
+		Plan:         plan,
+		OS:           testOS,
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deviceID := d.ID
+
+	d = waitDeviceActive(t, c, deviceID)
+	defer deleteDevice(t, c, d.ID, false)
+
+	for _, p := range d.NetworkPorts {
+		port, resp, err := c.Ports.Get(p.ID, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if resp == nil || resp.StatusCode != 200 {
+			t.Fatal("Expected a HTTP response with a 200 StatusCode")
+		}
+
+		if port.ID != p.ID {
+			t.Fatal("Fetched port is not expected port")
+		}
+	}
+}
+
 func TestPortServiceOp_Assign(t *testing.T) {
 	type fields struct {
 		client requestDoer
