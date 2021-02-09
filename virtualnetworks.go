@@ -15,13 +15,15 @@ type ProjectVirtualNetworkService interface {
 }
 
 type VirtualNetwork struct {
-	ID           string  `json:"id"`
-	Description  string  `json:"description,omitempty"`
-	VXLAN        int     `json:"vxlan,omitempty"`
-	FacilityCode string  `json:"facility_code,omitempty"`
-	CreatedAt    string  `json:"created_at,omitempty"`
-	Href         string  `json:"href"`
-	Project      Project `json:"assigned_to"`
+	ID           string    `json:"id"`
+	Description  string    `json:"description,omitempty"`
+	VXLAN        int       `json:"vxlan,omitempty"`
+	FacilityCode string    `json:"facility_code,omitempty"`
+	CreatedAt    string    `json:"created_at,omitempty"`
+	Href         string    `json:"href"`
+	Project      *Project  `json:"assigned_to,omitempty"`
+	Facility     *Facility `json:"facility,omitempty"`
+	Instances    []*Device `json:"instances,omitempty"`
 }
 
 type ProjectVirtualNetworkServiceOp struct {
