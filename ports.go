@@ -24,11 +24,16 @@ type PortServiceOp struct {
 var _ PortService = (*PortServiceOp)(nil)
 
 type PortData struct {
-	MAC    string `json:"mac"`
-	Bonded bool   `json:"bonded"`
+	// MAC address is set for NetworkPort ports
+	MAC string `json:"mac,omitempty"`
+
+	// Bonded is true for NetworkPort ports in a bond and NetworkBondPort ports
+	// that are active
+	Bonded bool `json:"bonded"`
 }
 
 type BondData struct {
+	// ID is the Port.ID of the bonding port
 	ID string `json:"id"`
 
 	// Name of the port interface for the bond ("bond0")
@@ -38,6 +43,7 @@ type BondData struct {
 // Port is a hardware port associated with a reserved or instanciated hardware
 // device.
 type Port struct {
+	// ID of the Port
 	ID string `json:"id"`
 
 	// Type is either "NetworkBondPort" for bond ports or "NetworkPort" for
@@ -47,7 +53,8 @@ type Port struct {
 	// Name of the interface for this port (such as "bond0" or "eth0")
 	Name string `json:"name"`
 
-	Data PortData `json:"data"`
+	// Data about the port
+	Data PortData `json:"data,omitempty"`
 
 	// Indicates whether or not the bond can be broken on the port (when applicable).
 	DisbondOperationSupported bool `json:"disbond_operation_supported,omitempty"`
@@ -56,14 +63,15 @@ type Port struct {
 	// hybrid, hybrid-bonded
 	NetworkType string `json:"network_type,omitempty"`
 
-	// The Native VLAN attached to the port
+	// NativeVirtualNetwork is the Native VLAN attached to the port
 	// <https://metal.equinix.com/developers/docs/layer2-networking/native-vlan>
-	NativeVirtualNetwork *VirtualNetwork `json:"native_virtual_network"`
+	NativeVirtualNetwork *VirtualNetwork `json:"native_virtual_network,omitempty"`
 
 	// VLANs attached to the port
-	AttachedVirtualNetworks []VirtualNetwork `json:"virtual_networks"`
+	AttachedVirtualNetworks []VirtualNetwork `json:"virtual_networks,omitempty"`
 
-	Bond *BondData `json:"bond"`
+	// Bond details for ports with a NetworkPort type
+	Bond *BondData `json:"bond,omitempty"`
 }
 
 type AddressRequest struct {
