@@ -8,6 +8,8 @@ import (
 const portBasePath = "/ports"
 
 // DevicePortService handles operations on a port which belongs to a particular device
+//
+// Deprecated: use PortService or Device methods
 type DevicePortService interface {
 	Assign(*PortAssignRequest) (*Port, *Response, error)
 	Unassign(*PortAssignRequest) (*Port, *Response, error)
@@ -77,6 +79,9 @@ type BackToL3Request struct {
 	RequestIPs []AddressRequest `json:"request_ips"`
 }
 
+// DevicePortServiceOp implements DevicePortService on the Equinix Metal API
+//
+// Deprecated: use PortServiceOp or Device methods
 type DevicePortServiceOp struct {
 	client *Client
 }
@@ -96,6 +101,9 @@ type DisbondRequest struct {
 	BulkDisable bool   `json:"bulk_disable"`
 }
 
+// GetPortByName returns the matching Port on the specified device
+//
+// Deprecated: use Device.GetPortByName
 func (i *DevicePortServiceOp) GetPortByName(deviceID, name string) (*Port, error) {
 	device, _, err := i.client.Devices.Get(deviceID, nil)
 	if err != nil {
@@ -104,37 +112,62 @@ func (i *DevicePortServiceOp) GetPortByName(deviceID, name string) (*Port, error
 	return device.GetPortByName(name)
 }
 
+// Assign the specified VLAN to the specified Port
+//
+// Deprecated: use PortServiceOp.Assign
 func (i *DevicePortServiceOp) Assign(par *PortAssignRequest) (*Port, *Response, error) {
 	return i.client.Ports.Assign(par)
 }
 
+// AssignNative designates the specified VLAN as the native VLAN for the
+// specified Port
+//
+// Deprecated: use PortServiceOp.AssignNative
 func (i *DevicePortServiceOp) AssignNative(par *PortAssignRequest) (*Port, *Response, error) {
 	return i.client.Ports.AssignNative(par)
 }
 
+// UnassignNative removes the native VLAN from the specified Port
+//
+// Deprecated: use PortServiceOp.UnassignNative
 func (i *DevicePortServiceOp) UnassignNative(portID string) (*Port, *Response, error) {
 	return i.client.Ports.UnassignNative(portID)
 }
 
+// Unassign removes the specified VLAN from the specified Port
+//
+// Deprecated: use PortServiceOp.Unassign
 func (i *DevicePortServiceOp) Unassign(par *PortAssignRequest) (*Port, *Response, error) {
 	return i.client.Ports.Unassign(par)
 }
 
-func (i *DevicePortServiceOp) Bond(p *Port, be bool) (*Port, *Response, error) {
+// Bond enabled bonding on the specified port
+//
+// Deprecated: use PortServiceOp.Bond
+func (i *DevicePortServiceOp) Bond(p *Port, bulk_enable bool) (*Port, *Response, error) {
 	if p.Data.Bonded {
 		return p, nil, nil
 	}
 
-	return i.client.Ports.Bond(p.ID, be)
+	return i.client.Ports.Bond(p.ID, bulk_enable)
 }
 
-func (i *DevicePortServiceOp) Disbond(p *Port, bd bool) (*Port, *Response, error) {
+// Disbond disables bonding on the specified port
+//
+// Deprecated: use PortServiceOp.Disbond
+func (i *DevicePortServiceOp) Disbond(p *Port, bulk_disable bool) (*Port, *Response, error) {
 	if !p.Data.Bonded {
 		return p, nil, nil
 	}
-	return i.client.Ports.Disbond(p.ID, bd)
+	return i.client.Ports.Disbond(p.ID, bulk_disable)
 }
 
+// PortToLayerTwo fetches the specified device, finds the matching port by name,
+// and converts it to layer2. A port may already be in a layer2 mode, in which
+// case the port will be returned with a nil response and nil error with no
+// additional action taking place.
+//
+// Deprecated: use PortServiceOp.ConvertToLayerTwo
 func (i *DevicePortServiceOp) PortToLayerTwo(deviceID, portName string) (*Port, *Response, error) {
 	p, err := i.GetPortByName(deviceID, portName)
 	if err != nil {
@@ -147,6 +180,15 @@ func (i *DevicePortServiceOp) PortToLayerTwo(deviceID, portName string) (*Port, 
 	return i.client.Ports.ConvertToLayerTwo(p.ID)
 }
 
+// PortToLayerThree fetches the specified device, finds the matching port by
+// name, and converts it to layer3. A port may already be in a layer3 mode, in
+// which case the port will be returned with a nil response and nil error with
+// no additional action taking place.
+//
+// When switching to Layer3, a new set of IP addresses will be requested
+// including Public IPv4, Public IPv6, and Private IPv6 addresses.
+//
+// Deprecated: use PortServiceOp.ConvertToLayerTwo
 func (i *DevicePortServiceOp) PortToLayerThree(deviceID, portName string) (*Port, *Response, error) {
 	p, err := i.GetPortByName(deviceID, portName)
 	if err != nil {
@@ -165,6 +207,10 @@ func (i *DevicePortServiceOp) PortToLayerThree(deviceID, portName string) (*Port
 	return i.client.Ports.ConvertToLayerThree(p.ID, ips)
 }
 
+// DeviceNetworkType fetches the specified Device and returns a heuristic single
+// word network type consistent with the Equinix Metal console experience.
+//
+// Deprecated: use Device.GetNetworkType
 func (i *DevicePortServiceOp) DeviceNetworkType(deviceID string) (string, error) {
 	d, _, err := i.client.Devices.Get(deviceID, nil)
 	if err != nil {
@@ -173,6 +219,10 @@ func (i *DevicePortServiceOp) DeviceNetworkType(deviceID string) (string, error)
 	return d.GetNetworkType(), nil
 }
 
+// GetAllEthPorts fetches the specified Device and returns a heuristic single
+// word network type consistent with the Equinix Metal console experience.
+//
+// Deprecated: use Device.GetPhysicalPorts
 func (i *DevicePortServiceOp) GetAllEthPorts(d *Device) (map[string]*Port, error) {
 	d, _, err := i.client.Devices.Get(d.ID, nil)
 	if err != nil {
@@ -181,6 +231,11 @@ func (i *DevicePortServiceOp) GetAllEthPorts(d *Device) (map[string]*Port, error
 	return d.GetPhysicalPorts(), nil
 }
 
+// GetOddEthPorts fetches the specified Device and returns physical
+// ports eth1 and eth3.
+//
+// Deprecated: use Device.GetPhysicalPorts and filter the map to only the keys
+// ending with odd digits
 func (i *DevicePortServiceOp) GetOddEthPorts(d *Device) (map[string]*Port, error) {
 	d, _, err := i.client.Devices.Get(d.ID, nil)
 	if err != nil {
@@ -202,6 +257,13 @@ func (i *DevicePortServiceOp) GetOddEthPorts(d *Device) (map[string]*Port, error
 
 }
 
+// ConvertDevice converts the specified device's network ports (including
+// addresses and vlans) to the named network type, consistent with the Equinix
+// Metal console experience.
+//
+// Deprecated: Equinix Metal devices may support more than two ports and the
+// whole-device single word network type can no longer capture the capabilities
+// and permutations of device port configurations.
 func (i *DevicePortServiceOp) ConvertDevice(d *Device, targetType string) error {
 	bondPorts := d.GetBondPorts()
 
@@ -288,6 +350,12 @@ func (i *DevicePortServiceOp) ConvertDevice(d *Device, targetType string) error 
 	return nil
 }
 
+// DeviceToNetworkType fetches the specified device and converts its network
+// ports (including addresses and vlans) to the named network type, consistent
+// with the Equinix Metal console experience.
+//
+// Deprecated: use DevicePortServiceOp.ConvertDevice which this function thinly
+// wraps.
 func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, targetType string) (*Device, error) {
 	d, _, err := i.client.Devices.Get(deviceID, nil)
 	if err != nil {

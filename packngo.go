@@ -106,7 +106,6 @@ type Client struct {
 	CapacityService        CapacityService
 	Connections            ConnectionService
 	DeviceIPs              DeviceIPService
-	DevicePorts            DevicePortService
 	Devices                DeviceService
 	Emails                 EmailService
 	Events                 EventService
@@ -129,6 +128,11 @@ type Client struct {
 	VirtualCircuits        VirtualCircuitService
 	VolumeAttachments      VolumeAttachmentService
 	Volumes                VolumeService
+
+	// DevicePorts
+	//
+	// Deprecated: Use Client.Ports or Device methods
+	DevicePorts DevicePortService
 }
 
 // requestDoer provides methods for making HTTP requests and receiving the
