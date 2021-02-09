@@ -4,10 +4,6 @@ import (
 	"path"
 )
 
-type PortServiceOp struct {
-	client requestDoer
-}
-
 // PortService handles operations on a port
 type PortService interface {
 	Assign(*PortAssignRequest) (*Port, *Response, error)
@@ -21,7 +17,78 @@ type PortService interface {
 	Get(string, *GetOptions) (*Port, *Response, error)
 }
 
-var _ PortService = &PortServiceOp{}
+type PortServiceOp struct {
+	client requestDoer
+}
+
+var _ PortService = (*PortServiceOp)(nil)
+
+type PortData struct {
+	MAC    string `json:"mac"`
+	Bonded bool   `json:"bonded"`
+}
+
+type BondData struct {
+	ID string `json:"id"`
+
+	// Name of the port interface for the bond ("bond0")
+	Name string `json:"name"`
+}
+
+// Port is a hardware port associated with a reserved or instanciated hardware
+// device.
+type Port struct {
+	ID string `json:"id"`
+
+	// Type is either "NetworkBondPort" for bond ports or "NetworkPort" for
+	// bondable ethernet ports
+	Type string `json:"type"`
+
+	// Name of the interface for this port (such as "bond0" or "eth0")
+	Name string `json:"name"`
+
+	Data PortData `json:"data"`
+
+	// Indicates whether or not the bond can be broken on the port (when applicable).
+	DisbondOperationSupported bool `json:"disbond_operation_supported,omitempty"`
+
+	// NetworkType is either of layer2-bonded, layer2-individual, layer3,
+	// hybrid, hybrid-bonded
+	NetworkType string `json:"network_type,omitempty"`
+
+	// The Native VLAN attached to the port
+	// <https://metal.equinix.com/developers/docs/layer2-networking/native-vlan>
+	NativeVirtualNetwork *VirtualNetwork `json:"native_virtual_network"`
+
+	// VLANs attached to the port
+	AttachedVirtualNetworks []VirtualNetwork `json:"virtual_networks"`
+
+	Bond *BondData `json:"bond"`
+}
+
+type AddressRequest struct {
+	AddressFamily int  `json:"address_family"`
+	Public        bool `json:"public"`
+}
+
+type BackToL3Request struct {
+	RequestIPs []AddressRequest `json:"request_ips"`
+}
+
+type PortAssignRequest struct {
+	PortID           string `json:"id"`
+	VirtualNetworkID string `json:"vnid"`
+}
+
+type BondRequest struct {
+	PortID     string `json:"id"`
+	BulkEnable bool   `json:"bulk_enable"`
+}
+
+type DisbondRequest struct {
+	PortID      string `json:"id"`
+	BulkDisable bool   `json:"bulk_disable"`
+}
 
 // Assign adds a VLAN to a port
 func (i *PortServiceOp) Assign(par *PortAssignRequest) (*Port, *Response, error) {
