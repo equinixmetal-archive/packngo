@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	errBoom    = errors.New("boom")
-	testPortID = "12345"
+	errBoom              = errors.New("boom")
+	testPortID           = "12345"
+	testVirtualNetworkID = "abcdef"
 )
 
 // reverse a string slice
@@ -100,7 +101,8 @@ func TestPortServiceOp_Assign(t *testing.T) {
 		client requestDoer
 	}
 	type args struct {
-		par *PortAssignRequest
+		portID string
+		vlanID string
 	}
 	tests := []struct {
 		name    string
@@ -128,10 +130,8 @@ func TestPortServiceOp_Assign(t *testing.T) {
 				},
 			},
 			args: args{
-				par: &PortAssignRequest{
-					PortID:           testPortID,
-					VirtualNetworkID: "abcdef",
-				},
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
 			},
 			want:    testPort(testPortID),
 			want1:   &Response{},
@@ -145,10 +145,8 @@ func TestPortServiceOp_Assign(t *testing.T) {
 				},
 			}},
 			args: args{
-				par: &PortAssignRequest{
-					PortID:           testPortID,
-					VirtualNetworkID: "abcdef",
-				},
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
 			},
 			want:    nil,
 			want1:   nil,
@@ -160,7 +158,7 @@ func TestPortServiceOp_Assign(t *testing.T) {
 			i := &PortServiceOp{
 				client: tt.fields.client,
 			}
-			got, got1, err := i.Assign(tt.args.par)
+			got, got1, err := i.Assign(tt.args.portID, tt.args.vlanID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PortServiceOp.Assign() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -180,7 +178,8 @@ func TestPortServiceOp_AssignNative(t *testing.T) {
 		client requestDoer
 	}
 	type args struct {
-		par *PortAssignRequest
+		portID string
+		vlanID string
 	}
 	tests := []struct {
 		name    string
@@ -208,10 +207,8 @@ func TestPortServiceOp_AssignNative(t *testing.T) {
 				},
 			},
 			args: args{
-				par: &PortAssignRequest{
-					PortID:           testPortID,
-					VirtualNetworkID: "abcdef",
-				},
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
 			},
 			want:    testPort(testPortID),
 			want1:   &Response{},
@@ -225,10 +222,8 @@ func TestPortServiceOp_AssignNative(t *testing.T) {
 				},
 			}},
 			args: args{
-				par: &PortAssignRequest{
-					PortID:           testPortID,
-					VirtualNetworkID: "abcdef",
-				},
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
 			},
 			want:    nil,
 			want1:   nil,
@@ -240,7 +235,7 @@ func TestPortServiceOp_AssignNative(t *testing.T) {
 			i := &PortServiceOp{
 				client: tt.fields.client,
 			}
-			got, got1, err := i.AssignNative(tt.args.par)
+			got, got1, err := i.AssignNative(tt.args.portID, tt.args.vlanID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PortServiceOp.AssignNative() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -260,7 +255,8 @@ func TestPortServiceOp_Unassign(t *testing.T) {
 		client requestDoer
 	}
 	type args struct {
-		par *PortAssignRequest
+		portID string
+		vlanID string
 	}
 	tests := []struct {
 		name    string
@@ -288,10 +284,8 @@ func TestPortServiceOp_Unassign(t *testing.T) {
 				},
 			},
 			args: args{
-				par: &PortAssignRequest{
-					PortID:           testPortID,
-					VirtualNetworkID: "abcdef",
-				},
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
 			},
 			want:    testPort(testPortID),
 			want1:   &Response{},
@@ -305,10 +299,8 @@ func TestPortServiceOp_Unassign(t *testing.T) {
 				},
 			}},
 			args: args{
-				par: &PortAssignRequest{
-					PortID:           testPortID,
-					VirtualNetworkID: "abcdef",
-				},
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
 			},
 			want:    nil,
 			want1:   nil,
@@ -320,7 +312,7 @@ func TestPortServiceOp_Unassign(t *testing.T) {
 			i := &PortServiceOp{
 				client: tt.fields.client,
 			}
-			got, got1, err := i.Unassign(tt.args.par)
+			got, got1, err := i.Unassign(tt.args.portID, tt.args.vlanID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PortServiceOp.Unassign() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -49,7 +49,7 @@ func (i *DevicePortServiceOp) GetPortByName(deviceID, name string) (*Port, error
 //
 // Deprecated: use PortServiceOp.Assign
 func (i *DevicePortServiceOp) Assign(par *PortAssignRequest) (*Port, *Response, error) {
-	return i.client.Ports.Assign(par)
+	return i.client.Ports.Assign(par.PortID, par.VirtualNetworkID)
 }
 
 // AssignNative designates the specified VLAN as the native VLAN for the
@@ -57,7 +57,7 @@ func (i *DevicePortServiceOp) Assign(par *PortAssignRequest) (*Port, *Response, 
 //
 // Deprecated: use PortServiceOp.AssignNative
 func (i *DevicePortServiceOp) AssignNative(par *PortAssignRequest) (*Port, *Response, error) {
-	return i.client.Ports.AssignNative(par)
+	return i.client.Ports.AssignNative(par.PortID, par.VirtualNetworkID)
 }
 
 // UnassignNative removes the native VLAN from the specified Port
@@ -71,7 +71,7 @@ func (i *DevicePortServiceOp) UnassignNative(portID string) (*Port, *Response, e
 //
 // Deprecated: use PortServiceOp.Unassign
 func (i *DevicePortServiceOp) Unassign(par *PortAssignRequest) (*Port, *Response, error) {
-	return i.client.Ports.Unassign(par)
+	return i.client.Ports.Unassign(par.PortID, par.VirtualNetworkID)
 }
 
 // Bond enabled bonding on the specified port

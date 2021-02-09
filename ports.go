@@ -6,9 +6,9 @@ import (
 
 // PortService handles operations on a port
 type PortService interface {
-	Assign(*PortAssignRequest) (*Port, *Response, error)
-	Unassign(*PortAssignRequest) (*Port, *Response, error)
-	AssignNative(*PortAssignRequest) (*Port, *Response, error)
+	Assign(string, string) (*Port, *Response, error)
+	Unassign(string, string) (*Port, *Response, error)
+	AssignNative(string, string) (*Port, *Response, error)
 	UnassignNative(string) (*Port, *Response, error)
 	Bond(string, bool) (*Port, *Response, error)
 	Disbond(string, bool) (*Port, *Response, error)
@@ -84,29 +84,36 @@ type BackToL3Request struct {
 }
 
 type PortAssignRequest struct {
-	PortID           string `json:"id"`
+	// PortID of the Port
+	//
+	// Deprecated: this is redundant to the portID parameter in request
+	// functions. This is kept for use by deprecated DevicePortServiceOps
+	// methods.
+	PortID string `json:"id,omitempty"`
+
 	VirtualNetworkID string `json:"vnid"`
 }
 
 type BondRequest struct {
-	PortID     string `json:"id"`
-	BulkEnable bool   `json:"bulk_enable"`
+	BulkEnable bool `json:"bulk_enable"`
 }
 
 type DisbondRequest struct {
-	PortID      string `json:"id"`
-	BulkDisable bool   `json:"bulk_disable"`
+	BulkDisable bool `json:"bulk_disable"`
 }
 
 // Assign adds a VLAN to a port
-func (i *PortServiceOp) Assign(par *PortAssignRequest) (*Port, *Response, error) {
-	apiPath := path.Join(portBasePath, par.PortID, "assign")
+func (i *PortServiceOp) Assign(portID, vlanID string) (*Port, *Response, error) {
+	apiPath := path.Join(portBasePath, portID, "assign")
+	par := &PortAssignRequest{VirtualNetworkID: vlanID}
+
 	return i.portAction(apiPath, par)
 }
 
 // AssignNative assigns a virtual network to the port as a "native VLAN"
-func (i *PortServiceOp) AssignNative(par *PortAssignRequest) (*Port, *Response, error) {
-	apiPath := path.Join(portBasePath, par.PortID, "native-vlan")
+func (i *PortServiceOp) AssignNative(portID, vlanID string) (*Port, *Response, error) {
+	apiPath := path.Join(portBasePath, portID, "native-vlan")
+	par := &PortAssignRequest{VirtualNetworkID: vlanID}
 	return i.portAction(apiPath, par)
 }
 
@@ -124,22 +131,24 @@ func (i *PortServiceOp) UnassignNative(portID string) (*Port, *Response, error) 
 }
 
 // Unassign removes a VLAN from the port
-func (i *PortServiceOp) Unassign(par *PortAssignRequest) (*Port, *Response, error) {
-	apiPath := path.Join(portBasePath, par.PortID, "unassign")
+func (i *PortServiceOp) Unassign(portID, vlanID string) (*Port, *Response, error) {
+	apiPath := path.Join(portBasePath, portID, "unassign")
+	par := &PortAssignRequest{VirtualNetworkID: vlanID}
+
 	return i.portAction(apiPath, par)
 }
 
 // Bond enables bonding for one or all ports
 func (i *PortServiceOp) Bond(portID string, bulkEnable bool) (*Port, *Response, error) {
-	br := &BondRequest{PortID: portID, BulkEnable: bulkEnable}
-	apiPath := path.Join(portBasePath, br.PortID, "bond")
+	br := &BondRequest{BulkEnable: bulkEnable}
+	apiPath := path.Join(portBasePath, portID, "bond")
 	return i.portAction(apiPath, br)
 }
 
 // Disbond disables bonding for one or all ports
 func (i *PortServiceOp) Disbond(portID string, bulkEnable bool) (*Port, *Response, error) {
-	dr := &DisbondRequest{PortID: portID, BulkDisable: bulkEnable}
-	apiPath := path.Join(portBasePath, dr.PortID, "disbond")
+	dr := &DisbondRequest{BulkDisable: bulkEnable}
+	apiPath := path.Join(portBasePath, portID, "disbond")
 	return i.portAction(apiPath, dr)
 }
 
