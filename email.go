@@ -63,7 +63,7 @@ func (s *EmailServiceOp) Create(request *EmailRequest) (*Email, *Response, error
 	return email, resp, err
 }
 
-// Delete removes the email addres from the current user account
+// Delete removes the email address from the current user account
 func (s *EmailServiceOp) Delete(emailID string) (*Response, error) {
 	apiPath := path.Join(emailBasePath, emailID)
 

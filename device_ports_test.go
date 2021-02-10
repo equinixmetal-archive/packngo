@@ -40,7 +40,7 @@ func TestAccDevicePort1E(t *testing.T) {
 	defer deleteDevice(t, c, d.ID, false)
 	dID := d.ID
 
-	// If you need to test this, run a 1e device in your project in a faciltiy
+	// If you need to test this, run a 1e device in your project in a facility
 	// and then comment code from MARK_1 to here and uncomment following.
 	// Fill the values from your device, project and facility.
 
@@ -75,7 +75,7 @@ func TestAccDevicePort1E(t *testing.T) {
 	}
 
 	if len(eth1.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to a eth1 in the begining of this test")
+		t.Fatal("No vlans should be attached to a eth1 in the beginning of this test")
 	}
 
 	vncr := VirtualNetworkCreateRequest{
@@ -216,7 +216,7 @@ func testL2HybridL3Convert(t *testing.T, plan string) {
 		t.Fatal(err)
 	}
 	if len(eth1.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to a eth1 in the begining of this test")
+		t.Fatal("No vlans should be attached to a eth1 in the beginning of this test")
 	}
 
 	vncr := VirtualNetworkCreateRequest{
@@ -373,7 +373,7 @@ func testL2L3Convert(t *testing.T, plan string) {
 	}
 
 	if len(bond0.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to a bond0 in the begining of this test")
+		t.Fatal("No vlans should be attached to a bond0 in the beginning of this test")
 	}
 
 	vncr := VirtualNetworkCreateRequest{

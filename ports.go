@@ -40,7 +40,7 @@ type BondData struct {
 	Name string `json:"name"`
 }
 
-// Port is a hardware port associated with a reserved or instanciated hardware
+// Port is a hardware port associated with a reserved or instantiated hardware
 // device.
 type Port struct {
 	// ID of the Port
