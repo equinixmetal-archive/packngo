@@ -106,7 +106,6 @@ type Client struct {
 	CapacityService        CapacityService
 	Connections            ConnectionService
 	DeviceIPs              DeviceIPService
-	DevicePorts            DevicePortService
 	Devices                DeviceService
 	Emails                 EmailService
 	Events                 EventService
@@ -116,6 +115,7 @@ type Client struct {
 	OperatingSystems       OSService
 	Organizations          OrganizationService
 	Plans                  PlanService
+	Ports                  PortService
 	ProjectIPs             ProjectIPService
 	ProjectVirtualNetworks ProjectVirtualNetworkService
 	Projects               ProjectService
@@ -128,6 +128,11 @@ type Client struct {
 	VirtualCircuits        VirtualCircuitService
 	VolumeAttachments      VolumeAttachmentService
 	Volumes                VolumeService
+
+	// DevicePorts
+	//
+	// Deprecated: Use Client.Ports or Device methods
+	DevicePorts DevicePortService
 }
 
 // requestDoer provides methods for making HTTP requests and receiving the
@@ -365,6 +370,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.OperatingSystems = &OSServiceOp{client: c}
 	c.Organizations = &OrganizationServiceOp{client: c}
 	c.Plans = &PlanServiceOp{client: c}
+	c.Ports = &PortServiceOp{client: c}
 	c.ProjectIPs = &ProjectIPServiceOp{client: c}
 	c.ProjectVirtualNetworks = &ProjectVirtualNetworkServiceOp{client: c}
 	c.Projects = &ProjectServiceOp{client: c}

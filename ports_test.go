@@ -1,533 +1,72 @@
 package packngo
 
 import (
-	"log"
-	"path"
+	"errors"
+	"fmt"
+	"net/http"
+	"reflect"
+	"strings"
 	"testing"
-	"time"
 )
 
-// run this test as
-// PACKNGO_TEST_FACILITY=atl1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccPort1E
-// .. you can choose another facility, but there must be Type 1E available
+var (
+	errBoom              = errors.New("boom")
+	testPortID           = "12345"
+	testVirtualNetworkID = "abcdef"
+)
 
-func TestAccPort1E(t *testing.T) {
+// reverse a string slice
+// https://github.com/golang/go/wiki/SliceTricks#reversing
+func reverse(a []string) {
+	for i := len(a)/2 - 1; i >= 0; i-- {
+		opp := len(a) - 1 - i
+		a[i], a[opp] = a[opp], a[i]
+	}
+}
+
+// testPort returns a non-empty Port. Few parameters are configurable because
+// the functions relying on this Port do not care about the contents. Any
+// non-empty Port would be sufficient.
+func testPort(id string) *Port {
+	v := &Port{}
+	v.ID = id
+	v.Type = "NetworkPort"
+	v.Name = "eth0"
+	v.Data = PortData{
+		MAC:    "aa:bb:cc:dd:ee:ff",
+		Bonded: true,
+	}
+	v.NetworkType = NetworkTypeL3
+	v.Bond = &BondData{
+		ID:   "bond0-uuid",
+		Name: "bond0",
+	}
+	v.AttachedVirtualNetworks = []VirtualNetwork{
+		{
+			ID:           "abcedf",
+			Description:  "vlan-foo",
+			VXLAN:        1234,
+			FacilityCode: "facility-foo",
+			CreatedAt:    "2020-07-02T15:24:28Z",
+			Href:         "/virtual-networks/f343a677-c86a-48f4-9cc3-607afedc1ca2",
+		},
+	}
+	return v
+}
+
+func TestAccPortServiceOp_Get(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
-
-	// MARK__1
-
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
 
-	hn := randString8()
-
 	fac := testFacility()
+	plan := testPlan()
 
 	cr := DeviceCreateRequest{
-		Hostname:     hn,
-		Facility:     []string{fac},
-		Plan:         "baremetal_1e",
-		OS:           testOS,
-		ProjectID:    projectID,
-		BillingCycle: "hourly",
-	}
-
-	d, _, err := c.Devices.Create(&cr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteDevice(t, c, d.ID, false)
-	dID := d.ID
-
-	// If you need to test this, run a 1e device in your project in a faciltiy
-	// and then comment code from MARK_1 to here and uncomment following.
-	// Fill the values from your device, project and facility.
-
-	/*
-
-				c, stopRecord := setup(t)
-		defer stopRecord()
-
-				dID := "414f52d3-022a-420d-a521-915fdcc66801"
-				projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-				fac := "atl1"
-				d := &Device{}
-				err := fmt.Errorf("hi")
-
-	*/
-
-	d = waitDeviceActive(t, c, dID)
-
-	nType, err := c.DevicePorts.DeviceNetworkType(d.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if nType != NetworkTypeHybrid {
-		t.Fatal("New 1E device should be in Hybrid Network Type")
-	}
-
-	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(eth1.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to a eth1 in the begining of this test")
-	}
-
-	vncr := VirtualNetworkCreateRequest{
-		ProjectID: projectID,
-		Facility:  fac,
-	}
-
-	vlan, _, err := c.ProjectVirtualNetworks.Create(&vncr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteProjectVirtualNetwork(t, c, vlan.ID)
-	par := PortAssignRequest{
-		PortID:           eth1.ID,
-		VirtualNetworkID: vlan.ID}
-
-	p, _, err := c.DevicePorts.Assign(&par)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(p.AttachedVirtualNetworks) != 1 {
-		t.Fatal("Exactly one vlan should be attached to a eth1 at this point")
-	}
-
-	if path.Base(p.AttachedVirtualNetworks[0].Href) != vlan.ID {
-		t.Fatal("mismatch in the UUID of the assigned VLAN")
-	}
-
-	p, _, err = c.DevicePorts.Unassign(&par)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(p.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to the port at this time")
-	}
-}
-
-func TestAccPortL2HybridL3ConvertTypeC1LA(t *testing.T) {
-	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 30m -run=TestAccPortL2HybridL3ConvertType2A
-	testL2HybridL3Convert(t, "c1.large.arm")
-}
-
-func TestAccPortL2HybridL3ConvertType2(t *testing.T) {
-	testL2HybridL3Convert(t, "baremetal_2")
-}
-
-func TestAccPortL2HybridL3ConvertType3(t *testing.T) {
-	testL2HybridL3Convert(t, "baremetal_3")
-}
-
-func TestAccPortL2HybridL3ConvertTypeS(t *testing.T) {
-	testL2HybridL3Convert(t, "baremetal_s")
-}
-
-func TestAccPortL2HybridL3ConvertN2(t *testing.T) {
-	testL2HybridL3Convert(t, "n2.xlarge.x86")
-}
-
-func testL2HybridL3Convert(t *testing.T, plan string) {
-	skipUnlessAcceptanceTestsAllowed(t)
-	t.Parallel()
-	log.Println("Testing type", plan, "convert to Hybrid L2 and back to L3")
-
-	// MARK_2
-
-	c, projectID, teardown := setupWithProject(t)
-	defer teardown()
-
-	hn := randString8()
-
-	fac := testFacility()
-
-	cr := DeviceCreateRequest{
-		Hostname:     hn,
+		Hostname:     "test-portget",
 		Facility:     []string{fac},
 		Plan:         plan,
-		OS:           testOS,
-		ProjectID:    projectID,
-		BillingCycle: "hourly",
-	}
-
-	d, _, err := c.Devices.Create(&cr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteDevice(t, c, d.ID, false)
-	dID := d.ID
-
-	// If you need to test this, run a ${plan} device in your project in a
-	// facility,
-	// and then comment code from MARK_2 to here and uncomment following.
-	// Fill the values from youri testing device, project and facility.
-
-	/*
-				c, stopRecord := setup(t)
-		defer stopRecord()
-
-				projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-				dID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
-				fac := "dfw2"
-
-				//dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
-				//fac := "ewr1"
-
-				d := &Device{}
-				err := fmt.Errorf("hi")
-	*/
-
-	d = waitDeviceActive(t, c, dID)
-
-	nType, err := c.DevicePorts.DeviceNetworkType(d.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if nType != NetworkTypeL3 {
-		t.Fatalf("New %s device should be in network type L3", plan)
-	}
-
-	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, NetworkTypeHybrid)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nType, err = c.DevicePorts.DeviceNetworkType(d.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if nType != NetworkTypeHybrid {
-		t.Fatal("the device should now be in network type L2 Bonded")
-	}
-
-	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(eth1.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to a eth1 in the begining of this test")
-	}
-
-	vncr := VirtualNetworkCreateRequest{
-		ProjectID: projectID,
-		Facility:  fac,
-	}
-
-	vlan, _, err := c.ProjectVirtualNetworks.Create(&vncr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteProjectVirtualNetwork(t, c, vlan.ID)
-
-	par := PortAssignRequest{
-		PortID:           eth1.ID,
-		VirtualNetworkID: vlan.ID}
-	p, _, err := c.DevicePorts.Assign(&par)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(p.AttachedVirtualNetworks) != 1 {
-		t.Fatal("Exactly one vlan should be attached to a eth1 at this point")
-	}
-
-	if path.Base(p.AttachedVirtualNetworks[0].Href) != vlan.ID {
-		t.Fatal("mismatch in the UUID of the assigned VLAN")
-	}
-
-	p, _, err = c.DevicePorts.Unassign(&par)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(p.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to the port at this time")
-	}
-
-	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, NetworkTypeL3)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nType, err = c.DevicePorts.DeviceNetworkType(d.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if nType != NetworkTypeL3 {
-		t.Fatal("the device should now be back in network type L3")
-	}
-
-}
-
-func TestAccPortL2L3ConvertType2A(t *testing.T) {
-	// run possible as:
-	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -timeout 20m -run=TestAccPort2A
-	testL2L3Convert(t, "baremetal_2a")
-}
-
-func TestAccPortL2L3ConvertType2(t *testing.T) {
-	// PACKNGO_TEST_FACILITY=nrt1 PACKNGO_TEST_ACTUAL_API=1 go test -v -run=TestAccPort2
-	testL2L3Convert(t, "baremetal_2")
-}
-
-func TestAccPortL2L3ConvertType3(t *testing.T) {
-	testL2L3Convert(t, "baremetal_3")
-}
-
-func TestAccPortL2L3ConvertTypeS(t *testing.T) {
-	testL2L3Convert(t, "baremetal_s")
-}
-
-func TestAccPortL2L3ConvertN2(t *testing.T) {
-	testL2L3Convert(t, "n2.xlarge.x86")
-}
-
-func testL2L3Convert(t *testing.T, plan string) {
-	skipUnlessAcceptanceTestsAllowed(t)
-	t.Parallel()
-	log.Println("Testing type", plan, "convert to L2 and back to L3")
-
-	// MARK_2
-
-	c, projectID, teardown := setupWithProject(t)
-	defer teardown()
-
-	hn := randString8()
-
-	fac := testFacility()
-
-	cr := DeviceCreateRequest{
-		Hostname:     hn,
-		Facility:     []string{fac},
-		Plan:         plan,
-		OS:           testOS,
-		ProjectID:    projectID,
-		BillingCycle: "hourly",
-	}
-
-	d, _, err := c.Devices.Create(&cr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteDevice(t, c, d.ID, false)
-	dID := d.ID
-	/*
-
-		// If you need to test this, run a ${plan} device in your project in a
-		// facility,
-		// and then comment code from MARK_2 to here and uncomment following.
-		// Fill the values from youri testing device, project and facility.
-
-		c, stopRecord := setup(t)
-		defer stopRecord()
-
-		//	dID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
-		dID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
-		projectID := "52000fb2-ee46-4673-93a8-de2c2bdba33b"
-		fac := "dfw2"
-
-		d := &Device{}
-		err := fmt.Errorf("hi")
-	*/
-
-	d = waitDeviceActive(t, c, dID)
-
-	nType, err := c.DevicePorts.DeviceNetworkType(d.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if nType != NetworkTypeL3 {
-		t.Fatalf("New %s device should be in network type L3", plan)
-	}
-
-	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, NetworkTypeL2Bonded)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nType, err = c.DevicePorts.DeviceNetworkType(d.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if nType != NetworkTypeL2Bonded {
-		t.Fatal("the device should now be in network type L2 Bonded")
-	}
-
-	bond0, err := c.DevicePorts.GetPortByName(d.ID, "bond0")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(bond0.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to a bond0 in the begining of this test")
-	}
-
-	vncr := VirtualNetworkCreateRequest{
-		ProjectID: projectID,
-		Facility:  fac,
-	}
-
-	vlan, _, err := c.ProjectVirtualNetworks.Create(&vncr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteProjectVirtualNetwork(t, c, vlan.ID)
-
-	par := PortAssignRequest{
-		PortID:           bond0.ID,
-		VirtualNetworkID: vlan.ID}
-	p, _, err := c.DevicePorts.Assign(&par)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(p.AttachedVirtualNetworks) != 1 {
-		t.Fatal("Exactly one vlan should be attached to a bond0 at this point")
-	}
-
-	if path.Base(p.AttachedVirtualNetworks[0].Href) != vlan.ID {
-		t.Fatal("mismatch in the UUID of the assigned VLAN")
-	}
-
-	p, _, err = c.DevicePorts.Unassign(&par)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(p.AttachedVirtualNetworks) != 0 {
-		t.Fatal("No vlans should be attached to the port at this time")
-	}
-
-	d, err = c.DevicePorts.DeviceToNetworkType(d.ID, NetworkTypeL3)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nType, err = c.DevicePorts.DeviceNetworkType(d.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if nType != NetworkTypeL3 {
-		t.Fatal("the device now should be back in network type L3")
-	}
-
-}
-
-func deviceToNetworkType(t *testing.T, c *Client, deviceID, targetNetworkType string) {
-	oldt, err := c.DevicePorts.DeviceNetworkType(deviceID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	log.Println("Converting", oldt, "=>", targetNetworkType, "...")
-	_, err = c.DevicePorts.DeviceToNetworkType(deviceID, targetNetworkType)
-	if err != nil {
-		t.Fatal(err)
-	}
-	log.Println(oldt, "=>", targetNetworkType, "OK")
-	time.Sleep(15 * time.Second)
-}
-
-/*
-func TestXXX(t *testing.T) {
-	skipUnlessAcceptanceTestsAllowed(t)
-	t.Parallel()
-	c, stopRecord := setup(t)
-defer stopRecord()
-	//	deviceID := "131dfaf1-e38a-4963-86d6-dbc2531f85d7"
-	deviceID := "b7515d6b-6a86-4830-ab50-9bca3aa51e1c"
-	d, _, err := c.Devices.Get(deviceID, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	log.Println(d)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeHybrid)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Individual)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
-
-}
-*/
-
-func TestAccPortNetworkStateTransitions(t *testing.T) {
-	skipUnlessAcceptanceTestsAllowed(t)
-	t.Parallel()
-	c, projectID, teardown := setupWithProject(t)
-	defer teardown()
-
-	fac := testFacility()
-
-	cr := DeviceCreateRequest{
-		Hostname:     "networktypetest",
-		Facility:     []string{fac},
-		Plan:         "m1.xlarge.x86",
-		OS:           testOS,
-		ProjectID:    projectID,
-		BillingCycle: "hourly",
-	}
-	d, _, err := c.Devices.Create(&cr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteDevice(t, c, d.ID, false)
-	deviceID := d.ID
-
-	d = waitDeviceActive(t, c, deviceID)
-
-	networkType := d.GetNetworkType()
-	if networkType != NetworkTypeL3 {
-		t.Fatal("network_type should be 'layer3'")
-	}
-
-	if networkType != NetworkTypeL2Bonded {
-		deviceToNetworkType(t, c, deviceID, NetworkTypeL2Bonded)
-	}
-
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Individual)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeHybrid)
-
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Bonded)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Bonded)
-
-	deviceToNetworkType(t, c, deviceID, NetworkTypeHybrid)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Individual)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeHybrid)
-
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL3)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Individual)
-	deviceToNetworkType(t, c, deviceID, NetworkTypeL2Bonded)
-}
-
-func TestAccPortNativeVlan(t *testing.T) {
-	skipUnlessAcceptanceTestsAllowed(t)
-	t.Parallel()
-	c, projectID, teardown := setupWithProject(t)
-	defer teardown()
-
-	fac := testFacility()
-
-	cr := DeviceCreateRequest{
-		Hostname:     "networktypetest",
-		Facility:     []string{fac},
-		Plan:         "baremetal_2",
 		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
@@ -541,71 +80,705 @@ func TestAccPortNativeVlan(t *testing.T) {
 	d = waitDeviceActive(t, c, deviceID)
 	defer deleteDevice(t, c, d.ID, false)
 
-	deviceToNetworkType(t, c, deviceID, NetworkTypeHybrid)
-
-	vncr := VirtualNetworkCreateRequest{
-		ProjectID: projectID,
-		Facility:  fac,
-	}
-
-	vlan1, _, err := c.ProjectVirtualNetworks.Create(&vncr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteProjectVirtualNetwork(t, c, vlan1.ID)
-	vlan2, _, err := c.ProjectVirtualNetworks.Create(&vncr)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer deleteProjectVirtualNetwork(t, c, vlan2.ID)
-
-	eth1, err := c.DevicePorts.GetPortByName(d.ID, "eth1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if eth1.NativeVirtualNetwork != nil {
-		t.Fatal("Native virtual network on fresh device should be nil")
-	}
-	par1 := PortAssignRequest{
-		PortID:           eth1.ID,
-		VirtualNetworkID: vlan1.ID}
-	_, _, err = c.DevicePorts.Assign(&par1)
-	if err != nil {
-		t.Fatal(err)
-	}
-	par2 := PortAssignRequest{
-		PortID:           eth1.ID,
-		VirtualNetworkID: vlan2.ID}
-	_, _, err = c.DevicePorts.Assign(&par2)
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, _, err = c.DevicePorts.AssignNative(&par1)
-	if err != nil {
-		t.Fatal(err)
-	}
-	eth1, err = c.DevicePorts.GetPortByName(deviceID, "eth1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if eth1.NativeVirtualNetwork != nil {
-		if path.Base(eth1.NativeVirtualNetwork.Href) != vlan1.ID {
-			t.Fatal("Wrong native virtual network at the test device")
+	for _, p := range d.NetworkPorts {
+		port, resp, err := c.Ports.Get(p.ID, nil)
+		if err != nil {
+			t.Fatal(err)
 		}
-	} else {
-		t.Fatal("No native virtual network at the test device")
+
+		if resp == nil || resp.StatusCode != 200 {
+			t.Fatal("Expected a HTTP response with a 200 StatusCode")
+		}
+
+		if port.ID != p.ID {
+			t.Fatal("Fetched port is not expected port")
+		}
 	}
-	_, _, err = c.DevicePorts.UnassignNative(eth1.ID)
-	if err != nil {
-		t.Fatal(err)
+}
+
+func TestPortServiceOp_Assign(t *testing.T) {
+	type fields struct {
+		client requestDoer
 	}
-	_, _, err = c.DevicePorts.Unassign(&par2)
-	if err != nil {
-		t.Fatal(err)
+	type args struct {
+		portID string
+		vlanID string
 	}
-	p, _, err := c.DevicePorts.Unassign(&par1)
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Port
+		want1   *Response
+		wantErr bool
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				client: &MockClient{
+					fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+						parts := strings.Split(path, "/")
+						reverse(parts)
+
+						if v, ok := v.(*Port); ok && parts[0] == "assign" && method == http.MethodPost {
+							*v = *(testPort(parts[1]))
+							return &Response{}, nil
+						}
+
+						return nil, errBoom
+					},
+				},
+			},
+			args: args{
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
+			},
+			want:    testPort(testPortID),
+			want1:   &Response{},
+			wantErr: false,
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			args: args{
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
+			},
+			want:    nil,
+			want1:   nil,
+			wantErr: true,
+		},
 	}
-	log.Println(p)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := &PortServiceOp{
+				client: tt.fields.client,
+			}
+			got, got1, err := i.Assign(tt.args.portID, tt.args.vlanID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PortServiceOp.Assign() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PortServiceOp.Assign() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("PortServiceOp.Assign() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestPortServiceOp_AssignNative(t *testing.T) {
+	type fields struct {
+		client requestDoer
+	}
+	type args struct {
+		portID string
+		vlanID string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Port
+		want1   *Response
+		wantErr bool
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				client: &MockClient{
+					fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+						parts := strings.Split(path, "/")
+						reverse(parts)
+
+						if v, ok := v.(*Port); ok && parts[0] == "native-vlan" && method == http.MethodPost {
+							*v = *(testPort(parts[1]))
+							return &Response{}, nil
+						}
+
+						return nil, errBoom
+					},
+				},
+			},
+			args: args{
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
+			},
+			want:    testPort(testPortID),
+			want1:   &Response{},
+			wantErr: false,
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			args: args{
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
+			},
+			want:    nil,
+			want1:   nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := &PortServiceOp{
+				client: tt.fields.client,
+			}
+			got, got1, err := i.AssignNative(tt.args.portID, tt.args.vlanID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PortServiceOp.AssignNative() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PortServiceOp.AssignNative() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("PortServiceOp.AssignNative() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestPortServiceOp_Unassign(t *testing.T) {
+	type fields struct {
+		client requestDoer
+	}
+	type args struct {
+		portID string
+		vlanID string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Port
+		want1   *Response
+		wantErr bool
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				client: &MockClient{
+					fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+						parts := strings.Split(path, "/")
+						reverse(parts)
+
+						if v, ok := v.(*Port); ok && parts[0] == "unassign" && method == http.MethodPost {
+							*v = *(testPort(parts[1]))
+							return &Response{}, nil
+						}
+
+						return nil, errBoom
+					},
+				},
+			},
+			args: args{
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
+			},
+			want:    testPort(testPortID),
+			want1:   &Response{},
+			wantErr: false,
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			args: args{
+				portID: testPortID,
+				vlanID: testVirtualNetworkID,
+			},
+			want:    nil,
+			want1:   nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := &PortServiceOp{
+				client: tt.fields.client,
+			}
+			got, got1, err := i.Unassign(tt.args.portID, tt.args.vlanID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PortServiceOp.Unassign() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PortServiceOp.Unassign() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("PortServiceOp.Unassign() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestPortServiceOp_UnassignNative(t *testing.T) {
+	type fields struct {
+		client requestDoer
+	}
+	type args struct {
+		portID string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Port
+		want1   *Response
+		wantErr bool
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				client: &MockClient{
+					fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+						parts := strings.Split(path, "/")
+						reverse(parts)
+
+						if v, ok := v.(*Port); ok && parts[0] == "native-vlan" && method == http.MethodDelete {
+							*v = *(testPort(parts[1]))
+							return &Response{}, nil
+						}
+
+						return nil, errBoom
+					},
+				},
+			},
+			args: args{
+				portID: testPortID,
+			},
+			want:    testPort(testPortID),
+			want1:   &Response{},
+			wantErr: false,
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			args: args{
+				portID: testPortID,
+			},
+			want:    nil,
+			want1:   nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := &PortServiceOp{
+				client: tt.fields.client,
+			}
+			got, got1, err := i.UnassignNative(tt.args.portID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PortServiceOp.UnassignNative() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PortServiceOp.UnassignNative() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("PortServiceOp.UnassignNative() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestPortServiceOp_Bond(t *testing.T) {
+	type fields struct {
+		client requestDoer
+	}
+	type args struct {
+		portID     string
+		bulkEnable bool
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Port
+		want1   *Response
+		wantErr bool
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				client: &MockClient{
+					fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+						parts := strings.Split(path, "/")
+						reverse(parts)
+
+						if v, ok := v.(*Port); ok && parts[0] == "bond" && method == http.MethodPost {
+							*v = *(testPort(parts[1]))
+							return &Response{}, nil
+						}
+
+						return nil, errBoom
+					},
+				},
+			},
+			args: args{
+				portID:     testPortID,
+				bulkEnable: false,
+			},
+			want:    testPort(testPortID),
+			want1:   &Response{},
+			wantErr: false,
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			args: args{
+				portID:     testPortID,
+				bulkEnable: false,
+			},
+			want:    nil,
+			want1:   nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := &PortServiceOp{
+				client: tt.fields.client,
+			}
+			got, got1, err := i.Bond(tt.args.portID, tt.args.bulkEnable)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PortServiceOp.Bond() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PortServiceOp.Bond() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("PortServiceOp.Bond() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestPortServiceOp_Disbond(t *testing.T) {
+	type fields struct {
+		client requestDoer
+	}
+	type args struct {
+		portID     string
+		bulkEnable bool
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Port
+		want1   *Response
+		wantErr bool
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				client: &MockClient{
+					fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+						parts := strings.Split(path, "/")
+						reverse(parts)
+
+						if v, ok := v.(*Port); ok && parts[0] == "disbond" && method == http.MethodPost {
+							*v = *(testPort(parts[1]))
+							return &Response{}, nil
+						}
+
+						return nil, errBoom
+					},
+				},
+			},
+			args: args{
+				portID:     testPortID,
+				bulkEnable: false,
+			},
+			want:    testPort(testPortID),
+			want1:   &Response{},
+			wantErr: false,
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			args: args{
+				portID:     testPortID,
+				bulkEnable: false,
+			},
+			want:    nil,
+			want1:   nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := &PortServiceOp{
+				client: tt.fields.client,
+			}
+			got, got1, err := i.Disbond(tt.args.portID, tt.args.bulkEnable)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PortServiceOp.Disbond() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PortServiceOp.Disbond() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("PortServiceOp.Disbond() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestPortServiceOp_ConvertToLayerTwo(t *testing.T) {
+	type fields struct {
+		client requestDoer
+	}
+	type args struct {
+		portID string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Port
+		want1   *Response
+		wantErr bool
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				client: &MockClient{
+					fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+						parts := strings.Split(path, "/")
+						reverse(parts)
+
+						if v, ok := v.(*Port); ok && parts[0] == "layer-2" && parts[1] == "convert" && method == http.MethodPost {
+							*v = *(testPort(parts[2]))
+							return &Response{}, nil
+						}
+
+						return nil, errBoom
+					},
+				},
+			},
+			args: args{
+				portID: testPortID,
+			},
+			want:    testPort(testPortID),
+			want1:   &Response{},
+			wantErr: false,
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			args: args{
+				portID: testPortID,
+			},
+			want:    nil,
+			want1:   nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := &PortServiceOp{
+				client: tt.fields.client,
+			}
+			got, got1, err := i.ConvertToLayerTwo(tt.args.portID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PortServiceOp.ConvertToLayerTwo() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PortServiceOp.ConvertToLayerTwo() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("PortServiceOp.ConvertToLayerTwo() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestPortServiceOp_ConvertToLayerThree(t *testing.T) {
+	type fields struct {
+		client requestDoer
+	}
+	type args struct {
+		portID string
+		ips    []AddressRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Port
+		want1   *Response
+		wantErr bool
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				client: &MockClient{
+					fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+						parts := strings.Split(path, "/")
+						reverse(parts)
+
+						if v, ok := v.(*Port); ok && parts[0] == "layer-3" && parts[1] == "convert" && method == http.MethodPost {
+							*v = *(testPort(parts[2]))
+							return &Response{}, nil
+						}
+
+						return nil, errBoom
+					},
+				},
+			},
+			args: args{
+				portID: testPortID,
+				ips:    []AddressRequest{},
+			},
+			want:    testPort(testPortID),
+			want1:   &Response{},
+			wantErr: false,
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			args: args{
+				portID: testPortID,
+				ips:    []AddressRequest{},
+			},
+			want:    nil,
+			want1:   nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			i := &PortServiceOp{
+				client: tt.fields.client,
+			}
+			got, got1, err := i.ConvertToLayerThree(tt.args.portID, tt.args.ips)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PortServiceOp.ConvertToLayerThree() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PortServiceOp.ConvertToLayerThree() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("PortServiceOp.ConvertToLayerThree() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestPortServiceOp_Get(t *testing.T) {
+	type fields struct {
+		client requestDoer
+	}
+	type args struct {
+		portID string
+		opts   *GetOptions
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Port
+		want1   *Response
+		wantErr bool
+	}{
+		{
+			name: "Success",
+			fields: fields{
+				client: &MockClient{
+					fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+						parts := strings.Split(path, "/")
+						reverse(parts)
+
+						if v, ok := v.(*Port); ok && parts[1] == "ports" && method == http.MethodGet {
+							*v = *(testPort(parts[0]))
+							return &Response{}, nil
+						}
+
+						return nil, errBoom
+					},
+				},
+			},
+			args: args{
+				portID: testPortID,
+				opts:   nil,
+			},
+			want:    testPort(testPortID),
+			want1:   &Response{},
+			wantErr: false,
+		},
+		{
+			name: "ErrorIsHandled",
+			fields: fields{client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, fmt.Errorf("boom")
+				},
+			}},
+			args: args{
+				portID: testPortID,
+				opts:   nil,
+			},
+			want:    nil,
+			want1:   nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &PortServiceOp{
+				client: tt.fields.client,
+			}
+			got, got1, err := s.Get(tt.args.portID, tt.args.opts)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PortServiceOp.Get() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PortServiceOp.Get() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, tt.want1) {
+				t.Errorf("PortServiceOp.Get() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
 }
