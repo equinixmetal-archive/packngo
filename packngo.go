@@ -32,8 +32,6 @@ const (
 	expectedAPIContentTypePrefix = "application/json"
 )
 
-var redirectsErrorRe = regexp.MustCompile(`stopped after \d+ redirects\z`)
-
 // meta contains pagination information
 type meta struct {
 	Self           *Href `json:"self"`
