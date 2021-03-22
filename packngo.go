@@ -121,7 +121,6 @@ type Client struct {
 	SpotMarketRequests     SpotMarketRequestService
 	TwoFactorAuth          TwoFactorAuthService
 	Users                  UserService
-	VPN                    VPNService
 	VirtualCircuits        VirtualCircuitService
 	VolumeAttachments      VolumeAttachmentService
 	Volumes                VolumeService
@@ -130,6 +129,13 @@ type Client struct {
 	//
 	// Deprecated: Use Client.Ports or Device methods
 	DevicePorts DevicePortService
+
+	// VPN
+	//
+	// Deprecated: As of March 31, 2021, Doorman service is no longer
+	// available. See https://metal.equinix.com/developers/docs/accounts/doorman/
+	// for more details.
+	VPN VPNService
 }
 
 // requestDoer provides methods for making HTTP requests and receiving the
