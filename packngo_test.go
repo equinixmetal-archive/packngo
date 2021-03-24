@@ -20,6 +20,7 @@ const (
 	packngoAccTestVar = "PACKNGO_TEST_ACTUAL_API"
 	testProjectPrefix = "PACKNGO_TEST_DELME_2d768716_"
 	testFacilityVar   = "PACKNGO_TEST_FACILITY"
+	testMetroVar      = "PACKNGO_TEST_METRO"
 	testPlanVar       = "PACKNGO_TEST_PLAN"
 	testRecorderEnv   = "PACKNGO_TEST_RECORDER"
 
@@ -32,6 +33,7 @@ const (
 	// defaults should be available to most users
 	testFacilityDefault   = "ny5"
 	testFacilityAlternate = "dc13"
+	testMetroDefault      = "sv"
 	testPlanDefault       = "c3.small.x86"
 	testOS                = "ubuntu_18_04"
 )
@@ -42,6 +44,14 @@ func testPlan() string {
 		return envPlan
 	}
 	return testPlanDefault
+}
+
+func testMetro() string {
+	envMet := os.Getenv(testMetroVar)
+	if envMet != "" {
+		return envMet
+	}
+	return testMetroDefault
 }
 
 func testFacility() string {

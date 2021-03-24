@@ -93,7 +93,7 @@ type IPReservationRequest struct {
 	Quantity    int         `json:"quantity"`
 	Description string      `json:"details,omitempty"`
 	Facility    *string     `json:"facility,omitempty"`
-	Metro       string      `json:"metro,omitempty"`
+	Metro       *string     `json:"metro,omitempty"`
 	Tags        []string    `json:"tags,omitempty"`
 	CustomData  interface{} `json:"customdata,omitempty"`
 	// FailOnApprovalRequired if the IP request cannot be approved automatically, rather than sending to

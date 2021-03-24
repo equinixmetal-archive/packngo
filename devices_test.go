@@ -1581,3 +1581,77 @@ func TestDevice_GetNetworkType(t *testing.T) {
 		})
 	}
 }
+
+func TestAccDeviceMetroBasic(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+	metro := testMetro()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Metro:        metro,
+		Plan:         testPlan(),
+		OS:           testOS,
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+		Description:  "test",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID, false)
+
+	dID := d.ID
+
+	d = waitDeviceActive(t, c, dID)
+
+	if len(d.ShortID) == 0 {
+		t.Fatal("Device should have shortID")
+	}
+	if len(d.SwitchUUID) == 0 {
+		t.Fatal("Device should have switch UUID")
+	}
+	networkType := d.GetNetworkType()
+	if networkType != NetworkTypeL3 {
+		t.Fatal("network_type should be 'layer3'")
+	}
+
+	if d.User != "root" {
+		t.Fatal("user should be 'root'")
+	}
+	if d.Description == nil || *d.Description != cr.Description {
+		t.Fatal("description is empty or non-existent")
+	}
+	if len(d.RootPassword) == 0 {
+		t.Fatal("root_password is empty or non-existent")
+	}
+	networkInfo := d.GetNetworkInfo()
+
+	for _, ipa := range d.Network {
+		if !ipa.Management {
+			t.Fatalf("management flag for all the IP addresses in a new device should be True: was %s", ipa)
+		}
+		if ipa.Public && (ipa.AddressFamily == 4) {
+			if ipa.Address != networkInfo.PublicIPv4 {
+				t.Fatalf("strange public IPv4 from GetNetworkInfo, should be %s, is %s", ipa.Address, networkInfo.PublicIPv4)
+
+			}
+		}
+	}
+	dl, _, err := c.Devices.List(projectID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(dl) != 1 {
+		t.Fatalf("Device List should contain exactly one device, was: %v", dl)
+	}
+
+}
