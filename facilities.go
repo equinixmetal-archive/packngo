@@ -18,6 +18,7 @@ type Facility struct {
 	Code     string   `json:"code,omitempty"`
 	Features []string `json:"features,omitempty"`
 	Address  *Address `json:"address,omitempty"`
+	Metro    *Metro   `json:"metro,omitempty"`
 	URL      string   `json:"href,omitempty"`
 }
 

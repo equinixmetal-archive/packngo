@@ -63,6 +63,7 @@ type Connection struct {
 	Status       string               `json:"status,omitempty"`
 	Redundancy   ConnectionRedundancy `json:"redundancy,omitempty"`
 	Facility     *Facility            `json:"facility,omitempty"`
+	Metro        *Metro               `json:"metro,omitempty"`
 	Type         ConnectionType       `json:"type,omitempty"`
 	Description  string               `json:"description,omitempty"`
 	Project      *Project             `json:"project,omitempty"`
@@ -77,6 +78,7 @@ type ConnectionCreateRequest struct {
 	Name        string               `json:"name,omitempty"`
 	Redundancy  ConnectionRedundancy `json:"redundancy,omitempty"`
 	Facility    string               `json:"facility,omitempty"`
+	Metro       string               `json:"metro,omitempty"`
 	Type        ConnectionType       `json:"type,omitempty"`
 	Description *string              `json:"description,omitempty"`
 	Project     string               `json:"project,omitempty"`
