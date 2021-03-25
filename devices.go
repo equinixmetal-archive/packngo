@@ -266,7 +266,7 @@ type CPR struct {
 type DeviceCreateRequest struct {
 	Hostname              string     `json:"hostname"`
 	Plan                  string     `json:"plan"`
-	Facility              []string   `json:"facility"`
+	Facility              []string   `json:"facility,omitempty"`
 	Metro                 string     `json:"metro,omitempty"`
 	OS                    string     `json:"operating_system"`
 	BillingCycle          string     `json:"billing_cycle"`
