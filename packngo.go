@@ -311,12 +311,38 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 		httpClient = http.DefaultClient
 	}
 
-	u, err := url.Parse(apiBaseURL)
+	c := &Client{client: httpClient, UserAgent: userAgent, ConsumerToken: consumerToken}
+	withAPIKey(c)
+	withServices(c)
+	withDebug(c)
+	f, err := withBaseURL(apiBaseURL)
 	if err != nil {
 		return nil, err
 	}
+	f(c)
 
-	c := &Client{client: httpClient, BaseURL: u, UserAgent: userAgent, ConsumerToken: consumerToken, APIKey: apiKey}
+	return c, nil
+}
+
+func withAPIKey(c *Client) {
+	, APIKey: apiKey
+}
+func withBaseURL(apiBaseURL string) (func(c *Client), error) {
+	return func(c *Client) {
+		u, err := url.Parse(apiBaseURL)
+		if err != nil {
+			return nil, err
+		}
+
+		c.BaseURL = u
+	}, nil
+}
+
+func withDebug(c *Client) {
+	c.debug = os.Getenv(debugEnvVar) != ""
+}
+
+func withServices(c *Client) {
 	c.APIKeys = &APIKeyServiceOp{client: c}
 	c.BGPConfig = &BGPConfigServiceOp{client: c}
 	c.BGPSessions = &BGPSessionServiceOp{client: c}
@@ -347,9 +373,6 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.VPN = &VPNServiceOp{client: c}
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
 	c.Volumes = &VolumeServiceOp{client: c}
-	c.debug = os.Getenv(debugEnvVar) != ""
-
-	return c, nil
 }
 
 func checkResponse(r *http.Response) error {
