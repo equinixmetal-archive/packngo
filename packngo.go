@@ -325,8 +325,9 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 }
 
 func withAPIKey(c *Client) {
-	, APIKey: apiKey
+	c.APIKey = apiKey
 }
+
 func withBaseURL(apiBaseURL string) (func(c *Client), error) {
 	return func(c *Client) {
 		u, err := url.Parse(apiBaseURL)

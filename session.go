@@ -34,40 +34,43 @@ type DefaultConfig struct {
 type Service interface {
 	Config
 
-	NewClient() *Client
+	NewClient(...ClientConfigurator) *Client
 }
 
 // SessionMaker ...
 type SessionMaker interface {
-	NewSession(...Configurator)
+	NewSession(...ServiceConfigurator)
 }
 
-// Configurator ...
-type Configurator func(Service)
+// ServiceConfigurator ...
+type ServiceConfigurator func(Service)
 
 var (
 	// ConfigFromEnv ...
-	ConfigFromEnv Configurator = func(s Service) {
+	ConfigFromEnv ServiceConfigurator = func(s Service) {
 
 	}
 
 	// ConfigFromConfig ...
-	ConfigFromConfig Configurator = func(s Service) {
+	ConfigFromConfig ServiceConfigurator = func(s Service) {
 
 	}
 
 	// ConfigFromMetadata ...
-	ConfigFromMetadata Configurator = func(s Service) {
+	ConfigFromMetadata ServiceConfigurator = func(s Service) {
 
 	}
 )
+
+// ClientConfigurator ...
+type ClientConfigurator func(*Client)
 
 // DefaultService ...
 type DefaultService struct {
 	DefaultConfig
 }
 
-func (s *DefaultService) NewCient() *Client {
+func (s *DefaultService) NewCient(...ClientConfigurator) *Client {
 	return NewClientWithAuth()
 }
 
@@ -114,7 +117,7 @@ func (s *DefaultConfig) DefaultDeviceOS() string {
 }
 
 // NewSession ...
-func (s *DefaultService) NewSession(configs ...Configurator) {
+func (s *DefaultService) NewSession(configs ...ServiceConfigurator) {
 	for _, c := range configs {
 		c(s)
 	}
