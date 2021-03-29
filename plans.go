@@ -17,17 +17,18 @@ type planRoot struct {
 
 // Plan represents an Equinix Metal service plan
 type Plan struct {
-	ID              string     `json:"id"`
-	Slug            string     `json:"slug,omitempty"`
-	Name            string     `json:"name,omitempty"`
-	Description     string     `json:"description,omitempty"`
-	Line            string     `json:"line,omitempty"`
-	Legacy          bool       `json:"legacy,omitempty"`
-	Specs           *Specs     `json:"specs,omitempty"`
-	Pricing         *Pricing   `json:"pricing,omitempty"`
-	DeploymentTypes []string   `json:"deployment_types"`
-	Class           string     `json:"class"`
-	AvailableIn     []Facility `json:"available_in"`
+	ID                string     `json:"id"`
+	Slug              string     `json:"slug,omitempty"`
+	Name              string     `json:"name,omitempty"`
+	Description       string     `json:"description,omitempty"`
+	Line              string     `json:"line,omitempty"`
+	Legacy            bool       `json:"legacy,omitempty"`
+	Specs             *Specs     `json:"specs,omitempty"`
+	Pricing           *Pricing   `json:"pricing,omitempty"`
+	DeploymentTypes   []string   `json:"deployment_types"`
+	Class             string     `json:"class"`
+	AvailableIn       []Facility `json:"available_in"`
+	AvailableInMetros []Metro    `json:"available_in_metros"`
 }
 
 func (p Plan) String() string {

@@ -54,6 +54,7 @@ type Device struct {
 	OS                  *OS                    `json:"operating_system,omitempty"`
 	Plan                *Plan                  `json:"plan,omitempty"`
 	Facility            *Facility              `json:"facility,omitempty"`
+	Metro               *Metro                 `json:"metro,omitempty"`
 	Project             *Project               `json:"project,omitempty"`
 	ProvisionEvents     []*Event               `json:"provisioning_events,omitempty"`
 	ProvisionPer        float32                `json:"provisioning_percentage,omitempty"`
@@ -265,7 +266,8 @@ type CPR struct {
 type DeviceCreateRequest struct {
 	Hostname              string     `json:"hostname"`
 	Plan                  string     `json:"plan"`
-	Facility              []string   `json:"facility"`
+	Facility              []string   `json:"facility,omitempty"`
+	Metro                 string     `json:"metro,omitempty"`
 	OS                    string     `json:"operating_system"`
 	BillingCycle          string     `json:"billing_cycle"`
 	ProjectID             string     `json:"project_id"`
