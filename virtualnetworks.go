@@ -16,13 +16,15 @@ type ProjectVirtualNetworkService interface {
 
 type VirtualNetwork struct {
 	ID           string    `json:"id"`
-	Description  string    `json:"description,omitempty"`
+	Description  string    `json:"description,omitempty"` // TODO: field can be null
 	VXLAN        int       `json:"vxlan,omitempty"`
 	FacilityCode string    `json:"facility_code,omitempty"`
+	MetroCode    string    `json:"metro_code,omitempty"`
 	CreatedAt    string    `json:"created_at,omitempty"`
 	Href         string    `json:"href"`
 	Project      *Project  `json:"assigned_to,omitempty"`
 	Facility     *Facility `json:"facility,omitempty"`
+	Metro        *Metro    `json:"metro,omitempty"`
 	Instances    []*Device `json:"instances,omitempty"`
 }
 
@@ -48,9 +50,22 @@ func (i *ProjectVirtualNetworkServiceOp) List(projectID string, opts *ListOption
 }
 
 type VirtualNetworkCreateRequest struct {
-	ProjectID   string `json:"project_id"`
+	// ProjectID of the project where the VLAN will be made available.
+	ProjectID string `json:"project_id"`
+
+	// Description is a user supplied description of the VLAN.
 	Description string `json:"description"`
-	Facility    string `json:"facility"`
+
+	// TODO: default Description is null when not specified. Permitting *string here would require changing VirtualNetwork.Description to *string too.
+
+	// Facility in which to create the VLAN. Mutually exclusive with Metro.
+	Facility string `json:"facility,omitempty"`
+
+	// Metro in which to create the VLAN. Mutually exclusive with Facility.
+	Metro string `json:"metro,omitempty"`
+
+	// VLAN ID may be specified when created in a metro. It is remotely incremented otherwise. Must be unique per Metro.
+	VLAN int `json:"vlan,omitempty"`
 }
 
 func (i *ProjectVirtualNetworkServiceOp) Get(vlanID string, opts *GetOptions) (*VirtualNetwork, *Response, error) {
