@@ -1,5 +1,8 @@
 package packngo
 
+import "os"
+
+// Config ...
 type Config interface {
 	URL() string
 
@@ -13,6 +16,7 @@ type Config interface {
 	DebugEnabled() bool
 }
 
+// MetalConfig ...
 type MetalConfig struct {
 	OrganizationID string `json:"organization_id,omitempty"`
 	ProjectID      string `json:"project_id,omitempty"`
@@ -21,9 +25,10 @@ type MetalConfig struct {
 	URL            string `json:"url,omitempty"`
 	Plan           string `json:"plan,omitempty"`
 	OS             string `json:"os,omitempty"`
-	Debug          string `json:"debug,omitempty"`
+	Debug          bool   `json:"debug,omitempty"`
 }
 
+// DefaultConfig ...
 type DefaultConfig struct {
 	Config      *MetalConfig
 	ConfigFiles []string
@@ -34,7 +39,7 @@ type DefaultConfig struct {
 type Service interface {
 	Config
 
-	NewClient(...ClientConfigurator) *Client
+	NewClient(...ClientConfigurator) (*Client, error)
 }
 
 // SessionMaker ...
@@ -47,8 +52,21 @@ type ServiceConfigurator func(Service)
 
 var (
 	// ConfigFromEnv ...
-	ConfigFromEnv ServiceConfigurator = func(s Service) {
+	// TODO(displague) sessions should report the definitive Token, URL, etc
+	// after consulting with each serviceconfigurator
+	// services should report nil to a Session if the value is not set by that services configurator.
+	//
+	//
 
+	ConfigFromEnv ServiceConfigurator = func(s Service) {
+		// TODO instead of this pattern, ServiceWriter interface can implement all the setters like (s.SetDefaultTokenFn(withToken))
+		// and "ConfigFromEnv" can Set that (withToken) configurator
+		// its not safe to assume that a DefaultService was used here
+		if s, ok := s.(*DefaultService); ok {
+			s.Config.Debug = os.Getenv(debugEnvVar) != ""
+			s.Config.Token = os.Getenv(authTokenEnvVar)
+			s.Config.URL = baseURL
+		}
 	}
 
 	// ConfigFromConfig ...
@@ -63,32 +81,41 @@ var (
 )
 
 // ClientConfigurator ...
-type ClientConfigurator func(*Client)
+type ClientConfigurator func(*Client, Config) error
 
 // DefaultService ...
 type DefaultService struct {
 	DefaultConfig
 }
 
-func (s *DefaultService) NewCient(...ClientConfigurator) *Client {
-	return NewClientWithAuth()
+// NewClient ...
+func (s *DefaultService) NewClient(configs ...ClientConfigurator) (*Client, error) {
+	client := &Client{}
+	for _, c := range configs {
+		err := c(client, s)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }
 
 var _ Service = (*DefaultService)(nil)
 
 // DebugEnabled ...
 func (s *DefaultConfig) DebugEnabled() bool {
-	return false
+	return s.Config.Debug
 }
 
 // URL ...
 func (s *DefaultConfig) URL() string {
-	return ""
+	return s.Config.URL
 }
 
 // Token ...
 func (s *DefaultConfig) Token() string {
-	return ""
+	return s.Config.Token
+
 }
 
 // DefaultProject ...

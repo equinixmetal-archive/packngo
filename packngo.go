@@ -291,6 +291,7 @@ func NewClient() (*Client, error) {
 		return nil, fmt.Errorf("you must export %s", authTokenEnvVar)
 	}
 	c := NewClientWithAuth("packngo lib", apiToken, nil)
+
 	return c, nil
 
 }
@@ -307,73 +308,103 @@ func NewClientWithAuth(consumerToken string, apiKey string, httpClient *http.Cli
 // NewClientWithBaseURL returns a Client pointing to nonstandard API URL, e.g.
 // for mocking the remote API
 func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.Client, apiBaseURL string) (*Client, error) {
-	if httpClient == nil {
-		httpClient = http.DefaultClient
-	}
-
-	c := &Client{client: httpClient, UserAgent: userAgent, ConsumerToken: consumerToken}
-	withAPIKey(c)
-	withServices(c)
-	withDebug(c)
-	f, err := withBaseURL(apiBaseURL)
-	if err != nil {
-		return nil, err
-	}
-	f(c)
-
-	return c, nil
+	svc := &DefaultService{}
+	svc.NewSession(ConfigFromEnv)
+	return svc.NewClient(
+		withBaseURL(apiBaseURL),
+		withServices(),
+		withAPIKey(apiKey),
+		withDebug(svc.DebugEnabled()),
+		withHTTPClient(httpClient),
+		withUserAgent(userAgent),
+		withConsumerToken(consumerToken),
+	)
 }
 
-func withAPIKey(c *Client) {
-	c.APIKey = apiKey
+func withAPIKey(apiKey string) func(c *Client, _ Config) error {
+	return func(c *Client, _ Config) error {
+		c.APIKey = apiKey
+		return nil
+	}
 }
 
-func withBaseURL(apiBaseURL string) (func(c *Client), error) {
-	return func(c *Client) {
+func withBaseURL(apiBaseURL string) func(c *Client, _ Config) error {
+	return func(c *Client, _ Config) error {
 		u, err := url.Parse(apiBaseURL)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		c.BaseURL = u
-	}, nil
+		return nil
+	}
 }
 
-func withDebug(c *Client) {
-	c.debug = os.Getenv(debugEnvVar) != ""
+func withDebug(enabled bool) func(c *Client, _ Config) error {
+	return func(c *Client, _ Config) error {
+		c.debug = enabled
+		return nil
+	}
 }
 
-func withServices(c *Client) {
-	c.APIKeys = &APIKeyServiceOp{client: c}
-	c.BGPConfig = &BGPConfigServiceOp{client: c}
-	c.BGPSessions = &BGPSessionServiceOp{client: c}
-	c.Batches = &BatchServiceOp{client: c}
-	c.CapacityService = &CapacityServiceOp{client: c}
-	c.Connections = &ConnectionServiceOp{client: c}
-	c.DeviceIPs = &DeviceIPServiceOp{client: c}
-	c.DevicePorts = &DevicePortServiceOp{client: c}
-	c.Devices = &DeviceServiceOp{client: c}
-	c.Emails = &EmailServiceOp{client: c}
-	c.Events = &EventServiceOp{client: c}
-	c.Facilities = &FacilityServiceOp{client: c}
-	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
-	c.Notifications = &NotificationServiceOp{client: c}
-	c.OperatingSystems = &OSServiceOp{client: c}
-	c.Organizations = &OrganizationServiceOp{client: c}
-	c.Plans = &PlanServiceOp{client: c}
-	c.Ports = &PortServiceOp{client: c}
-	c.ProjectIPs = &ProjectIPServiceOp{client: c}
-	c.ProjectVirtualNetworks = &ProjectVirtualNetworkServiceOp{client: c}
-	c.Projects = &ProjectServiceOp{client: c}
-	c.SSHKeys = &SSHKeyServiceOp{client: c}
-	c.SpotMarket = &SpotMarketServiceOp{client: c}
-	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
-	c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
-	c.Users = &UserServiceOp{client: c}
-	c.VirtualCircuits = &VirtualCircuitServiceOp{client: c}
-	c.VPN = &VPNServiceOp{client: c}
-	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
-	c.Volumes = &VolumeServiceOp{client: c}
+func withServices() func(c *Client, _ Config) error {
+	return func(c *Client, _ Config) error {
+		c.APIKeys = &APIKeyServiceOp{client: c}
+		c.BGPConfig = &BGPConfigServiceOp{client: c}
+		c.BGPSessions = &BGPSessionServiceOp{client: c}
+		c.Batches = &BatchServiceOp{client: c}
+		c.CapacityService = &CapacityServiceOp{client: c}
+		c.Connections = &ConnectionServiceOp{client: c}
+		c.DeviceIPs = &DeviceIPServiceOp{client: c}
+		c.DevicePorts = &DevicePortServiceOp{client: c}
+		c.Devices = &DeviceServiceOp{client: c}
+		c.Emails = &EmailServiceOp{client: c}
+		c.Events = &EventServiceOp{client: c}
+		c.Facilities = &FacilityServiceOp{client: c}
+		c.HardwareReservations = &HardwareReservationServiceOp{client: c}
+		c.Notifications = &NotificationServiceOp{client: c}
+		c.OperatingSystems = &OSServiceOp{client: c}
+		c.Organizations = &OrganizationServiceOp{client: c}
+		c.Plans = &PlanServiceOp{client: c}
+		c.Ports = &PortServiceOp{client: c}
+		c.ProjectIPs = &ProjectIPServiceOp{client: c}
+		c.ProjectVirtualNetworks = &ProjectVirtualNetworkServiceOp{client: c}
+		c.Projects = &ProjectServiceOp{client: c}
+		c.SSHKeys = &SSHKeyServiceOp{client: c}
+		c.SpotMarket = &SpotMarketServiceOp{client: c}
+		c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
+		c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
+		c.Users = &UserServiceOp{client: c}
+		c.VirtualCircuits = &VirtualCircuitServiceOp{client: c}
+		c.VPN = &VPNServiceOp{client: c}
+		c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
+		c.Volumes = &VolumeServiceOp{client: c}
+		return nil
+	}
+}
+
+func withHTTPClient(httpClient *http.Client) func(c *Client, _ Config) error {
+	return func(c *Client, _ Config) error {
+		c.client = httpClient
+		if httpClient == nil {
+			c.client = http.DefaultClient
+		}
+		return nil
+	}
+}
+
+func withUserAgent(ua string) func(c *Client, _ Config) error {
+	return func(c *Client, _ Config) error {
+		c.UserAgent = ua
+		return nil
+	}
+}
+
+func withConsumerToken(consumerToken string) func(c *Client, _ Config) error {
+	return func(c *Client, _ Config) error {
+		c.ConsumerToken = consumerToken
+		return nil
+	}
 }
 
 func checkResponse(r *http.Response) error {
