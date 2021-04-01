@@ -32,8 +32,6 @@ func TestAccVirtualNetworksFacility(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	defer c.ProjectVirtualNetworks.Delete(vlan.ID)
-
 	vlan, _, err = c.ProjectVirtualNetworks.Get(vlan.ID,
 		&GetOptions{Includes: []string{"assigned_to", "facility"}})
 	if err != nil {
@@ -46,6 +44,11 @@ func TestAccVirtualNetworksFacility(t *testing.T) {
 
 	if vlan.Facility.Code != testFacility() {
 		t.Fatalf("Wrong Facility in test VLAN, should be %s, was %s", testFacility(), vlan.Facility.Code)
+	}
+
+	_, err = c.ProjectVirtualNetworks.Delete(vlan.ID)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -77,8 +80,6 @@ func TestAccVirtualNetworksMetro(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	defer c.ProjectVirtualNetworks.Delete(vlan.ID)
-
 	vlan, _, err = c.ProjectVirtualNetworks.Get(vlan.ID,
 		&GetOptions{Includes: []string{"assigned_to", "metro"}})
 	if err != nil {
@@ -91,6 +92,10 @@ func TestAccVirtualNetworksMetro(t *testing.T) {
 
 	if vlan.Metro.Code != testMetro() {
 		t.Fatalf("Wrong metro for testing VLAN, should be %s, was %s", testMetro(), vlan.Metro.Code)
+	}
+	_, err = c.ProjectVirtualNetworks.Delete(vlan.ID)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
