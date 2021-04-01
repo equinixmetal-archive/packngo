@@ -4,7 +4,102 @@ import (
 	"testing"
 )
 
-func TestAccVirtualNetworks(t *testing.T) {
+func TestAccVirtualNetworksFacility(t *testing.T) {
+
+	skipUnlessAcceptanceTestsAllowed(t)
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	l, _, err := c.ProjectVirtualNetworks.List(projectID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(l.VirtualNetworks) != 0 {
+		t.Fatal("Newly created project should not have any vlans")
+
+	}
+
+	testDesc := "test_desc_" + randString8()
+
+	cr := VirtualNetworkCreateRequest{
+		ProjectID:   projectID,
+		Description: testDesc,
+		Facility:    testFacility(),
+	}
+
+	vlan, _, err := c.ProjectVirtualNetworks.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vlan, _, err = c.ProjectVirtualNetworks.Get(vlan.ID,
+		&GetOptions{Includes: []string{"assigned_to", "facility"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if vlan.Metro != nil {
+		t.Fatalf("Metro should be null in facility-enabled VLAN")
+	}
+
+	if vlan.Facility.Code != testFacility() {
+		t.Fatalf("Wrong Facility in test VLAN, should be %s, was %s", testFacility(), vlan.Facility.Code)
+	}
+
+	_, err = c.ProjectVirtualNetworks.Delete(vlan.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestAccVirtualNetworksMetro(t *testing.T) {
+
+	skipUnlessAcceptanceTestsAllowed(t)
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	l, _, err := c.ProjectVirtualNetworks.List(projectID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(l.VirtualNetworks) != 0 {
+		t.Fatal("Newly created project should not have any vlans")
+
+	}
+
+	testDesc := "test_desc_" + randString8()
+
+	cr := VirtualNetworkCreateRequest{
+		ProjectID:   projectID,
+		Description: testDesc,
+		Metro:       testMetro(),
+	}
+
+	vlan, _, err := c.ProjectVirtualNetworks.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vlan, _, err = c.ProjectVirtualNetworks.Get(vlan.ID,
+		&GetOptions{Includes: []string{"assigned_to", "metro"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if vlan.Facility != nil {
+		t.Fatalf("Facility should be null in metro-enabled VLAN")
+	}
+
+	if vlan.Metro.Code != testMetro() {
+		t.Fatalf("Wrong metro for testing VLAN, should be %s, was %s", testMetro(), vlan.Metro.Code)
+	}
+	_, err = c.ProjectVirtualNetworks.Delete(vlan.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestAccVirtualNetworksBasic(t *testing.T) {
 
 	skipUnlessAcceptanceTestsAllowed(t)
 	c, projectID, teardown := setupWithProject(t)
