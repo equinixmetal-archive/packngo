@@ -204,6 +204,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	if c.debug {
 		dumpResponse(response.Response)
 	}
+	dumpDeprecation(response.Response)
 	c.RateLimit = response.Rate
 
 	err = checkResponse(resp)
@@ -228,6 +229,45 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	}
 
 	return &response, err
+}
+
+// dumpDeprecation logs headers defined by
+// https://tools.ietf.org/html/rfc8594
+func dumpDeprecation(resp *http.Response) {
+	deprecation := resp.Header.Get("Deprecation")
+
+	links := resp.Header.Values("Link")
+	link := map[string]string{}
+
+	// TODO multiple relevant links would be reduced to one
+	for i := range links {
+		if strings.Contains(links[i], "rel=\"sunset\"") {
+			link["sunset"] = strings.Split(links[i], ";")[0]
+		}
+		if strings.Contains(links[i], "rel=\"deprecation\"") {
+			link["deprecation"] = strings.Split(links[i], ";")[0]
+		}
+	}
+	if len(link) == 0 {
+		link["sunset"] = strings.Join(links, ", ")
+		link["deprecation"] = link["sunset"]
+	}
+	uri := ""
+	if resp.Request != nil {
+		uri = resp.Request.Method + " " + resp.Request.RequestURI
+	}
+
+	if deprecation != "" {
+		link := link["deprecation"]
+
+		log.Printf("WARNING: %q is deprecated since %s %s", uri, deprecation, link)
+	}
+	sunset := resp.Header.Get("Sunset")
+	if sunset != "" {
+		link := link["sunset"]
+
+		log.Printf("WARNING: %q will sunset on %s %s", uri, sunset, link)
+	}
 }
 
 func dumpResponse(resp *http.Response) {

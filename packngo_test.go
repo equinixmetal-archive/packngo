@@ -1,7 +1,9 @@
 package packngo
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -244,4 +246,83 @@ func TestAccInvalidCredentials(t *testing.T) {
 		t.Fatalf("Unexpected error string: %s", expectedErr)
 	}
 
+}
+
+func Test_dumpDeprecation(t *testing.T) {
+	type args struct {
+		resp *http.Response
+	}
+	tests := []struct {
+		name   string
+		args   args
+		logged string
+	}{
+		{
+			name: "Deprecation",
+			args: args{
+				resp: &http.Response{
+					Header: http.Header{
+						"Deprecation": {
+							"Sat, 1 Aug 2020 23:59:59 GMT",
+						},
+						"Link": {
+							"<https://api.example.com/deprecation>; rel=\"deprecation\"; type=\"text/html\"",
+						},
+					},
+					Request: &http.Request{
+						Method:     "POST",
+						RequestURI: "/deprecated",
+					},
+				},
+			},
+			logged: "WARNING: \"POST /deprecated\" is deprecated since Sat, 1 Aug 2020 23:59:59 GMT <https://api.example.com/deprecation>",
+		},
+		{
+			name: "Sunset",
+			args: args{
+				resp: &http.Response{
+					Header: http.Header{
+						"Sunset": {
+							"Sat, 1 Aug 2020 23:59:59 GMT",
+						},
+						"Link": {
+							"<https://api.example.com/sunset>; rel=\"sunset\"; type=\"text/html\"",
+						},
+					},
+					Request: &http.Request{
+						Method:     "GET",
+						RequestURI: "/sunset",
+					},
+				},
+			},
+			logged: "WARNING: \"GET /sunset\" will sunset on Sat, 1 Aug 2020 23:59:59 GMT <https://api.example.com/sunset>",
+		},
+		{
+			name: "None",
+			args: args{
+				resp: &http.Response{
+					Header: http.Header{},
+				},
+			},
+			logged: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			logged := &bytes.Buffer{}
+			log.SetOutput(logged)
+			f := log.Flags()
+			log.SetFlags(0)
+			defer func() {
+				log.SetOutput(os.Stderr)
+				log.SetFlags(f)
+			}()
+			dumpDeprecation(tt.args.resp)
+			got := strings.TrimSpace(logged.String())
+			if got != tt.logged {
+				t.Logf("%s failed; got %q, want %q", t.Name(), got, tt.logged)
+				t.Fail()
+			}
+		})
+	}
 }
