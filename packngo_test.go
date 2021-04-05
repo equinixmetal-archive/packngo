@@ -1,9 +1,12 @@
 package packngo
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"regexp"
@@ -244,4 +247,113 @@ func TestAccInvalidCredentials(t *testing.T) {
 		t.Fatalf("Unexpected error string: %s", expectedErr)
 	}
 
+}
+
+func Test_dumpDeprecation(t *testing.T) {
+	type args struct {
+		resp *http.Response
+	}
+	tests := []struct {
+		name   string
+		args   args
+		logged string
+	}{
+		{
+			name: "Deprecation",
+			args: args{
+				resp: &http.Response{
+					Header: http.Header{
+						"Deprecation": {
+							"Sat, 1 Aug 2020 23:59:59 GMT",
+						},
+						"Link": {
+							"<https://api.example.com/deprecation>; rel=\"deprecation\"; type=\"text/html\"",
+						},
+					},
+					Request: &http.Request{
+						Method: "POST",
+						URL:    &url.URL{Path: "/deprecated"},
+					},
+				},
+			},
+			logged: "WARNING: \"POST /deprecated\" reported deprecation on Sat, 1 Aug 2020 23:59:59 GMT\nWARNING: See <https://api.example.com/deprecation> for deprecation details",
+		},
+		{
+			name: "Sunset",
+			args: args{
+				resp: &http.Response{
+					Header: http.Header{
+						"Sunset": {
+							"Sat, 1 Aug 2020 23:59:59 GMT",
+						},
+						"Link": {
+							"<https://api.example.com/sunset>; rel=\"sunset\"; type=\"text/html\"",
+						},
+					},
+					Request: &http.Request{
+						Method: "GET",
+						URL:    &url.URL{Path: "/sunset"},
+					},
+				},
+			},
+			logged: "WARNING: \"GET /sunset\" reported sunsetting on Sat, 1 Aug 2020 23:59:59 GMT\nWARNING: See <https://api.example.com/sunset> for sunset details",
+		},
+		{
+			name: "DeprecateAndSunset",
+			args: args{
+				resp: &http.Response{
+					Header: http.Header{
+						"Sunset": {
+							"Sat, 1 Aug 2020 23:59:59 GMT",
+						},
+						"Deprecation": {
+							"true",
+						},
+						// comma separated header value and repeated header
+						"Link": {
+							"<https://api.example.com/deprecation/field-a>; rel=\"deprecation\"; type=\"text/html\"",
+							"<https://api.example.com/sunset/value-a>; rel=\"sunset\"; type=\"text/html\"",
+							"<https://api.example.com/sunset>; rel=\"sunset\"; type=\"text/html\",<https://api.example.com/deprecation>; rel=\"deprecation\"; type=\"text/html\"",
+						},
+					},
+					Request: func() *http.Request {
+						body := bytes.NewReader([]byte("{\"sunset\":true,\"deprecated\":true}"))
+						r, _ := http.NewRequest(
+							http.MethodPost,
+							"/deprecate-and-sunset", body)
+						return r
+					}(),
+				},
+			},
+			// only the comma separate header is returned by Header.Get()
+			logged: "WARNING: \"POST /deprecate-and-sunset\" reported deprecation\nWARNING: \"POST /deprecate-and-sunset\" reported sunsetting on Sat, 1 Aug 2020 23:59:59 GMT\nWARNING: See <https://api.example.com/deprecation/field-a> for deprecation details\nWARNING: See <https://api.example.com/sunset/value-a> for sunset details\nWARNING: See <https://api.example.com/sunset> for sunset details\nWARNING: See <https://api.example.com/deprecation> for deprecation details",
+		},
+		{
+			name: "None",
+			args: args{
+				resp: &http.Response{
+					Header: http.Header{},
+				},
+			},
+			logged: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			logged := &bytes.Buffer{}
+			log.SetOutput(logged)
+			f := log.Flags()
+			log.SetFlags(0)
+			defer func() {
+				log.SetOutput(os.Stderr)
+				log.SetFlags(f)
+			}()
+			dumpDeprecation(tt.args.resp)
+			got := strings.TrimSpace(logged.String())
+			if got != tt.logged {
+				t.Logf("%s failed; got %q, want %q", t.Name(), got, tt.logged)
+				t.Fail()
+			}
+		})
+	}
 }

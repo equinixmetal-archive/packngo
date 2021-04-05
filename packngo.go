@@ -204,6 +204,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	if c.debug {
 		dumpResponse(response.Response)
 	}
+	dumpDeprecation(response.Response)
 	c.RateLimit = response.Rate
 
 	err = checkResponse(resp)
@@ -228,6 +229,44 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	}
 
 	return &response, err
+}
+
+// dumpDeprecation logs headers defined by
+// https://tools.ietf.org/html/rfc8594
+func dumpDeprecation(resp *http.Response) {
+	uri := ""
+	if resp.Request != nil {
+		uri = resp.Request.Method + " " + resp.Request.URL.Path
+	}
+
+	deprecation := resp.Header.Get("Deprecation")
+	if deprecation != "" {
+		if deprecation == "true" {
+			deprecation = ""
+		} else {
+			deprecation = " on " + deprecation
+		}
+		log.Printf("WARNING: %q reported deprecation%s", uri, deprecation)
+	}
+
+	sunset := resp.Header.Get("Sunset")
+	if sunset != "" {
+		log.Printf("WARNING: %q reported sunsetting on %s", uri, sunset)
+	}
+
+	links := resp.Header.Values("Link")
+
+	for _, s := range links {
+		for _, ss := range strings.Split(s, ",") {
+			if strings.Contains(ss, "rel=\"sunset\"") {
+				link := strings.Split(ss, ";")[0]
+				log.Printf("WARNING: See %s for sunset details", link)
+			} else if strings.Contains(ss, "rel=\"deprecation\"") {
+				link := strings.Split(ss, ";")[0]
+				log.Printf("WARNING: See %s for deprecation details", link)
+			}
+		}
+	}
 }
 
 func dumpResponse(resp *http.Response) {
