@@ -138,8 +138,12 @@ If the Equinix Metal API returns a [RFC-8594](https://tools.ietf.org/html/rfc859
 Example:
 
 ```console
-2021/04/01 17:43:37 WARNING: "POST /deprecated" is deprecated since Sat, 1 Aug 2021 23:59:59 GMT <https://api.example.com/deprecation>
-2021/04/01 17:43:37 WARNING: "GET /sunset" will sunset on Sat, 1 Aug 2022 23:59:59 GMT <https://api.example.com/sunset>
+WARNING: "POST /deprecate-and-sunset" reported deprecation
+WARNING: "POST /deprecate-and-sunset" reported sunsetting on Sat, 1 Aug 2020 23:59:59 GMT
+WARNING: See <https://api.example.com/deprecation/field-a> for deprecation details
+WARNING: See <https://api.example.com/sunset/value-a> for sunset details
+WARNING: See <https://api.example.com/sunset> for sunset details
+WARNING: See <https://api.example.com/deprecation> for deprecation details
 ```
 
 ## Contributing

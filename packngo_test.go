@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"regexp"
@@ -270,12 +271,12 @@ func Test_dumpDeprecation(t *testing.T) {
 						},
 					},
 					Request: &http.Request{
-						Method:     "POST",
-						RequestURI: "/deprecated",
+						Method: "POST",
+						URL:    &url.URL{Path: "/deprecated"},
 					},
 				},
 			},
-			logged: "WARNING: \"POST /deprecated\" is deprecated since Sat, 1 Aug 2020 23:59:59 GMT <https://api.example.com/deprecation>",
+			logged: "WARNING: \"POST /deprecated\" reported deprecation on Sat, 1 Aug 2020 23:59:59 GMT\nWARNING: See <https://api.example.com/deprecation> for deprecation details",
 		},
 		{
 			name: "Sunset",
@@ -290,12 +291,42 @@ func Test_dumpDeprecation(t *testing.T) {
 						},
 					},
 					Request: &http.Request{
-						Method:     "GET",
-						RequestURI: "/sunset",
+						Method: "GET",
+						URL:    &url.URL{Path: "/sunset"},
 					},
 				},
 			},
-			logged: "WARNING: \"GET /sunset\" will sunset on Sat, 1 Aug 2020 23:59:59 GMT <https://api.example.com/sunset>",
+			logged: "WARNING: \"GET /sunset\" reported sunsetting on Sat, 1 Aug 2020 23:59:59 GMT\nWARNING: See <https://api.example.com/sunset> for sunset details",
+		},
+		{
+			name: "DeprecateAndSunset",
+			args: args{
+				resp: &http.Response{
+					Header: http.Header{
+						"Sunset": {
+							"Sat, 1 Aug 2020 23:59:59 GMT",
+						},
+						"Deprecation": {
+							"true",
+						},
+						// comma separated header value and repeated header
+						"Link": {
+							"<https://api.example.com/deprecation/field-a>; rel=\"deprecation\"; type=\"text/html\"",
+							"<https://api.example.com/sunset/value-a>; rel=\"sunset\"; type=\"text/html\"",
+							"<https://api.example.com/sunset>; rel=\"sunset\"; type=\"text/html\",<https://api.example.com/deprecation>; rel=\"deprecation\"; type=\"text/html\"",
+						},
+					},
+					Request: func() *http.Request {
+						body := bytes.NewReader([]byte("{\"sunset\":true,\"deprecated\":true}"))
+						r, _ := http.NewRequest(
+							http.MethodPost,
+							"/deprecate-and-sunset", body)
+						return r
+					}(),
+				},
+			},
+			// only the comma separate header is returned by Header.Get()
+			logged: "WARNING: \"POST /deprecate-and-sunset\" reported deprecation\nWARNING: \"POST /deprecate-and-sunset\" reported sunsetting on Sat, 1 Aug 2020 23:59:59 GMT\nWARNING: See <https://api.example.com/deprecation/field-a> for deprecation details\nWARNING: See <https://api.example.com/sunset/value-a> for sunset details\nWARNING: See <https://api.example.com/sunset> for sunset details\nWARNING: See <https://api.example.com/deprecation> for deprecation details",
 		},
 		{
 			name: "None",
