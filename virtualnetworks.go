@@ -64,8 +64,8 @@ type VirtualNetworkCreateRequest struct {
 	// Metro in which to create the VLAN. Mutually exclusive with Facility.
 	Metro string `json:"metro,omitempty"`
 
-	// VLAN ID may be specified when created in a metro. It is remotely incremented otherwise. Must be unique per Metro.
-	VLAN int `json:"vlan,omitempty"`
+	// VXLAN is the VLAN ID. VXLAN may be specified when Metro is defined. It is remotely incremented otherwise. Must be unique per Metro.
+	VXLAN int `json:"vxlan,omitempty"`
 }
 
 func (i *ProjectVirtualNetworkServiceOp) Get(vlanID string, opts *GetOptions) (*VirtualNetwork, *Response, error) {
