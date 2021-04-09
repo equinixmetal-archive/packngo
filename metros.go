@@ -13,9 +13,10 @@ type metroRoot struct {
 
 // Metro represents an Equinix Metal metro
 type Metro struct {
-	ID   string `json:"id"`
-	Name string `json:"name,omitempty"`
-	Code string `json:"code,omitempty"`
+	ID      string `json:"id"`
+	Name    string `json:"name,omitempty"`
+	Code    string `json:"code,omitempty"`
+	Country string `json:"country,omitempty"`
 }
 
 func (f Metro) String() string {
