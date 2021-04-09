@@ -65,6 +65,7 @@ type QueryAppender interface {
 	WithQuery(path string) string // we use this in all List functions (urlQuery)
 	GetPage() int                 // we use this in List
 	Including(...string)          // we use this in Device List to add facility
+	Excluding(...string)
 }
 
 // GetOptions returns GetOptions from GetOptions (and is nil-receiver safe)
@@ -114,6 +115,19 @@ func (g *GetOptions) Including(refs ...string) *GetOptions {
 	for _, v := range refs {
 		if !contains(ret.Includes, v) {
 			ret.Includes = append(ret.Includes, v)
+		}
+	}
+	return ret
+}
+
+// Excluding ensures that the variadic refs are included in the "Excluded" param
+// in a copy of the options.
+// Unknown values within refs will be silently ignore by the API.
+func (g *GetOptions) Excluding(refs ...string) *GetOptions {
+	ret := g.CopyOrNew()
+	for _, v := range refs {
+		if !contains(ret.Excludes, v) {
+			ret.Excludes = append(ret.Excludes, v)
 		}
 	}
 	return ret
