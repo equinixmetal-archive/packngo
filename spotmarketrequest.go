@@ -30,7 +30,7 @@ type SpotMarketRequest struct {
 	ID         string     `json:"id"`
 	Devices    []Device   `json:"devices"`
 	Facilities []Facility `json:"facilities,omitempty"`
-	Metro      string     `json:"metro,omitempty"`
+	Metro      Metro      `json:"metro,omitempty"`
 	Project    Project    `json:"project"`
 	Href       string     `json:"href"`
 	Plan       Plan       `json:"plan"`
