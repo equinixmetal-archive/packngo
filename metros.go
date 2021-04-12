@@ -17,6 +17,8 @@ type Metro struct {
 	Name    string `json:"name,omitempty"`
 	Code    string `json:"code,omitempty"`
 	Country string `json:"country,omitempty"`
+
+	Href string `json:"href,omitempty"`
 }
 
 func (f Metro) String() string {

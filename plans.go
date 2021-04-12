@@ -29,6 +29,8 @@ type Plan struct {
 	Class             string     `json:"class"`
 	AvailableIn       []Facility `json:"available_in"`
 	AvailableInMetros []Metro    `json:"available_in_metros"`
+
+	Href string `json:"href,omitempty"`
 }
 
 func (p Plan) String() string {

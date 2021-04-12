@@ -18,7 +18,8 @@ type SpotMarketRequestCreateRequest struct {
 	DevicesMax  int        `json:"devices_max"`
 	DevicesMin  int        `json:"devices_min"`
 	EndAt       *Timestamp `json:"end_at,omitempty"`
-	FacilityIDs []string   `json:"facilities"`
+	FacilityIDs []string   `json:"facilities,omitempty"`
+	Metro       string     `json:"metro,omitempty"`
 	MaxBidPrice float64    `json:"max_bid_price"`
 
 	Parameters SpotMarketRequestInstanceParameters `json:"instance_parameters"`
@@ -28,7 +29,8 @@ type SpotMarketRequest struct {
 	SpotMarketRequestCreateRequest
 	ID         string     `json:"id"`
 	Devices    []Device   `json:"devices"`
-	Facilities []Facility `json:"facilities"`
+	Facilities []Facility `json:"facilities,omitempty"`
+	Metro      Metro      `json:"metro,omitempty"`
 	Project    Project    `json:"project"`
 	Href       string     `json:"href"`
 	Plan       Plan       `json:"plan"`
