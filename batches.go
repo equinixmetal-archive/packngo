@@ -17,7 +17,10 @@ type BatchService interface {
 
 // Batch type
 type Batch struct {
-	ID        string     `json:"id"`
+	ID            string   `json:"id"`
+	ErrorMessages []string `json:"error_messages,omitempty"`
+
+	// State may be 'failed' or 'completed'
 	State     string     `json:"state,omitempty"`
 	Quantity  int32      `json:"quantity,omitempty"`
 	CreatedAt *Timestamp `json:"created_at,omitempty"`
@@ -39,8 +42,10 @@ type BatchCreateRequest struct {
 // BatchCreateDevice type used to describe batch instances
 type BatchCreateDevice struct {
 	DeviceCreateRequest
-	Quantity               int32 `json:"quantity"`
-	FacilityDiversityLevel int32 `json:"facility_diversity_level,omitempty"`
+	Quantity               int32   `json:"quantity"`
+	FacilityDiversityLevel int32   `json:"facility_diversity_level,omitempty"`
+	SpotInstance           bool    `json:"spot_instance,omitempty"`
+	SpotPriceMax           float64 `json:"spot_price_max,omitempty"`
 }
 
 // BatchServiceOp implements BatchService
