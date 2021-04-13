@@ -10,7 +10,18 @@ const (
 
 // SpotMarketService expooses Spot Market methods
 type SpotMarketService interface {
+	// Prices gets current spot market prices by facility.
+	//
+	// Deprecated: Use PricesByFacility
 	Prices() (PriceMap, *Response, error)
+
+	// PricesByFacility gets current spot market prices by facility. The map is
+	// indexed by facility code and then plan name.
+	PricesByFacility() (PriceMap, *Response, error)
+
+	// PricesByMetro gets current spot market prices by metro. The map is
+	// indexed by metro code and then plan name.
+	PricesByMetro() (PriceMap, *Response, error)
 }
 
 // SpotMarketServiceOp implements SpotMarketService
@@ -18,7 +29,7 @@ type SpotMarketServiceOp struct {
 	client *Client
 }
 
-// PriceMap is a map of [facility][plan]-> float Price
+// PriceMap is a map of [location][plan]-> float Price
 type PriceMap map[string]map[string]float64
 
 // Prices gets current spot market prices by facility.
