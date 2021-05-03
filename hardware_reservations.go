@@ -15,7 +15,7 @@ type HardwareReservationService interface {
 
 // HardwareReservationServiceOp implements HardwareReservationService
 type HardwareReservationServiceOp struct {
-	client *Client
+	client requestDoer
 }
 
 // HardwareReservation struct
@@ -42,20 +42,18 @@ type hardwareReservationRoot struct {
 
 // List returns all hardware reservations for a given project
 func (s *HardwareReservationServiceOp) List(projectID string, opts *ListOptions) (reservations []HardwareReservation, resp *Response, err error) {
-	root := new(hardwareReservationRoot)
-
 	endpointPath := path.Join(projectBasePath, projectID, hardwareReservationBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(hardwareReservationRoot)
 
-		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, root)
+		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
 
-		reservations = append(reservations, root.HardwareReservations...)
+		reservations = append(reservations, subset.HardwareReservations...)
 		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
 			continue
 		}
