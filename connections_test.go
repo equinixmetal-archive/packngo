@@ -51,7 +51,7 @@ func TestAccConnectionProject(t *testing.T) {
 	}
 
 	if port.ID != ports[0].ID {
-		t.Fatalf("Mismatch when getting Conenction Port, ID should be %s, was %s", ports[0].ID, port.ID)
+		t.Fatalf("Mismatch when getting Connection Port, ID should be %s, was %s", ports[0].ID, port.ID)
 	}
 
 	_, _, err = c.Connections.PortEvents(conn.ID, port.ID, nil)
