@@ -71,6 +71,19 @@ func TestHardwareReservationServiceOp_List(t *testing.T) {
 		wantReservations: []HardwareReservation{{ID: "1"}, {ID: "2"}, {ID: "3"}},
 		wantResp:         &Response{},
 		wantErr:          false,
+	}, {
+		name: "Error",
+		fields: fields{
+			client: &MockClient{
+				fnDoRequest: func(method, path string, body, v interface{}) (*Response, error) {
+					return nil, errBoom
+				},
+			},
+		},
+		args:             args{},
+		wantReservations: nil,
+		wantResp:         nil,
+		wantErr:          true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
