@@ -47,6 +47,7 @@ type VirtualCircuit struct {
 	NniVNID        int             `json:"nni_vnid,omitempty"`
 	NniVLAN        int             `json:"nni_vlan,omitempty"`
 	Project        *Project        `json:"project,omitempty"`
+	Port           *ConnectionPort `json:"port,omitempty"`
 	VirtualNetwork *VirtualNetwork `json:"virtual_network,omitempty"`
 }
 
