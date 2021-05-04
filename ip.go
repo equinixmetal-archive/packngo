@@ -55,7 +55,7 @@ type IpAddressCommon struct { //nolint:golint
 	Manageable    bool        `json:"manageable"`
 	Metro         *Metro      `json:"metro,omitempty"`
 	Project       Href        `json:"project"`
-	Global        *bool       `json:"global_ip"`
+	Global        bool        `json:"global_ip"`
 	Tags          []string    `json:"tags,omitempty"`
 	CustomData    interface{} `json:"customdata,omitempty"`
 }
