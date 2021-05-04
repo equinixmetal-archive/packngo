@@ -96,8 +96,8 @@ func TestAccVirtualCircuitDedicated(t *testing.T) {
 	}
 	defer removeVirtualCircuit(t, c, vc.ID)
 
-	_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusActive,
-		[]string{vcStatusActivationFailed})
+	_, err = waitVirtualCircuitStatus(t, c, vc.ID, VCStatusActive,
+		[]string{VCStatusActivationFailed})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,8 +115,8 @@ func TestAccVirtualCircuitDedicated(t *testing.T) {
 
 	defer removeVirtualCircuit(t, c, vc2.ID)
 
-	_, err = waitVirtualCircuitStatus(t, c, vc2.ID, vcStatusActive,
-		[]string{vcStatusActivationFailed})
+	_, err = waitVirtualCircuitStatus(t, c, vc2.ID, VCStatusActive,
+		[]string{VCStatusActivationFailed})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,14 +130,14 @@ func TestAccVirtualCircuitDedicated(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusWaiting,
-		[]string{vcStatusDeactivationFailed})
+	_, err = waitVirtualCircuitStatus(t, c, vc.ID, VCStatusWaiting,
+		[]string{VCStatusDeactivationFailed})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = waitVirtualCircuitStatus(t, c, vc2.ID, vcStatusWaiting,
-		[]string{vcStatusDeactivationFailed})
+	_, err = waitVirtualCircuitStatus(t, c, vc2.ID, VCStatusWaiting,
+		[]string{VCStatusDeactivationFailed})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -166,7 +166,7 @@ func TestAccVirtualCircuitShared(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if vc.Status == vcStatusActive {
+	if vc.Status == VCStatusActive {
 		vc, _, err = c.VirtualCircuits.Update(
 			vc.ID,
 			&VCUpdateRequest{VirtualNetworkID: nil},
@@ -175,8 +175,8 @@ func TestAccVirtualCircuitShared(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusWaiting,
-			[]string{vcStatusDeactivationFailed})
+		_, err = waitVirtualCircuitStatus(t, c, vc.ID, VCStatusWaiting,
+			[]string{VCStatusDeactivationFailed})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -205,8 +205,8 @@ func TestAccVirtualCircuitShared(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusActive,
-		[]string{vcStatusActivationFailed})
+	_, err = waitVirtualCircuitStatus(t, c, vc.ID, VCStatusActive,
+		[]string{VCStatusActivationFailed})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -231,8 +231,8 @@ func TestAccVirtualCircuitShared(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = waitVirtualCircuitStatus(t, c, vc.ID, vcStatusWaiting,
-		[]string{vcStatusDeactivationFailed})
+	_, err = waitVirtualCircuitStatus(t, c, vc.ID, VCStatusWaiting,
+		[]string{VCStatusDeactivationFailed})
 	if err != nil {
 		t.Fatal(err)
 	}

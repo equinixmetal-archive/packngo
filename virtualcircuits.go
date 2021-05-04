@@ -4,12 +4,25 @@ import "path"
 
 const (
 	virtualCircuitBasePath = "/virtual-circuits"
-	vcStatusActive         = "active"
-	vcStatusWaiting        = "waiting_on_customer_vlan"
-	//vcStatusActivating         = "activating"
-	//vcStatusDeactivating       = "deactivating"
-	vcStatusActivationFailed   = "activation_failed"
-	vcStatusDeactivationFailed = "dactivation_failed"
+
+	// VC is being create but not ready yet
+	VCStatusPending = "pending"
+
+	// VC is ready with a VLAN
+	VCStatusActive = "active"
+
+	// VC is ready without a VLAN
+	VCStatusWaiting = "waiting_on_customer_vlan"
+
+	// VC is being deleted
+	VCStatusDeleting = "deleting"
+
+	// not sure what the following states mean, or whether they exist
+	// someone from the API side could check
+	VCStatusActivating         = "activating"
+	VCStatusDeactivating       = "deactivating"
+	VCStatusActivationFailed   = "activation_failed"
+	VCStatusDeactivationFailed = "dactivation_failed"
 )
 
 type VirtualCircuitService interface {
