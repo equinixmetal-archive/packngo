@@ -26,7 +26,7 @@ they can be run in the absence of that automation.
 
   ```sh
   vim version.go # change Version, "0.8.0" (no v)
-  git commit --signoff -m 'v0.8.0 version bump' packngo.go
+  git commit --signoff -m 'v0.8.0 version bump' version.go
   ```
 
 * Tag `master` with a semver tag that suits the level of changes
