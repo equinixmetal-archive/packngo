@@ -1,8 +1,11 @@
 package packngo
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/url"
 	"path"
+	"strconv"
 )
 
 const deviceBasePath = "/devices"
@@ -29,6 +32,7 @@ type DeviceService interface {
 	ListBGPSessions(deviceID string, opts *ListOptions) ([]BGPSession, *Response, error)
 	ListBGPNeighbors(deviceID string, opts *ListOptions) ([]BGPNeighbor, *Response, error)
 	ListEvents(deviceID string, opts *ListOptions) ([]Event, *Response, error)
+	GetBandwidth(deviceID string, opts *BandwidthOpts) (*BandwidthIO, *Response, error)
 }
 
 type devicesRoot struct {
@@ -78,6 +82,117 @@ type NetworkInfo struct {
 	PublicIPv4  string
 	PublicIPv6  string
 	PrivateIPv4 string
+}
+
+type BandwidthIO struct {
+	Inbound  BandwidthComponent `json:"inbound"`
+	Outbound BandwidthComponent `json:"outbound"`
+}
+
+func (b *BandwidthIO) UnmarshalJSON(buf []byte) error {
+	tmp := []interface{}{&b.Inbound, &b.Outbound}
+	wantLen := len(tmp)
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return fmt.Errorf("foo %s", err)
+	}
+	if g, e := len(tmp), wantLen; g != e {
+		return fmt.Errorf("wrong number of fields in BandwidthIO: %d != %d", g, e)
+	}
+	if b.Inbound.Target == BandwidthOutbound {
+		b.Inbound, b.Outbound = b.Outbound, b.Inbound
+	}
+	return nil
+}
+
+type bandwidthRoot struct {
+	Components BandwidthIO `json:"bandwidth"`
+}
+
+type BandwidthTarget string
+
+// BandwidthTarget enums
+const (
+	BandwidthInbound  BandwidthTarget = "inbound"
+	BandwidthOutbound BandwidthTarget = "outbound"
+)
+
+// BandwidthTags
+type BandwidthTags struct {
+	// AggregatedBy
+	AggregatedBy string `json:"aggregatedBy"`
+
+	// Name
+	Name string `json:"name"`
+}
+
+// BandwidthComponent
+type BandwidthComponent struct {
+	// Datapoints
+	Datapoints []Datapoint `json:"datapoints"`
+
+	// Tags
+	Tags BandwidthTags `json:"tags"`
+
+	// Target
+	Target BandwidthTarget `json:"target"`
+}
+type Datapoint struct {
+	// Rate is the aggregated sum of Bytes/Second across all ports
+	Rate *float64 `json:"rate"`
+
+	// When the rate was captured
+	When Timestamp `json:"when"`
+}
+
+func (d *Datapoint) UnmarshalJSON(buf []byte) error {
+	tmp := []interface{}{&d.Rate, &d.When}
+	wantLen := len(tmp)
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return fmt.Errorf("bar %s", err)
+	}
+	if g, e := len(tmp), wantLen; g != e {
+		return fmt.Errorf("wrong number of fields in BandwidthComponent: %d != %d", g, e)
+	}
+	return nil
+}
+
+type BandwidthOpts struct {
+	From  *Timestamp `json:"from,omitempty"`
+	Until *Timestamp `json:"until,omitempty"`
+}
+
+func (b *BandwidthOpts) Encode() string {
+	if b == nil {
+		return ""
+	}
+	v := url.Values{}
+	if b.From != nil {
+		v.Add("from", strconv.FormatInt(b.From.Unix(), 10))
+	}
+	if b.Until != nil {
+		v.Add("until", strconv.FormatInt(b.Until.Unix(), 10))
+	}
+	return v.Encode()
+}
+
+func (b *BandwidthOpts) WithQuery(apiPath string) string {
+	params := b.Encode()
+	if params != "" {
+		// parse path, take existing vars
+		return fmt.Sprintf("%s?%s", apiPath, params)
+	}
+	return apiPath
+}
+
+func (d *DeviceServiceOp) GetBandwidth(deviceID string, opts *BandwidthOpts) (*BandwidthIO, *Response, error) {
+	endpointPath := path.Join(deviceBasePath, deviceID, "/bandwidth")
+	apiPathQuery := opts.WithQuery(endpointPath)
+	bw := new(bandwidthRoot)
+	resp, err := d.client.DoRequest("GET", apiPathQuery, nil, bw)
+	if err != nil {
+		return nil, resp, err
+	}
+	return &bw.Components, resp, nil
 }
 
 func (d *Device) GetNetworkInfo() NetworkInfo {
