@@ -93,7 +93,7 @@ func (b *BandwidthIO) UnmarshalJSON(buf []byte) error {
 	tmp := []interface{}{&b.Inbound, &b.Outbound}
 	wantLen := len(tmp)
 	if err := json.Unmarshal(buf, &tmp); err != nil {
-		return fmt.Errorf("foo %s", err)
+		return err
 	}
 	if g, e := len(tmp), wantLen; g != e {
 		return fmt.Errorf("wrong number of fields in BandwidthIO: %d != %d", g, e)
@@ -105,7 +105,7 @@ func (b *BandwidthIO) UnmarshalJSON(buf []byte) error {
 }
 
 type bandwidthRoot struct {
-	Components BandwidthIO `json:"bandwidth"`
+	Bandwidth BandwidthIO `json:"bandwidth"`
 }
 
 type BandwidthTarget string
@@ -148,7 +148,7 @@ func (d *Datapoint) UnmarshalJSON(buf []byte) error {
 	tmp := []interface{}{&d.Rate, &d.When}
 	wantLen := len(tmp)
 	if err := json.Unmarshal(buf, &tmp); err != nil {
-		return fmt.Errorf("bar %s", err)
+		return err
 	}
 	if g, e := len(tmp), wantLen; g != e {
 		return fmt.Errorf("wrong number of fields in BandwidthComponent: %d != %d", g, e)
@@ -167,10 +167,10 @@ func (b *BandwidthOpts) Encode() string {
 	}
 	v := url.Values{}
 	if b.From != nil {
-		v.Add("from", strconv.FormatInt(b.From.Unix(), 10))
+		v.Add("from", strconv.FormatInt(b.From.UTC().Unix(), 10))
 	}
 	if b.Until != nil {
-		v.Add("until", strconv.FormatInt(b.Until.Unix(), 10))
+		v.Add("until", strconv.FormatInt(b.Until.UTC().Unix(), 10))
 	}
 	return v.Encode()
 }
@@ -185,14 +185,14 @@ func (b *BandwidthOpts) WithQuery(apiPath string) string {
 }
 
 func (d *DeviceServiceOp) GetBandwidth(deviceID string, opts *BandwidthOpts) (*BandwidthIO, *Response, error) {
-	endpointPath := path.Join(deviceBasePath, deviceID, "/bandwidth")
+	endpointPath := path.Join(deviceBasePath, deviceID, "bandwidth")
 	apiPathQuery := opts.WithQuery(endpointPath)
 	bw := new(bandwidthRoot)
 	resp, err := d.client.DoRequest("GET", apiPathQuery, nil, bw)
 	if err != nil {
 		return nil, resp, err
 	}
-	return &bw.Components, resp, nil
+	return &bw.Bandwidth, resp, nil
 }
 
 func (d *Device) GetNetworkInfo() NetworkInfo {
