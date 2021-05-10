@@ -58,7 +58,8 @@ func TestHardwareReservationServiceOp_List(t *testing.T) {
 						v.Meta.CurrentPageNum = page
 						if page < v.Meta.Total {
 							nextPage := page + 1
-							v.Meta.Next = &Href{Href: fmt.Sprintf("%s?page=%d", u.Path, nextPage)}
+							nextHref := fmt.Sprintf("%s?page=%d", u.Path, nextPage)
+							v.Meta.Next = &Href{Href: &nextHref}
 						}
 						return &Response{}, nil
 					}

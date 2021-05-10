@@ -50,7 +50,14 @@ type Response struct {
 
 // Href is an API link
 type Href struct {
-	Href string `json:"href"`
+	Href *string `json:"href,omitempty"`
+}
+
+func (h *Href) GetHref() string {
+	if h == nil {
+		return ""
+	}
+	return *h.Href
 }
 
 func (r *Response) populateRate() {

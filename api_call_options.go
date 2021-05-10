@@ -161,7 +161,7 @@ func nextPage(meta meta, opts *GetOptions) (path string) {
 	if meta.Next != nil && (opts.GetPage() == 0) {
 		optsCopy := opts.CopyOrNew()
 		optsCopy.Page = meta.CurrentPageNum + 1
-		return optsCopy.WithQuery(stripQuery(meta.Next.Href))
+		return optsCopy.WithQuery(stripQuery(*meta.Next.Href))
 	}
 	if opts != nil {
 		opts.Meta = meta

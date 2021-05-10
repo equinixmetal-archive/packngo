@@ -1,7 +1,10 @@
 package packngo
 
 import (
+	"net/http"
 	"path"
+
+	"github.com/packethost/packngo/href"
 )
 
 // API documentation https://metal.equinix.com/developers/api/organizations/
@@ -25,6 +28,7 @@ type organizationsRoot struct {
 
 // Organization represents an Equinix Metal organization
 type Organization struct {
+	*Href        `json:",inline"`
 	ID           string    `json:"id"`
 	Name         string    `json:"name,omitempty"`
 	Description  string    `json:"description,omitempty"`
@@ -45,8 +49,17 @@ type Organization struct {
 	Owners       []User    `json:"owners,omitempty"`
 }
 
-func (o Organization) String() string {
+func (o *Organization) String() string {
 	return Stringify(o)
+}
+
+func (o *Organization) SetHref(href string) {
+	o.Href = &Href{Href: &href}
+}
+
+func (o *Organization) SetID(id string) {
+	o.ID = id
+	o.Href = o.SetHref()
 }
 
 // OrganizationCreateRequest type used to create an Equinix Metal organization
@@ -101,16 +114,26 @@ func (s *OrganizationServiceOp) List(opts *ListOptions) (orgs []Organization, re
 	}
 }
 
+func (s *OrganizationServiceOp) DefaultIncludes() []string {
+	return []string{}
+}
+
+func (s *OrganizationServiceOp) Hydrate(resource href.Hrefer, opts *GetOptions) (*Response, error) {
+	opts.Including(s.DefaultIncludes()...)
+	apiPathQuery := opts.WithQuery(resource.GetHref())
+
+	return s.client.DoRequest(http.MethodGet, apiPathQuery, nil, resource)
+}
+
 // Get returns a organization by id
 func (s *OrganizationServiceOp) Get(organizationID string, opts *GetOptions) (*Organization, *Response, error) {
 	if validateErr := ValidateUUID(organizationID); validateErr != nil {
 		return nil, nil, validateErr
 	}
-	endpointPath := path.Join(organizationBasePath, organizationID)
-	apiPathQuery := opts.WithQuery(endpointPath)
 	organization := new(Organization)
-
-	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, organization)
+	href := path.Join(organizationBasePath, organizationID)
+	organization.Href = &Href{Href: &href}
+	resp, err := s.Hydrate(organization, opts)
 	if err != nil {
 		return nil, resp, err
 	}

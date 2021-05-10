@@ -400,7 +400,7 @@ func TestAccDeviceAssignGlobalIP(t *testing.T) {
 	}
 	t.Fatalf("assignment %s should be listed in device %s", assignment, d)
 
-	if assignment.AssignedTo.Href != d.Href {
+	if *assignment.AssignedTo.Href != d.Href {
 		t.Fatalf("device %s should be listed in assignment %s",
 			d, assignment)
 	}
@@ -587,7 +587,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	}
 	t.Fatalf("assignment %s should be listed in device %s", assignment, d)
 
-	if assignment.AssignedTo.Href != d.Href {
+	if *assignment.AssignedTo.Href != d.Href {
 		t.Fatalf("device %s should be listed in assignment %s",
 			d, assignment)
 	}
