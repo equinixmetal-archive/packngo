@@ -2,8 +2,14 @@ package packngo
 
 import "runtime/debug"
 
-// Version of the packngo package
-var Version = "(devel)"
+var (
+	// Version of the packngo package. Version will be updated at runtime.
+	Version = "(devel)"
+
+	// UserAgent is the default HTTP User-Agent Header value that will be used by NewClient.
+	// init() will update the version to match the built version of packngo.
+	UserAgent = "packngo/(devel)"
+)
 
 const packagePath = "github.com/packethost/packngo"
 
@@ -20,6 +26,7 @@ func init() {
 			if d.Replace != nil {
 				Version = d.Replace.Version
 			}
+			UserAgent = "packngo/" + Version
 			break
 		}
 	}
