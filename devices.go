@@ -63,7 +63,7 @@ type Device struct {
 	RootPassword        string                 `json:"root_password,omitempty"`
 	IPXEScriptURL       string                 `json:"ipxe_script_url,omitempty"`
 	AlwaysPXE           bool                   `json:"always_pxe,omitempty"`
-	HardwareReservation Href                   `json:"hardware_reservation,omitempty"`
+	HardwareReservation *HardwareReservation   `json:"hardware_reservation,omitempty"`
 	SpotInstance        bool                   `json:"spot_instance,omitempty"`
 	SpotPriceMax        float64                `json:"spot_price_max,omitempty"`
 	TerminationTime     *Timestamp             `json:"termination_time,omitempty"`
