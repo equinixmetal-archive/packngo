@@ -1655,3 +1655,39 @@ func TestAccDeviceMetroBasic(t *testing.T) {
 	}
 
 }
+
+func TestDatapoint_UnmarshalJSON(t *testing.T) {
+	type args struct {
+		buf []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    Datapoint
+		wantErr bool
+	}{{
+		name: "RateAndWhen",
+		args: args{buf: []byte(`[1,1609459200]`)},
+		want: Datapoint{
+			Rate: func(f float64) *float64 {
+				return &f
+			}(1),
+			When: Timestamp{Time: time.Date(2021, time.Month(1), 1, 0, 0, 0, 0, time.UTC)}},
+		wantErr: false,
+	}}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := &Datapoint{}
+			if err := got.UnmarshalJSON(tt.args.buf); (err != nil) != tt.wantErr {
+				t.Errorf("Datapoint.UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if got.When != tt.want.When {
+				t.Errorf("want Datapoint.When %v, got %v", tt.want.When, got.When)
+			}
+			if *got.Rate != *tt.want.Rate {
+				t.Errorf("want Datapoint.Rate %v, got %v", *tt.want.Rate, *got.Rate)
+			}
+		})
+	}
+}
