@@ -24,7 +24,10 @@ func init() {
 		if d.Path == packagePath {
 			Version = d.Version
 			if d.Replace != nil {
-				Version = d.Replace.Version
+				v := d.Replace.Version
+				if v != "" {
+					Version = v
+				}
 			}
 			UserAgent = "packngo/" + Version
 			break
