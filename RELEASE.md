@@ -20,15 +20,6 @@ they can be run in the absence of that automation.
   git branch --points-at=master -r  | grep origin/master >/dev/null || echo "master differs from origin/master"
   ```
 
-* Update the `Version` variable. This is a library, so we can not assure
-  that a build flag will be used in every client that provides a compile time
-  value, let alone the correct one.
-
-  ```sh
-  vim version.go # change Version, "0.8.0" (no v)
-  git commit --signoff -m 'v0.8.0 version bump' version.go
-  ```
-
 * Tag `master` with a semver tag that suits the level of changes
   introduced:
 

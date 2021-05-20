@@ -28,9 +28,6 @@ const (
 	headerRateRemaining          = "X-RateLimit-Remaining"
 	headerRateReset              = "X-RateLimit-Reset"
 	expectedAPIContentTypePrefix = "application/json"
-
-	// UserAgent is the default HTTP User-Agent Header value that will be used by NewClient
-	UserAgent = "packngo/" + Version
 )
 
 // meta contains pagination information
