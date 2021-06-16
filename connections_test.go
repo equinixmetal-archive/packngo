@@ -142,6 +142,9 @@ func TestAccConnectionOrganization(t *testing.T) {
 
 	updReq := ConnectionUpdateRequest{Redundancy: ConnectionPrimary}
 	conn, _, err = c.Connections.Update(conn.ID, &updReq, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if conn.Redundancy != ConnectionPrimary {
 		t.Fatalf("Updated connection should be primary")
