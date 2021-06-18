@@ -7,6 +7,7 @@ import (
 type ConnectionRedundancy string
 type ConnectionType string
 type ConnectionPortRole string
+type ConnectionMode string
 
 const (
 	connectionBasePath                           = "/connections"
@@ -16,6 +17,8 @@ const (
 	ConnectionPrimary       ConnectionRedundancy = "primary"
 	ConnectionPortPrimary   ConnectionPortRole   = "primary"
 	ConnectionPortSecondary ConnectionPortRole   = "secondary"
+	ConnectionModeStandard  ConnectionMode       = "standard"
+	ConnectionModeTunnel    ConnectionMode       = "tunnel"
 )
 
 type ConnectionService interface {
@@ -66,6 +69,7 @@ type Connection struct {
 	Facility     *Facility            `json:"facility,omitempty"`
 	Metro        *Metro               `json:"metro,omitempty"`
 	Type         ConnectionType       `json:"type,omitempty"`
+	Mode         ConnectionMode       `json:"mode,omitempty"`
 	Description  string               `json:"description,omitempty"`
 	Project      *Project             `json:"project,omitempty"`
 	Organization *Organization        `json:"organization,omitempty"`
@@ -81,6 +85,7 @@ type ConnectionCreateRequest struct {
 	Facility    string               `json:"facility,omitempty"`
 	Metro       string               `json:"metro,omitempty"`
 	Type        ConnectionType       `json:"type,omitempty"`
+	Mode        ConnectionMode       `json:"mode,omitempty"`
 	Description *string              `json:"description,omitempty"`
 	Project     string               `json:"project,omitempty"`
 	Speed       int                  `json:"speed,omitempty"`
