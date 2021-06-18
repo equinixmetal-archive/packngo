@@ -21,6 +21,7 @@ const (
 type ConnectionService interface {
 	OrganizationCreate(string, *ConnectionCreateRequest) (*Connection, *Response, error)
 	ProjectCreate(string, *ConnectionCreateRequest) (*Connection, *Response, error)
+	Update(string, *ConnectionUpdateRequest, *GetOptions) (*Connection, *Response, error)
 	OrganizationList(string, *GetOptions) ([]Connection, *Response, error)
 	ProjectList(string, *GetOptions) ([]Connection, *Response, error)
 	Delete(string) (*Response, error)
@@ -83,6 +84,12 @@ type ConnectionCreateRequest struct {
 	Description *string              `json:"description,omitempty"`
 	Project     string               `json:"project,omitempty"`
 	Speed       int                  `json:"speed,omitempty"`
+	Tags        []string             `json:"tags,omitempty"`
+}
+
+type ConnectionUpdateRequest struct {
+	Redundancy  ConnectionRedundancy `json:"redundancy,omitempty"`
+	Description *string              `json:"description,omitempty"`
 	Tags        []string             `json:"tags,omitempty"`
 }
 
@@ -171,6 +178,18 @@ func (s *ConnectionServiceOp) Get(id string, opts *GetOptions) (*Connection, *Re
 	if err != nil {
 		return nil, resp, err
 	}
+	return connection, resp, err
+}
+
+func (s *ConnectionServiceOp) Update(id string, updateRequest *ConnectionUpdateRequest, opts *GetOptions) (*Connection, *Response, error) {
+	endpointPath := path.Join(connectionBasePath, id)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	connection := new(Connection)
+	resp, err := s.client.DoRequest("PUT", apiPathQuery, updateRequest, connection)
+	if err != nil {
+		return nil, resp, err
+	}
+
 	return connection, resp, err
 }
 

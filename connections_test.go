@@ -1,7 +1,6 @@
 package packngo
 
 import (
-	"log"
 	"testing"
 )
 
@@ -25,8 +24,6 @@ func TestAccConnectionProject(t *testing.T) {
 	}
 
 	createdConnID := conn.ID
-
-	log.Printf("Test Connection:\n%#v\n", conn)
 
 	conn, _, err = c.Connections.Get(conn.ID, nil)
 	if err != nil {
@@ -138,11 +135,19 @@ func TestAccConnectionOrganization(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	log.Printf("%#v\n", conn)
-
 	conns, _, err := c.Connections.OrganizationList(user.DefaultOrganizationID, nil)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	updReq := ConnectionUpdateRequest{Redundancy: ConnectionPrimary}
+	conn, _, err = c.Connections.Update(conn.ID, &updReq, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if conn.Redundancy != ConnectionPrimary {
+		t.Fatalf("Updated connection should be primary")
 	}
 
 	found := false
