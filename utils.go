@@ -2,6 +2,7 @@ package packngo
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"reflect"
@@ -153,4 +154,12 @@ func stringifyValue(w io.Writer, val reflect.Value) error {
 		}
 	}
 	return nil
+}
+
+func jstr(o interface{}) string {
+	jsonBytes, err := json.MarshalIndent(o, "", "  ")
+	if err != nil {
+		return ""
+	}
+	return string(jsonBytes)
 }
