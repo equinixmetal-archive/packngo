@@ -16,7 +16,7 @@ func TestAccSubnetRouterSubnetSize(t *testing.T) {
 	vcr := VirtualNetworkCreateRequest{
 		ProjectID:   projectID,
 		Description: testDesc,
-		Facility:    testFacility(),
+		Metro:       testMetro(),
 	}
 
 	vlan, _, err := c.ProjectVirtualNetworks.Create(&vcr)
