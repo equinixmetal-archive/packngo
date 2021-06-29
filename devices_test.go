@@ -152,13 +152,12 @@ func TestAccDeviceReinstall(t *testing.T) {
 	defer teardown()
 
 	hn := randString8()
-	fac := testFacility()
 
 	cr := DeviceCreateRequest{
 		Hostname:     hn,
-		Facility:     []string{fac},
-		Plan:         "baremetal_0",
-		OS:           "ubuntu_16_04",
+		Metro:        testMetro(),
+		Plan:         testPlan(),
+		OS:           testOS,
 		ProjectID:    projectID,
 		BillingCycle: "hourly",
 	}
@@ -167,23 +166,17 @@ func TestAccDeviceReinstall(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer deleteDevice(t, c, d.ID)
+	defer deleteDevice(t, c, d.ID, false)
 
 	dID := d.ID
 
-	d, err = waitDeviceActive(dID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d = waitDeviceActive(t, c, dID)
 
 	rf := DeviceReinstallFields{DeprovisionFast: true}
 
 	_, err = c.Devices.Reinstall(dID, &rf)
 
-	d, err = waitDeviceActive(dID, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d = waitDeviceActive(t, c, dID)
 }
 
 func TestAccDeviceBasic(t *testing.T) {
