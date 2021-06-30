@@ -26,9 +26,22 @@ func (f Facility) String() string {
 	return Stringify(f)
 }
 
+// Coordinates struct for Coordinates
+type Coordinates struct {
+	Latitude  *string `json:"latitude,omitempty"`
+	Longitude *string `json:"longitude,omitempty"`
+}
+
 // Address - the physical address of the facility
 type Address struct {
-	ID string `json:"id,omitempty"`
+	ID          string       `json:"id,omitempty"`
+	Address     string       `json:"address"`
+	Address2    *string      `json:"address2,omitempty"`
+	City        *string      `json:"city,omitempty"`
+	State       *string      `json:"state,omitempty"`
+	ZipCode     string       `json:"zip_code"`
+	Country     string       `json:"country"`
+	Coordinates *Coordinates `json:"coordinates,omitempty"`
 }
 
 func (a Address) String() string {
