@@ -39,7 +39,7 @@ var (
 func waitDeviceActive(t *testing.T, c *Client, id string) *Device {
 	// 15 minutes = 180 * 5sec-retry
 	for i := 0; i < 180; i++ {
-		<-time.After(15 * time.Second)
+		<-time.After(5 * time.Second)
 		d, _, err := c.Devices.Get(id, nil)
 		if err != nil {
 			t.Fatal(err)

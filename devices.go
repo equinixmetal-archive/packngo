@@ -549,20 +549,6 @@ func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
 // Reinstall reinstalls a device
 func (s *DeviceServiceOp) Reinstall(deviceID string, fields *DeviceReinstallFields) (*Response, error) {
 	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
-	/*
-		preserveData := false
-		deprovisionFast := false
-		if fields != nil {
-			preserveData = fields.PreserveData
-			deprovisionFast = fields.DeprovisionFast
-		}
-		action := &DeviceReinstallRequest{
-			DeviceActionRequest{Type: "reinstall"},
-			DeviceReinstallFields{
-				PreserveData:    preserveData,
-				DeprovisionFast: deprovisionFast},
-		}
-	*/
 	action := &DeviceReinstallRequest{DeviceActionRequest{Type: "reinstall"}, fields}
 
 	return s.client.DoRequest("POST", path, action, nil)
