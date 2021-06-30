@@ -7,7 +7,6 @@ import (
 )
 
 func waitSubnetRouterActive(id string, c *Client) (*SubnetRouter, error) {
-	// 1 minute = 12 * 5sec-retry
 	includes := &GetOptions{Includes: []string{"ip_reservation", "virtual_network"}}
 
 	for i := 0; i < 12; i++ {
@@ -56,8 +55,6 @@ func TestAccSubnetRouterSubnetSize(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	//log.Println(jstr(router))
 
 	routers, _, err := c.SubnetRouters.List(projectID, nil)
 	if err != nil {
@@ -124,8 +121,6 @@ func TestAccSubnetRouterExistingReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	//log.Println(jstr(router))
-
 	routers, _, err := c.SubnetRouters.List(projectID, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -134,16 +129,6 @@ func TestAccSubnetRouterExistingReservation(t *testing.T) {
 	if len(routers) != 1 {
 		t.Fatalf("There should be exactly one subnet router in the testing project")
 	}
-
-	/*
-		    //check for subnet_router attribute of IP reservation:
-
-			ip, _, err := c.ProjectIPs.Get(ipRes.ID, nil)
-			if err != nil {
-				t.Fatal(err)
-			}
-			log.Println(jstr(ip))
-	*/
 
 	_, err = c.SubnetRouters.Delete(router.ID)
 	if err != nil {
