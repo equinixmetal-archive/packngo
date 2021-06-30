@@ -170,13 +170,16 @@ func TestAccDeviceReinstall(t *testing.T) {
 
 	dID := d.ID
 
-	d = waitDeviceActive(t, c, dID)
+	waitDeviceActive(t, c, dID)
 
 	rf := DeviceReinstallFields{DeprovisionFast: true}
 
 	_, err = c.Devices.Reinstall(dID, &rf)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	d = waitDeviceActive(t, c, dID)
+	waitDeviceActive(t, c, dID)
 }
 
 func TestAccDeviceBasic(t *testing.T) {
