@@ -6,8 +6,7 @@ import (
 
 const subnetRouterBasePath = "/subnet-routers"
 
-// DevicePortService handles operations on a port which belongs to a particular device
-type ProjectSubnetRouterService interface {
+type SubnetRouterService interface {
 	List(projectID string, opts *ListOptions) ([]SubnetRouter, *Response, error)
 	Create(projectID string, input *SubnetRouterCreateRequest) (*SubnetRouter, *Response, error)
 	Get(subnetRouterID string, opts *GetOptions) (*SubnetRouter, *Response, error)
@@ -25,11 +24,11 @@ type SubnetRouter struct {
 	Updated        string                `json:"updated_at,omitempty"`
 }
 
-type ProjectSubnetRouterServiceOp struct {
+type SubnetRouterServiceOp struct {
 	client *Client
 }
 
-func (s *ProjectSubnetRouterServiceOp) List(projectID string, opts *ListOptions) (subnetRouters []SubnetRouter, resp *Response, err error) {
+func (s *SubnetRouterServiceOp) List(projectID string, opts *ListOptions) (subnetRouters []SubnetRouter, resp *Response, err error) {
 	type subnetRoutersRoot struct {
 		SubnetRouters []SubnetRouter `json:"subnet_routers"`
 		Meta          meta           `json:"meta"`
@@ -62,7 +61,7 @@ type SubnetRouterCreateRequest struct {
 	PrivateIPv4SubnetSize int    `json:"private_ipv4_subnet_size,omitempty"`
 }
 
-func (s *ProjectSubnetRouterServiceOp) Get(subnetRouterID string, opts *GetOptions) (*SubnetRouter, *Response, error) {
+func (s *SubnetRouterServiceOp) Get(subnetRouterID string, opts *GetOptions) (*SubnetRouter, *Response, error) {
 	endpointPath := path.Join(subnetRouterBasePath, subnetRouterID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	subnetRouter := new(SubnetRouter)
@@ -75,7 +74,7 @@ func (s *ProjectSubnetRouterServiceOp) Get(subnetRouterID string, opts *GetOptio
 	return subnetRouter, resp, err
 }
 
-func (s *ProjectSubnetRouterServiceOp) Create(projectID string, input *SubnetRouterCreateRequest) (*SubnetRouter, *Response, error) {
+func (s *SubnetRouterServiceOp) Create(projectID string, input *SubnetRouterCreateRequest) (*SubnetRouter, *Response, error) {
 	apiPath := path.Join(projectBasePath, projectID, subnetRouterBasePath)
 	output := new(SubnetRouter)
 
@@ -87,7 +86,7 @@ func (s *ProjectSubnetRouterServiceOp) Create(projectID string, input *SubnetRou
 	return output, resp, nil
 }
 
-func (s *ProjectSubnetRouterServiceOp) Delete(subnetRouterID string) (*Response, error) {
+func (s *SubnetRouterServiceOp) Delete(subnetRouterID string) (*Response, error) {
 	apiPath := path.Join(subnetRouterBasePath, subnetRouterID)
 
 	resp, err := s.client.DoRequest("DELETE", apiPath, nil, nil)
