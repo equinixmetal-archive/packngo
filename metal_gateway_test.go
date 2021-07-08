@@ -6,23 +6,23 @@ import (
 	"time"
 )
 
-func waitSubnetRouterActive(id string, c *Client) (*SubnetRouter, error) {
+func waitMetalGatewayActive(id string, c *Client) (*MetalGateway, error) {
 	includes := &GetOptions{Includes: []string{"ip_reservation", "virtual_network"}}
 
 	for i := 0; i < 12; i++ {
-		r, _, err := c.SubnetRouters.Get(id, includes)
+		r, _, err := c.MetalGateways.Get(id, includes)
 		if err != nil {
 			return nil, err
 		}
-		if r.State == "active" {
+		if r.State == MetalGatewayActive {
 			return r, nil
 		}
 		<-time.After(5 * time.Second)
 	}
-	return nil, fmt.Errorf("volume %s is still not active after timeout", id)
+	return nil, fmt.Errorf("Metal gateway %s is still not active after timeout", id)
 }
 
-func TestAccSubnetRouterSubnetSize(t *testing.T) {
+func TestAccMetalGatewaySubnetSize(t *testing.T) {
 
 	skipUnlessAcceptanceTestsAllowed(t)
 	c, projectID, teardown := setupWithProject(t)
@@ -41,30 +41,30 @@ func TestAccSubnetRouterSubnetSize(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rcr := SubnetRouterCreateRequest{
+	rcr := MetalGatewayCreateRequest{
 		VirtualNetworkID:      vlan.ID,
 		PrivateIPv4SubnetSize: 8,
 	}
 
-	router, _, err := c.SubnetRouters.Create(projectID, &rcr)
+	router, _, err := c.MetalGateways.Create(projectID, &rcr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	router, err = waitSubnetRouterActive(router.ID, c)
+	router, err = waitMetalGatewayActive(router.ID, c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	routers, _, err := c.SubnetRouters.List(projectID, nil)
+	routers, _, err := c.MetalGateways.List(projectID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(routers) != 1 {
-		t.Fatalf("There should be exactly one subnet router in the testing project")
+		t.Fatalf("There should be exactly one metal gateway in the testing project")
 	}
 
-	_, err = c.SubnetRouters.Delete(router.ID)
+	_, err = c.MetalGateways.Delete(router.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +75,7 @@ func TestAccSubnetRouterSubnetSize(t *testing.T) {
 	}
 }
 
-func TestAccSubnetRouterExistingReservation(t *testing.T) {
+func TestAccMetalGatewayExistingReservation(t *testing.T) {
 
 	skipUnlessAcceptanceTestsAllowed(t)
 	c, projectID, teardown := setupWithProject(t)
@@ -106,31 +106,31 @@ func TestAccSubnetRouterExistingReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rcr := SubnetRouterCreateRequest{
+	rcr := MetalGatewayCreateRequest{
 		VirtualNetworkID: vlan.ID,
 		IPReservationID:  ipRes.ID,
 	}
 
-	router, _, err := c.SubnetRouters.Create(projectID, &rcr)
+	router, _, err := c.MetalGateways.Create(projectID, &rcr)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	router, err = waitSubnetRouterActive(router.ID, c)
+	router, err = waitMetalGatewayActive(router.ID, c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	routers, _, err := c.SubnetRouters.List(projectID, nil)
+	routers, _, err := c.MetalGateways.List(projectID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if len(routers) != 1 {
-		t.Fatalf("There should be exactly one subnet router in the testing project")
+		t.Fatalf("There should be exactly one metal gateway in the testing project")
 	}
 
-	_, err = c.SubnetRouters.Delete(router.ID)
+	_, err = c.MetalGateways.Delete(router.ID)
 	if err != nil {
 		t.Fatal(err)
 	}

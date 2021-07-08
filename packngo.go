@@ -118,7 +118,7 @@ type Client struct {
 	SSHKeys                SSHKeyService
 	SpotMarket             SpotMarketService
 	SpotMarketRequests     SpotMarketRequestService
-	SubnetRouters          SubnetRouterService
+	MetalGateways          MetalGatewayService
 	TwoFactorAuth          TwoFactorAuthService
 	Users                  UserService
 	VirtualCircuits        VirtualCircuitService
@@ -381,7 +381,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.SSHKeys = &SSHKeyServiceOp{client: c}
 	c.SpotMarket = &SpotMarketServiceOp{client: c}
 	c.SpotMarketRequests = &SpotMarketRequestServiceOp{client: c}
-	c.SubnetRouters = &SubnetRouterServiceOp{client: c}
+	c.MetalGateways = &MetalGatewayServiceOp{client: c}
 	c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
 	c.Users = &UserServiceOp{client: c}
 	c.VirtualCircuits = &VirtualCircuitServiceOp{client: c}
