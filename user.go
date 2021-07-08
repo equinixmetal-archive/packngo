@@ -1,6 +1,8 @@
 package packngo
 
-import "path"
+import (
+	"path"
+)
 
 const usersBasePath = "/users"
 const userBasePath = "/user"
@@ -63,6 +65,17 @@ type User struct {
 	Staff                 bool    `json:"staff,omitempty"`
 }
 
+// UserUpdateRequest struct for UserService.Update
+type UserUpdateRequest struct {
+	FirstName   *string      `json:"first_name,omitempty"`
+	LastName    *string      `json:"last_name,omitempty"`
+	PhoneNumber *string      `json:"phone_number,omitempty"`
+	Timezone    *string      `json:"timezone,omitempty"`
+	Password    *string      `json:"password,omitempty"`
+	Avatar      *string      `json:"avatar,omitempty"`
+	Customdata  *interface{} `json:"customdata,omitempty"`
+}
+
 func (u User) String() string {
 	return Stringify(u)
 }
@@ -111,6 +124,21 @@ func (s *UserServiceOp) Get(userID string, opts *GetOptions) (*User, *Response, 
 	user := new(User)
 
 	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, user)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return user, resp, err
+}
+
+// Update updates the current user
+func (s *UserServiceOp) Update(updateRequest *UserUpdateRequest) (*User, *Response, error) {
+	opts := &GetOptions{}
+	endpointPath := path.Join(userBasePath)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	user := new(User)
+
+	resp, err := s.client.DoRequest("PUT", apiPathQuery, updateRequest, user)
 	if err != nil {
 		return nil, resp, err
 	}
