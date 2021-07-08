@@ -61,12 +61,6 @@ type User struct {
 	URL                   string  `json:"href,omitempty"`
 	Restricted            bool    `json:"restricted,omitempty"`
 	Staff                 bool    `json:"staff,omitempty"`
-	// VPN indicates if Doorman VPN service is enabled for the user.
-	//
-	// Deprecated: As of March 31, 2021, Doorman service is no longer
-	// available. See https://metal.equinix.com/developers/docs/accounts/doorman/
-	// for more details.
-	VPN bool `json:"vpn"`
 }
 
 func (u User) String() string {
