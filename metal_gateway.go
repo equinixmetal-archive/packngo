@@ -27,8 +27,8 @@ type MetalGateway struct {
 	VirtualNetwork *VirtualNetwork       `json:"virtual_network,omitempty"`
 	IPReservation  *IPAddressReservation `json:"ip_reservation,omitempty"`
 	Href           string                `json:"href"`
-	Created        string                `json:"created_at,omitempty"`
-	Updated        string                `json:"updated_at,omitempty"`
+	CreatedAt      string                `json:"created_at,omitempty"`
+	UpdatedAt      string                `json:"updated_at,omitempty"`
 }
 
 type MetalGatewayServiceOp struct {
@@ -63,8 +63,8 @@ func (s *MetalGatewayServiceOp) List(projectID string, opts *ListOptions) (metal
 }
 
 type MetalGatewayCreateRequest struct {
-	VirtualNetworkID      string `json:"virtual_network"`
-	IPReservationID       string `json:"ip_reservation,omitempty"`
+	VirtualNetworkID      string `json:"virtual_network_id"`
+	IPReservationID       string `json:"ip_reservation_id,omitempty"`
 	PrivateIPv4SubnetSize int    `json:"private_ipv4_subnet_size,omitempty"`
 }
 
