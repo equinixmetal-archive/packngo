@@ -144,6 +144,44 @@ func TestAccDeviceUpdate(t *testing.T) {
 	}
 }
 
+func TestAccDeviceReinstall(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Metro:        testMetro(),
+		Plan:         testPlan(),
+		OS:           testOS,
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID, false)
+
+	dID := d.ID
+
+	waitDeviceActive(t, c, dID)
+
+	rf := DeviceReinstallFields{DeprovisionFast: true}
+
+	_, err = c.Devices.Reinstall(dID, &rf)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	waitDeviceActive(t, c, dID)
+}
+
 func TestAccDeviceBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 	t.Parallel()
