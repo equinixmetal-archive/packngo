@@ -17,26 +17,50 @@ type usersRoot struct {
 	Meta  meta   `json:"meta"`
 }
 
+// SocialAccounts are social usernames or urls
+type SocialAccounts struct {
+	GitHub   string `json:"github,omitempty"`
+	LinkedIn string `json:"linkedin,omitempty"`
+	Twitter  string `json:"twitter,omitempty"`
+}
+
 // User represents an Equinix Metal user
 type User struct {
-	ID                    string  `json:"id"`
-	FirstName             string  `json:"first_name,omitempty"`
-	LastName              string  `json:"last_name,omitempty"`
-	FullName              string  `json:"full_name,omitempty"`
-	Email                 string  `json:"email,omitempty"`
-	TwoFactor             string  `json:"two_factor_auth,omitempty"`
+	ID               string          `json:"id"`
+	ShortID          string          `json:"short_id"`
+	FirstName        string          `json:"first_name,omitempty"`
+	LastName         string          `json:"last_name,omitempty"`
+	FullName         string          `json:"full_name,omitempty"`
+	Email            string          `json:"email,omitempty"`
+	SocialAccounts   *SocialAccounts `json:"social_accounts,omitempty"`
+	CustomData       interface{}     `json:"customdata,omitempty"`
+	OptIn            *bool           `json:"opt_in,omitempty"`
+	OptInUpdated     string          `json:"opt_in_updated_at,omitempty"`
+	DefaultProjectID string          `json:"default_project_id,omitempty"`
+	NumberOfSSHKeys  int             `json:"number_of_ssh_keys,omitempty"`
+	Language         string          `json:"language,omitempty"`
+	// MailingAddress TODO: format
+	VerificationStage string `json:"verification_stage,omitempty"`
+	MaxProjects       *int   `json:"max_projects,omitempty"`
+	LastLogin         string `json:"last_login_at,omitempty"`
+
+	// Features effect the behavior of the API and UI
+	Features []string `json:"features,omitempty"`
+
+	// TwoFactorAuth is the form of two factor auth, "app" or "sms"
+	// Renamed from TwoFactor in packngo v0.16 to match API
+	TwoFactorAuth         string  `json:"two_factor_auth,omitempty"`
 	DefaultOrganizationID string  `json:"default_organization_id,omitempty"`
 	AvatarURL             string  `json:"avatar_url,omitempty"`
-	Facebook              string  `json:"twitter,omitempty"`
-	Twitter               string  `json:"facebook,omitempty"`
-	LinkedIn              string  `json:"linkedin,omitempty"`
+	AvatarThumbURL        string  `json:"avatar_thumb_url,omitempty"`
 	Created               string  `json:"created_at,omitempty"`
 	Updated               string  `json:"updated_at,omitempty"`
 	TimeZone              string  `json:"timezone,omitempty"`
 	Emails                []Email `json:"emails,omitempty"`
 	PhoneNumber           string  `json:"phone_number,omitempty"`
 	URL                   string  `json:"href,omitempty"`
-
+	Restricted            bool    `json:"restricted,omitempty"`
+	Staff                 bool    `json:"staff,omitempty"`
 	// VPN indicates if Doorman VPN service is enabled for the user.
 	//
 	// Deprecated: As of March 31, 2021, Doorman service is no longer
