@@ -12,6 +12,7 @@ type UserService interface {
 	List(*ListOptions) ([]User, *Response, error)
 	Get(string, *GetOptions) (*User, *Response, error)
 	Current() (*User, *Response, error)
+	Update(*UserUpdateRequest) (*User, *Response, error)
 }
 
 type usersRoot struct {
@@ -24,6 +25,8 @@ type SocialAccounts struct {
 	GitHub   string `json:"github,omitempty"`
 	LinkedIn string `json:"linkedin,omitempty"`
 	Twitter  string `json:"twitter,omitempty"`
+	Gravatar string `json:"gravatar,omitempty"`
+	Keybase  string `json:"keybase,omitempty"`
 }
 
 // User represents an Equinix Metal user
@@ -37,10 +40,10 @@ type User struct {
 	SocialAccounts   *SocialAccounts `json:"social_accounts,omitempty"`
 	CustomData       interface{}     `json:"customdata,omitempty"`
 	OptIn            *bool           `json:"opt_in,omitempty"`
-	OptInUpdated     string          `json:"opt_in_updated_at,omitempty"`
-	DefaultProjectID string          `json:"default_project_id,omitempty"`
+	OptInUpdatedAt   string          `json:"opt_in_updated_at,omitempty"`
+	DefaultProjectID *string         `json:"default_project_id,omitempty"`
 	NumberOfSSHKeys  int             `json:"number_of_ssh_keys,omitempty"`
-	Language         string          `json:"language,omitempty"`
+	Language         *string         `json:"language,omitempty"`
 	// MailingAddress TODO: format
 	VerificationStage string `json:"verification_stage,omitempty"`
 	MaxProjects       *int   `json:"max_projects,omitempty"`
