@@ -38,9 +38,10 @@ type VCUpdateRequest struct {
 }
 
 type VCCreateRequest struct {
-	VirtualNetworkID string `json:"vnid"`
-	NniVLAN          int    `json:"nni_vlan,omitempty"`
-	Name             string `json:"name,omitempty"`
+	VirtualNetworkID string   `json:"vnid"`
+	NniVLAN          int      `json:"nni_vlan,omitempty"`
+	Name             string   `json:"name,omitempty"`
+	Tags             []string `json:"tags,omitempty"`
 }
 
 type VirtualCircuitServiceOp struct {
@@ -62,6 +63,7 @@ type VirtualCircuit struct {
 	Project        *Project        `json:"project,omitempty"`
 	Port           *ConnectionPort `json:"port,omitempty"`
 	VirtualNetwork *VirtualNetwork `json:"virtual_network,omitempty"`
+	Tags           []string        `json:"tags,omitempty"`
 }
 
 func (s *VirtualCircuitServiceOp) do(method, apiPathQuery string, req interface{}) (*VirtualCircuit, *Response, error) {
