@@ -189,6 +189,3 @@ func (g *GetOptions) Encode() string {
 	return urlValues.Encode()
 }
 */
-func urlQuery(o *GetOptions) string {
-	return o.Encode()
-}

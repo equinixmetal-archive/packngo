@@ -129,13 +129,6 @@ type Client struct {
 	//
 	// Deprecated: Use Client.Ports or Device methods
 	DevicePorts DevicePortService
-
-	// VPN
-	//
-	// Deprecated: As of March 31, 2021, Doorman service is no longer
-	// available. See https://metal.equinix.com/developers/docs/accounts/doorman/
-	// for more details.
-	VPN VPNService
 }
 
 // requestDoer provides methods for making HTTP requests and receiving the
@@ -385,7 +378,6 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.TwoFactorAuth = &TwoFactorAuthServiceOp{client: c}
 	c.Users = &UserServiceOp{client: c}
 	c.VirtualCircuits = &VirtualCircuitServiceOp{client: c}
-	c.VPN = &VPNServiceOp{client: c}
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
 	c.Volumes = &VolumeServiceOp{client: c}
 	c.debug = os.Getenv(debugEnvVar) != ""

@@ -44,3 +44,52 @@ func TestAccUsersList(t *testing.T) {
 	}
 
 }
+
+/*
+func strPtr(s string) *string {
+	return &s
+}
+
+func TestAccUserUpdate(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+
+	c, stopRecord := setup(t)
+	defer stopRecord()
+
+	u, _, err := c.Users.Current()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if u.DefaultOrganizationID == "" {
+		t.Fatal("Expected DefaultOrganizationID should not be empty")
+	}
+	testFirst := "test firstname"
+	testLast := "test lasstname"
+
+	uur := UserUpdateRequest{
+		FirstName: strPtr(testFirst),
+		LastName:  strPtr(testLast),
+	}
+	uu, _, err := c.Users.Update(&uur)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if uu.LastName != testLast {
+		t.Fatalf("Updated last name should be %s, was %s", testLast, uu.LastName)
+	}
+	if uu.FirstName != testFirst {
+		t.Fatalf("Updated first name should be %s, was %s", testFirst, uu.FirstName)
+	}
+
+	orig := UserUpdateRequest{
+		FirstName: strPtr(u.FirstName),
+		LastName:  strPtr(u.LastName),
+	}
+	_, _, err = c.Users.Update(&orig)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+*/
