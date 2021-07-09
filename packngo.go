@@ -267,9 +267,22 @@ func dumpDeprecation(resp *http.Response) {
 	}
 }
 
+// from terraform-plugin-sdk/v2/helper/logging/transport.go
+func prettyPrintJsonLines(b []byte) string {
+	parts := strings.Split(string(b), "\n")
+	for i, p := range parts {
+		if b := []byte(p); json.Valid(b) {
+			var out bytes.Buffer
+			json.Indent(&out, b, "", " ")
+			parts[i] = out.String()
+		}
+	}
+	return strings.Join(parts, "\n")
+}
+
 func dumpResponse(resp *http.Response) {
 	o, _ := httputil.DumpResponse(resp, true)
-	strResp := string(o)
+	strResp := prettyPrintJsonLines(o)
 	reg, _ := regexp.Compile(`"token":(.+?),`)
 	reMatches := reg.FindStringSubmatch(strResp)
 	if len(reMatches) == 2 {
