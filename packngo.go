@@ -302,9 +302,9 @@ func dumpRequest(req *http.Request) {
 
 	o, _ := httputil.DumpRequestOut(r, false)
 	bbs, _ := ioutil.ReadAll(r.Body)
-
-	strReq := string(o)
-	log.Printf("\n=======[REQUEST]=============\n%s%s\n", string(strReq), string(bbs))
+	reqBodyStr := prettyPrintJsonLines(bbs)
+	strReq := prettyPrintJsonLines(o)
+	log.Printf("\n=======[REQUEST]=============\n%s%s\n", string(strReq), reqBodyStr)
 }
 
 // DoRequest is a convenience method, it calls NewRequest followed by Do
