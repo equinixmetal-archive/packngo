@@ -40,24 +40,33 @@ type ProjectIPService interface {
 }
 
 type IpAddressCommon struct { //nolint:golint
-	ID            string      `json:"id"`
-	Address       string      `json:"address"`
-	Gateway       string      `json:"gateway"`
-	Network       string      `json:"network"`
-	AddressFamily int         `json:"address_family"`
-	Netmask       string      `json:"netmask"`
-	Public        bool        `json:"public"`
-	CIDR          int         `json:"cidr"`
-	Created       string      `json:"created_at,omitempty"`
-	Updated       string      `json:"updated_at,omitempty"`
-	Href          string      `json:"href"`
-	Management    bool        `json:"management"`
-	Manageable    bool        `json:"manageable"`
-	Metro         *Metro      `json:"metro,omitempty"`
-	Project       Href        `json:"project"`
-	Global        bool        `json:"global_ip"`
-	Tags          []string    `json:"tags,omitempty"`
-	CustomData    interface{} `json:"customdata,omitempty"`
+	ID            string       `json:"id"`
+	Address       string       `json:"address"`
+	Gateway       string       `json:"gateway"`
+	Network       string       `json:"network"`
+	AddressFamily int          `json:"address_family"`
+	Netmask       string       `json:"netmask"`
+	Public        bool         `json:"public"`
+	CIDR          int          `json:"cidr"`
+	Created       string       `json:"created_at,omitempty"`
+	Updated       string       `json:"updated_at,omitempty"`
+	Href          string       `json:"href"`
+	Management    bool         `json:"management"`
+	Manageable    bool         `json:"manageable"`
+	Metro         *Metro       `json:"metro,omitempty"`
+	Project       Href         `json:"project"`
+	Global        bool         `json:"global_ip"`
+	Tags          []string     `json:"tags,omitempty"`
+	ParentBlock   *ParentBlock `json:"parent_block,omitempty"`
+	CustomData    interface{}  `json:"customdata,omitempty"`
+}
+
+// ParentBlock is the network block for the parent of an IP address
+type ParentBlock struct {
+	Network string  `json:"network"`
+	Netmask string  `json:"netmask"`
+	CIDR    int     `json:"cidr"`
+	Href    *string `json:"href,omitempty"`
 }
 
 // IPAddressReservation is created when user sends IP reservation request for a project (considering it's within quota).
