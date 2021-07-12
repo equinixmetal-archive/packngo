@@ -260,9 +260,22 @@ func dumpDeprecation(resp *http.Response) {
 	}
 }
 
+// from terraform-plugin-sdk/v2/helper/logging/transport.go
+func prettyPrintJsonLines(b []byte) string {
+	parts := strings.Split(string(b), "\n")
+	for i, p := range parts {
+		if b := []byte(p); json.Valid(b) {
+			var out bytes.Buffer
+			_ = json.Indent(&out, b, "", " ")
+			parts[i] = out.String()
+		}
+	}
+	return strings.Join(parts, "\n")
+}
+
 func dumpResponse(resp *http.Response) {
 	o, _ := httputil.DumpResponse(resp, true)
-	strResp := string(o)
+	strResp := prettyPrintJsonLines(o)
 	reg, _ := regexp.Compile(`"token":(.+?),`)
 	reMatches := reg.FindStringSubmatch(strResp)
 	if len(reMatches) == 2 {
@@ -282,9 +295,9 @@ func dumpRequest(req *http.Request) {
 
 	o, _ := httputil.DumpRequestOut(r, false)
 	bbs, _ := ioutil.ReadAll(r.Body)
-
-	strReq := string(o)
-	log.Printf("\n=======[REQUEST]=============\n%s%s\n", string(strReq), string(bbs))
+	reqBodyStr := prettyPrintJsonLines(bbs)
+	strReq := prettyPrintJsonLines(o)
+	log.Printf("\n=======[REQUEST]=============\n%s%s\n", string(strReq), reqBodyStr)
 }
 
 // DoRequest is a convenience method, it calls NewRequest followed by Do
