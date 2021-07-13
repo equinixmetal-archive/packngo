@@ -411,6 +411,7 @@ type DeviceCreateRequest struct {
 	ProjectSSHKeys []string                 `json:"project_ssh_keys,omitempty"`
 	Features       map[string]string        `json:"features,omitempty"`
 	IPAddresses    []IPAddressCreateRequest `json:"ip_addresses,omitempty"`
+	NoSSHKeys      bool                     `json:"no_ssh_keys,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update an Equinix Metal device
