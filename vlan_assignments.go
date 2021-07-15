@@ -1,0 +1,174 @@
+package packngo
+
+import (
+	"path"
+)
+
+const (
+	portVLANAssignmentsPath      = "vlan-assignments"
+	portVLANAssignmentsBatchPath = "batches"
+)
+
+type vlanAssignmentsRoot struct {
+	VLANAssignments []VLANAssignment `json:"vlan_assignments"`
+	Meta            meta             `json:"meta"`
+}
+
+type vlanAssignmentBatchesRoot struct {
+	VLANAssignmentBatches []VLANAssignmentBatch `json:"batches"`
+	Meta                  meta                  `json:"meta"`
+}
+
+// VLANAssignmentService handles operations on a VLANAssignment
+type VLANAssignmentService interface {
+	Get(string, string, *GetOptions) (*VLANAssignment, *Response, error)
+	List(string, *ListOptions) ([]VLANAssignment, *Response, error)
+}
+
+type VLANAssignmentBatchService interface {
+	Get(string, string, *GetOptions) (*VLANAssignmentBatch, *Response, error)
+	List(string, *ListOptions) ([]VLANAssignmentBatch, *Response, error)
+	Create(string, *VLANAssignmentBatchCreateRequest, *GetOptions) (*VLANAssignmentBatch, *Response, error)
+}
+
+type VLANAssignmentServiceOp struct {
+	client requestDoer
+}
+
+type VLANAssignmentBatchServiceOp struct {
+	client requestDoer
+}
+
+var _ VLANAssignmentService = (*VLANAssignmentServiceOp)(nil)
+var _ VLANAssignmentBatchService = (*VLANAssignmentBatchServiceOp)(nil)
+
+type VLANAssignmentBatchState string
+
+const (
+	VLANAssignmentBatchQueued     VLANAssignmentBatchState = "queued"
+	VLANAssignmentBatchInProgress VLANAssignmentBatchState = "in_progress"
+	VLANAssignmentBatchCompleted  VLANAssignmentBatchState = "completed"
+	VLANAssignmentBatchFailed     VLANAssignmentBatchState = "failed"
+)
+
+type VLANAssignmentState string
+
+const (
+	VLANAssignmentAssigned   VLANAssignmentState = "assigned"
+	VLANAssignmentUnassigned VLANAssignmentState = "unassigned"
+)
+
+// VLANAssignment struct for VLANAssignment
+type VLANAssignment struct {
+	ID             string              `json:"id,omitempty"`
+	CreatedAt      Timestamp           `json:"created_at,omitempty"`
+	UpdatedAt      Timestamp           `json:"updated_at,omitempty"`
+	Native         bool                `json:"native,omitempty"`
+	State          VLANAssignmentState `json:"state,omitempty"`
+	VLAN           int                 `json:"vlan,omitempty"`
+	Port           *Port               `json:"port,omitempty"`
+	VirtualNetwork *VirtualNetwork     `json:"virtual_network,omitempty"`
+}
+
+// VLANAssignmentBatch struct for VLANAssignmentBatch
+type VLANAssignmentBatch struct {
+	ID              string                   `json:"id,omitempty"`
+	ErrorMessages   []string                 `json:"error_messages,omitempty"`
+	Quantity        int                      `json:"quantity,omitempty"`
+	State           VLANAssignmentBatchState `json:"state,omitempty"`
+	CreatedAt       Timestamp                `json:"created_at,omitempty"`
+	UpdatedAt       Timestamp                `json:"updated_at,omitempty"`
+	Port            *Port                    `json:"port,omitempty"`
+	Project         *Project                 `json:"project,omitempty"`
+	VLANAssignments []VLANAssignment         `json:"vlan_assignments,omitempty"`
+}
+
+// VLANAssignmentBatchCreateRequest struct for VLANAssignmentBatch Create
+type VLANAssignmentBatchCreateRequest struct {
+	VLANAssignments []VLANAssignmentCreateRequest `json:"vlan_assignments"`
+}
+
+// VLANAssignmentCreateRequest struct for VLANAssignmentBatchCreateRequest
+type VLANAssignmentCreateRequest struct {
+	VLAN   string `json:"vlan,omitempty"`
+	State  string `json:"state,omitempty"`
+	Native *bool  `json:"native,omitempty"`
+}
+
+// List returns VLANAssignmentBatches
+func (s *VLANAssignmentBatchServiceOp) List(portID string, opts *ListOptions) (results []VLANAssignmentBatch, resp *Response, err error) {
+	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, portVLANAssignmentsBatchPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
+
+	for {
+		subset := new(vlanAssignmentBatchesRoot)
+
+		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		results = append(results, subset.VLANAssignmentBatches...)
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
+			continue
+		}
+		return
+	}
+}
+
+// Get returns a VLANAssignmentBatch by id
+func (s *VLANAssignmentBatchServiceOp) Get(portID, batchID string, opts *GetOptions) (*VLANAssignmentBatch, *Response, error) {
+	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, portVLANAssignmentsBatchPath, batchID)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	batch := new(VLANAssignmentBatch)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, batch)
+	if err != nil {
+		return nil, resp, err
+	}
+	return batch, resp, err
+}
+
+// Create creates VLANAssignmentBatch objects
+func (s *VLANAssignmentBatchServiceOp) Create(portID string, request *VLANAssignmentBatchCreateRequest, opts *GetOptions) (*VLANAssignmentBatch, *Response, error) {
+	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, portVLANAssignmentsBatchPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	batch := new(VLANAssignmentBatch)
+	resp, err := s.client.DoRequest("POST", apiPathQuery, request, batch)
+	if err != nil {
+		return nil, resp, err
+	}
+	return batch, resp, err
+}
+
+// List returns VLANAssignment
+func (s *VLANAssignmentServiceOp) List(portID string, opts *ListOptions) (results []VLANAssignment, resp *Response, err error) {
+	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
+
+	for {
+		subset := new(vlanAssignmentsRoot)
+
+		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+
+		results = append(results, subset.VLANAssignments...)
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
+			continue
+		}
+		return
+	}
+}
+
+// Get returns a VLANAssignment by id
+func (s *VLANAssignmentServiceOp) Get(portID, assignmentID string, opts *GetOptions) (*VLANAssignment, *Response, error) {
+	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, assignmentID)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	VLANAssignment := new(VLANAssignment)
+	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, VLANAssignment)
+	if err != nil {
+		return nil, resp, err
+	}
+	return VLANAssignment, resp, err
+}

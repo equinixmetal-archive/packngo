@@ -122,6 +122,8 @@ type Client struct {
 	TwoFactorAuth          TwoFactorAuthService
 	Users                  UserService
 	VirtualCircuits        VirtualCircuitService
+	VLANAssignments        VLANAssignmentService
+	VLANAssignmentBatches  VLANAssignmentBatchService
 	VolumeAttachments      VolumeAttachmentService
 	Volumes                VolumeService
 
@@ -393,6 +395,8 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.VirtualCircuits = &VirtualCircuitServiceOp{client: c}
 	c.VolumeAttachments = &VolumeAttachmentServiceOp{client: c}
 	c.Volumes = &VolumeServiceOp{client: c}
+	c.VLANAssignments = &VLANAssignmentServiceOp{client: c}
+	c.VLANAssignmentBatches = &VLANAssignmentBatchServiceOp{client: c}
 	c.debug = os.Getenv(debugEnvVar) != ""
 
 	return c, nil
