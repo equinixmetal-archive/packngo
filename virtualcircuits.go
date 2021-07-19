@@ -34,14 +34,24 @@ type VirtualCircuitService interface {
 }
 
 type VCUpdateRequest struct {
-	VirtualNetworkID *string `json:"vnid"`
+	Name             *string   `json:"name,omitempty"`
+	Tags             *[]string `json:"tags,omitempty"`
+	Description      *string   `json:"description,omitempty"`
+	VirtualNetworkID *string   `json:"vnid,omitempty"`
+
+	// Speed is a bps representation of the VirtualCircuit throughput. This is informational only, the field is a user-controlled description of the speed. It may be presented as a whole number with a bps, mpbs, or gbps suffix (or the respective initial).
+	Speed string `json:"speed,omitempty"`
 }
 
 type VCCreateRequest struct {
 	VirtualNetworkID string   `json:"vnid"`
 	NniVLAN          int      `json:"nni_vlan,omitempty"`
 	Name             string   `json:"name,omitempty"`
+	Description      string   `json:"description,omitempty"`
 	Tags             []string `json:"tags,omitempty"`
+
+	// Speed is a bps representation of the VirtualCircuit throughput. This is informational only, the field is a user-controlled description of the speed. It may be presented as a whole number with a bps, mpbs, or gbps suffix (or the respective initial).
+	Speed string `json:"speed,omitempty"`
 }
 
 type VirtualCircuitServiceOp struct {
@@ -56,6 +66,8 @@ type virtualCircuitsRoot struct {
 type VirtualCircuit struct {
 	ID             string          `json:"id"`
 	Name           string          `json:"name,omitempty"`
+	Description    string          `json:"description,omitempty"`
+	Speed          string          `json:"speed,omitempty"`
 	Status         string          `json:"status,omitempty"`
 	VNID           int             `json:"vnid,omitempty"`
 	NniVNID        int             `json:"nni_vnid,omitempty"`
