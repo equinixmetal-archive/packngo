@@ -1,26 +1,8 @@
 package packngo
 
 import (
-	"fmt"
 	"testing"
-	"time"
 )
-
-func waitMetalGatewayActive(id string, c *Client) (*MetalGateway, error) {
-	includes := &GetOptions{Includes: []string{"ip_reservation", "virtual_network"}}
-
-	for i := 0; i < 12; i++ {
-		r, _, err := c.MetalGateways.Get(id, includes)
-		if err != nil {
-			return nil, err
-		}
-		if r.State == MetalGatewayActive {
-			return r, nil
-		}
-		<-time.After(5 * time.Second)
-	}
-	return nil, fmt.Errorf("Metal gateway %s is still not active after timeout", id)
-}
 
 func TestAccMetalGatewaySubnetSize(t *testing.T) {
 
@@ -51,7 +33,8 @@ func TestAccMetalGatewaySubnetSize(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	router, err = waitMetalGatewayActive(router.ID, c)
+	includes := &GetOptions{Includes: []string{"ip_reservation", "virtual_network"}}
+	router, _, err = c.MetalGateways.Get(router.ID, includes)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,7 +99,8 @@ func TestAccMetalGatewayExistingReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	router, err = waitMetalGatewayActive(router.ID, c)
+	includes := &GetOptions{Includes: []string{"ip_reservation", "virtual_network"}}
+	router, _, err = c.MetalGateways.Get(router.ID, includes)
 	if err != nil {
 		t.Fatal(err)
 	}

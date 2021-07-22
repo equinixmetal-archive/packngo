@@ -7,10 +7,10 @@ import (
 type MetalGatewayState string
 
 const (
-	metalGatewayBasePath                     = "/metal-gateways"
-	MetalGatewayActive     MetalGatewayState = "active"
-	MetalGatewayActivating MetalGatewayState = "activating"
-	MetalGatewayDeleting   MetalGatewayState = "deleting"
+	metalGatewayBasePath                   = "/metal-gateways"
+	MetalGatewayActive   MetalGatewayState = "active"
+	MetalGatewayReady    MetalGatewayState = "ready"
+	MetalGatewayDeleting MetalGatewayState = "deleting"
 )
 
 type MetalGatewayService interface {
