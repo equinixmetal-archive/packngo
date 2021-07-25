@@ -23,24 +23,17 @@ type vlanAssignmentBatchesRoot struct {
 type VLANAssignmentService interface {
 	Get(string, string, *GetOptions) (*VLANAssignment, *Response, error)
 	List(string, *ListOptions) ([]VLANAssignment, *Response, error)
-}
 
-type VLANAssignmentBatchService interface {
-	Get(string, string, *GetOptions) (*VLANAssignmentBatch, *Response, error)
-	List(string, *ListOptions) ([]VLANAssignmentBatch, *Response, error)
-	Create(string, *VLANAssignmentBatchCreateRequest, *GetOptions) (*VLANAssignmentBatch, *Response, error)
+	GetBatch(string, string, *GetOptions) (*VLANAssignmentBatch, *Response, error)
+	ListBatch(string, *ListOptions) ([]VLANAssignmentBatch, *Response, error)
+	CreateBatch(string, *VLANAssignmentBatchCreateRequest, *GetOptions) (*VLANAssignmentBatch, *Response, error)
 }
 
 type VLANAssignmentServiceOp struct {
 	client requestDoer
 }
 
-type VLANAssignmentBatchServiceOp struct {
-	client requestDoer
-}
-
 var _ VLANAssignmentService = (*VLANAssignmentServiceOp)(nil)
-var _ VLANAssignmentBatchService = (*VLANAssignmentBatchServiceOp)(nil)
 
 type VLANAssignmentBatchState string
 
@@ -96,7 +89,7 @@ type VLANAssignmentCreateRequest struct {
 }
 
 // List returns VLANAssignmentBatches
-func (s *VLANAssignmentBatchServiceOp) List(portID string, opts *ListOptions) (results []VLANAssignmentBatch, resp *Response, err error) {
+func (s *VLANAssignmentServiceOp) ListBatch(portID string, opts *ListOptions) (results []VLANAssignmentBatch, resp *Response, err error) {
 	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, portVLANAssignmentsBatchPath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
@@ -117,7 +110,7 @@ func (s *VLANAssignmentBatchServiceOp) List(portID string, opts *ListOptions) (r
 }
 
 // Get returns a VLANAssignmentBatch by id
-func (s *VLANAssignmentBatchServiceOp) Get(portID, batchID string, opts *GetOptions) (*VLANAssignmentBatch, *Response, error) {
+func (s *VLANAssignmentServiceOp) GetBatch(portID, batchID string, opts *GetOptions) (*VLANAssignmentBatch, *Response, error) {
 	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, portVLANAssignmentsBatchPath, batchID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	batch := new(VLANAssignmentBatch)
@@ -129,7 +122,7 @@ func (s *VLANAssignmentBatchServiceOp) Get(portID, batchID string, opts *GetOpti
 }
 
 // Create creates VLANAssignmentBatch objects
-func (s *VLANAssignmentBatchServiceOp) Create(portID string, request *VLANAssignmentBatchCreateRequest, opts *GetOptions) (*VLANAssignmentBatch, *Response, error) {
+func (s *VLANAssignmentServiceOp) CreateBatch(portID string, request *VLANAssignmentBatchCreateRequest, opts *GetOptions) (*VLANAssignmentBatch, *Response, error) {
 	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, portVLANAssignmentsBatchPath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	batch := new(VLANAssignmentBatch)
