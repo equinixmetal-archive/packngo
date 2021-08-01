@@ -82,36 +82,6 @@ func randString8() string {
 	return string(b)
 }
 
-// MockClient makes it simpler to test the Client
-type MockClient struct {
-	fnNewRequest          func(method, path string, body interface{}) (*http.Request, error)
-	fnDo                  func(req *http.Request, v interface{}) (*Response, error)
-	fnDoRequest           func(method, path string, body, v interface{}) (*Response, error)
-	fnDoRequestWithHeader func(method string, headers map[string]string, path string, body, v interface{}) (*Response, error)
-}
-
-var _ requestDoer = &MockClient{}
-
-// NewRequest uses the mock NewRequest function
-func (mc *MockClient) NewRequest(method, path string, body interface{}) (*http.Request, error) {
-	return mc.fnNewRequest(method, path, body)
-}
-
-// Do uses the mock Do function
-func (mc *MockClient) Do(req *http.Request, v interface{}) (*Response, error) {
-	return mc.fnDo(req, v)
-}
-
-// DoRequest uses the mock DoRequest function
-func (mc *MockClient) DoRequest(method, path string, body, v interface{}) (*Response, error) {
-	return mc.fnDoRequest(method, path, body, v)
-}
-
-// DoRequestWithHeader uses the mock DoRequestWithHeader function
-func (mc *MockClient) DoRequestWithHeader(method string, headers map[string]string, path string, body, v interface{}) (*Response, error) {
-	return mc.fnDoRequestWithHeader(method, headers, path, body, v)
-}
-
 // setupWithProject returns a client, project id, and teardown function
 // configured for a new project with a test recorder for the named test
 func setupWithProject(t *testing.T) (*Client, string, func()) {
