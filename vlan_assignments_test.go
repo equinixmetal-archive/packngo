@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -107,5 +108,133 @@ func TestVLANAssignmentServiceOp_Get(t *testing.T) {
 				t.Errorf("VLANAssignmentServiceOp.Get() mismatch (-want +got):\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestAccVLANAssignmentServiceOp(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	hn := randString8()
+
+	metro := testMetro()
+
+	cr := DeviceCreateRequest{
+		Hostname:     hn,
+		Metro:        metro,
+		Plan:         testPlan(),
+		OS:           testOS,
+		ProjectID:    projectID,
+		BillingCycle: "hourly",
+	}
+
+	d, _, err := c.Devices.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer deleteDevice(t, c, d.ID, false)
+	dID := d.ID
+
+	d = waitDeviceActive(t, c, dID)
+	bond0, err := d.GetPortByName("bond0")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(bond0.AttachedVirtualNetworks) != 0 {
+		t.Fatal("No vlans should be attached to a eth1 in the beginning of this test")
+	}
+
+	vlans := new([2]*VirtualNetwork)
+	for i, vxlan := range []int{1222, 1234} {
+		vncr := VirtualNetworkCreateRequest{
+			ProjectID: projectID,
+			Metro:     metro,
+			VXLAN:     vxlan,
+		}
+
+		vlans[i], _, err = c.ProjectVirtualNetworks.Create(&vncr)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		defer deleteProjectVirtualNetwork(t, c, vlans[i].ID)
+	}
+
+	// test unassignment and assignment states with both supported formats, VLAN ID and VXLAN
+	vabcr := &VLANAssignmentBatchCreateRequest{
+		VLANAssignments: []VLANAssignmentCreateRequest{{
+			VLAN:  vlans[0].ID,
+			State: VLANAssignmentUnassigned,
+		}, {
+			VLAN:   strconv.Itoa(vlans[1].VXLAN),
+			State:  VLANAssignmentAssigned,
+			Native: func() *bool { b := false; return &b }(),
+		}},
+	}
+
+	b, _, err := c.VLANAssignments.CreateBatch(bond0.ID, vabcr, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b.Quantity != 2 {
+		t.Fatal("Exactly two attachments should be batched")
+	}
+
+	if path.Base(b.Port.Href.Href) != bond0.ID {
+		t.Fatal("mismatch in the UUID of the assigned Port")
+	}
+
+	// verify batch can be fetched
+	b2, _, err := c.VLANAssignments.GetBatch(bond0.ID, b.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b2.CreatedAt != b.CreatedAt {
+		t.Fatal("Reloaded VLANAssignment batch create time should match original response")
+	}
+
+	// verify single assignment can be fetched
+	a2, _, err := c.VLANAssignments.Get(bond0.ID, b.VLANAssignments[0].ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a2.CreatedAt != b.VLANAssignments[0].CreatedAt {
+		t.Fatal("Reloaded VLANAssignment create time should match original response")
+	}
+
+	// verify port vlan assignments can be listed
+	allAs, _, err := c.VLANAssignments.List(bond0.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	unseen := map[string]bool{
+		b.VLANAssignments[0].ID: true,
+		b.VLANAssignments[1].ID: true,
+	}
+	for _, a := range allAs {
+		delete(unseen, a.ID)
+	}
+	if len(unseen) != 0 {
+		t.Fatal("unexpected or missing VLANAssignments in List results")
+	}
+
+	// verify port vlan batch assignments can be listed
+	allBs, _, err := c.VLANAssignments.ListBatch(bond0.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	unseen = map[string]bool{
+		b2.ID: true,
+	}
+	for _, b := range allBs {
+		delete(unseen, b.ID)
+	}
+	if len(unseen) != 0 {
+		t.Fatal("unexpected or missing Batch Assignments in ListBatch results")
 	}
 }

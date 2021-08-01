@@ -53,14 +53,26 @@ const (
 
 // VLANAssignment struct for VLANAssignment
 type VLANAssignment struct {
-	ID             string              `json:"id,omitempty"`
-	CreatedAt      Timestamp           `json:"created_at,omitempty"`
-	UpdatedAt      Timestamp           `json:"updated_at,omitempty"`
-	Native         bool                `json:"native,omitempty"`
-	State          VLANAssignmentState `json:"state,omitempty"`
-	VLAN           int                 `json:"vlan,omitempty"`
-	Port           *Port               `json:"port,omitempty"`
-	VirtualNetwork *VirtualNetwork     `json:"virtual_network,omitempty"`
+	// ID is the VirtualNetwork.ID of the VLAN the assignment was made to
+	ID string `json:"id,omitempty"`
+
+	CreatedAt Timestamp `json:"created_at,omitempty"`
+	UpdatedAt Timestamp `json:"updated_at,omitempty"`
+
+	// Native indicates the VLAN is the native VLAN on the port and packets for this vlan will be untagged
+	Native bool `json:"native,omitempty"`
+
+	// State of the assignment
+	State VLANAssignmentState `json:"state,omitempty"`
+
+	// VLAN is the VirtualNetwork.VXLAN of the VLAN the assignment was made to
+	VLAN int `json:"vlan,omitempty"`
+
+	// Port is a reference to the Port the assignment was made on
+	Port *Port `json:"port,omitempty"`
+
+	// VirtualNetwork is a reference to the VLAN the assignment was made to
+	VirtualNetwork *VirtualNetwork `json:"virtual_network,omitempty"`
 }
 
 // VLANAssignmentBatch struct for VLANAssignmentBatch
@@ -83,9 +95,9 @@ type VLANAssignmentBatchCreateRequest struct {
 
 // VLANAssignmentCreateRequest struct for VLANAssignmentBatchCreateRequest
 type VLANAssignmentCreateRequest struct {
-	VLAN   string `json:"vlan,omitempty"`
-	State  string `json:"state,omitempty"`
-	Native *bool  `json:"native,omitempty"`
+	VLAN   string              `json:"vlan,omitempty"`
+	State  VLANAssignmentState `json:"state,omitempty"`
+	Native *bool               `json:"native,omitempty"`
 }
 
 // List returns VLANAssignmentBatches
