@@ -7,4 +7,4 @@ require (
 	golang.org/x/crypto v0.0.0-20200420201142-3c4aac89819a
 )
 
-go 1.15
+go 1.16

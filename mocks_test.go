@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -107,7 +107,7 @@ func mockResponse(code int, body string, req *http.Request) *Response {
 	return &Response{Response: &http.Response{
 		Status:        fmt.Sprintf("%d Ignored", code),
 		StatusCode:    code,
-		Body:          io.NopCloser(bytes.NewReader([]byte(body))),
+		Body:          ioutil.NopCloser(bytes.NewReader([]byte(body))), // TODO: io.NopCloser requires go 1.16+
 		ContentLength: int64(len(body)),
 		Request:       req,
 	}}
