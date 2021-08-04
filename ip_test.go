@@ -49,7 +49,7 @@ func TestAccPublicIPReservation(t *testing.T) {
 			quantityToMask[quantity], res.CIDR)
 	}
 
-	if path.Base(res.Project.Href) != projectID {
+	if path.Base(res.Project.GetHref()) != projectID {
 		t.Fatalf("Wrong project linked in reserved block: %s", res.Project.Href)
 	}
 
@@ -153,7 +153,7 @@ func TestAccGlobalIPReservation(t *testing.T) {
 			quantityToMask[quantity], res.CIDR)
 	}
 
-	if path.Base(res.Project.Href) != projectID {
+	if path.Base(res.Project.GetHref()) != projectID {
 		t.Fatalf("Wrong project linked in reserved block: %s", res.Project.Href)
 	}
 
@@ -280,7 +280,7 @@ func TestAccPublicMetroIPReservation(t *testing.T) {
 			quantityToMask[quantity], res.CIDR)
 	}
 
-	if path.Base(res.Project.Href) != projectID {
+	if path.Base(res.Project.GetHref()) != projectID {
 		t.Fatalf("Wrong project linked in reserved block: %s", res.Project.Href)
 	}
 

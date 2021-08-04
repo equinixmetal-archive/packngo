@@ -3,11 +3,10 @@ package packngo
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"path"
 	"strconv"
-
-	"github.com/packethost/packngo/href"
 )
 
 const deviceBasePath = "/devices"
@@ -45,8 +44,9 @@ type devicesRoot struct {
 
 // Device represents an Equinix Metal device from API
 type Device struct {
+	*Href `json:",inline"`
+
 	ID                  string                 `json:"id"`
-	Href                string                 `json:"href,omitempty"`
 	Hostname            string                 `json:"hostname,omitempty"`
 	Description         *string                `json:"description,omitempty"`
 	State               string                 `json:"state,omitempty"`
@@ -460,7 +460,7 @@ func (d DeviceActionRequest) String() string {
 
 // DeviceServiceOp implements DeviceService
 type DeviceServiceOp struct {
-	client *Client
+	*serviceOp
 }
 
 // List returns devices on a project
@@ -477,14 +477,14 @@ func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []D
 	if validateErr := ValidateUUID(projectID); validateErr != nil {
 		return nil, nil, validateErr
 	}
-	opts = opts.Including("facility")
+	opts = opts.Including(s.DefaultIncludes()...)
 	endpointPath := path.Join(projectBasePath, projectID, deviceBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
 	for {
 		subset := new(devicesRoot)
 
-		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
+		resp, err = s.client.DoRequest(http.MethodGet, apiPathQuery, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}
@@ -499,25 +499,17 @@ func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []D
 	}
 }
 
-func (d *Device) GetHref() string {
-	if d == nil {
-		return ""
-	}
-	return d.Href
+func (s *DeviceServiceOp) DefaultIncludes() []string {
+	return []string{"facility"}
 }
 
-// Hydrate fetches and populates a resource based on the resources Href.
-// DeviceServiceOp.Hydrate specifically adds facility to the response.
-func (s *DeviceServiceOp) Hydrate(resource href.Hrefer, opts *GetOptions) (*Response, error) {
-	opts = opts.Including("facility")
+func (d *Device) SetHref(href string) {
+	d.Href = &Href{Href: &href}
+}
 
-	apiPathQuery := opts.WithQuery(resource.GetHref())
-
-	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, resource)
-	if err != nil {
-		return resp, err
-	}
-	return resp, err
+func (d *Device) SetID(id string) {
+	d.ID = id
+	d.SetHref(path.Join(deviceBasePath, id))
 }
 
 // Get returns a device by id
@@ -526,7 +518,8 @@ func (s *DeviceServiceOp) Get(deviceID string, opts *GetOptions) (*Device, *Resp
 		return nil, nil, validateErr
 	}
 	opts = opts.Including("facility")
-	device := &Device{Href: path.Join(deviceBasePath, deviceID)}
+	device := &Device{}
+	device.SetID(deviceID)
 	resp, err := s.Hydrate(device, opts)
 	if err != nil {
 		device = nil
@@ -539,7 +532,7 @@ func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *
 	apiPath := path.Join(projectBasePath, createRequest.ProjectID, deviceBasePath)
 	device := new(Device)
 
-	resp, err := s.client.DoRequest("POST", apiPath, createRequest, device)
+	resp, err := s.client.DoRequest(http.MethodPost, apiPath, createRequest, device)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -552,12 +545,12 @@ func (s *DeviceServiceOp) Update(deviceID string, updateRequest *DeviceUpdateReq
 		return nil, nil, validateErr
 	}
 	opts := &GetOptions{}
-	opts = opts.Including("facility")
+	opts = opts.Including(s.DefaultIncludes()...)
 	endpointPath := path.Join(deviceBasePath, deviceID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	device := new(Device)
 
-	resp, err := s.client.DoRequest("PUT", apiPathQuery, updateRequest, device)
+	resp, err := s.client.DoRequest(http.MethodPut, apiPathQuery, updateRequest, device)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -573,7 +566,7 @@ func (s *DeviceServiceOp) Delete(deviceID string, force bool) (*Response, error)
 	apiPath := path.Join(deviceBasePath, deviceID)
 	req := &DeviceDeleteRequest{Force: force}
 
-	return s.client.DoRequest("DELETE", apiPath, req, nil)
+	return s.client.DoRequest(http.MethodDelete, apiPath, req, nil)
 }
 
 // Reboot reboots on a device
@@ -584,7 +577,7 @@ func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
 	apiPath := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "reboot"}
 
-	return s.client.DoRequest("POST", apiPath, action, nil)
+	return s.client.DoRequest(http.MethodPost, apiPath, action, nil)
 }
 
 // Reinstall reinstalls a device
@@ -606,7 +599,7 @@ func (s *DeviceServiceOp) PowerOff(deviceID string) (*Response, error) {
 	apiPath := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "power_off"}
 
-	return s.client.DoRequest("POST", apiPath, action, nil)
+	return s.client.DoRequest(http.MethodPost, apiPath, action, nil)
 }
 
 // PowerOn powers on a device
@@ -617,7 +610,7 @@ func (s *DeviceServiceOp) PowerOn(deviceID string) (*Response, error) {
 	apiPath := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "power_on"}
 
-	return s.client.DoRequest("POST", apiPath, action, nil)
+	return s.client.DoRequest(http.MethodPost, apiPath, action, nil)
 }
 
 type lockType struct {
@@ -632,7 +625,7 @@ func (s *DeviceServiceOp) Lock(deviceID string) (*Response, error) {
 	apiPath := path.Join(deviceBasePath, deviceID)
 	action := lockType{Locked: true}
 
-	return s.client.DoRequest("PATCH", apiPath, action, nil)
+	return s.client.DoRequest(http.MethodPatch, apiPath, action, nil)
 }
 
 // Unlock sets a device to "unlocked"
@@ -643,7 +636,7 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 	apiPath := path.Join(deviceBasePath, deviceID)
 	action := lockType{Locked: false}
 
-	return s.client.DoRequest("PATCH", apiPath, action, nil)
+	return s.client.DoRequest(http.MethodPatch, apiPath, action, nil)
 }
 
 func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) ([]BGPNeighbor, *Response, error) {
@@ -654,7 +647,7 @@ func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) (
 	endpointPath := path.Join(deviceBasePath, deviceID, bgpNeighborsBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
-	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, root)
+	resp, err := s.client.DoRequest(http.MethodGet, apiPathQuery, nil, root)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -674,7 +667,7 @@ func (s *DeviceServiceOp) ListBGPSessions(deviceID string, opts *ListOptions) (b
 	for {
 		subset := new(bgpSessionsRoot)
 
-		resp, err = s.client.DoRequest("GET", apiPathQuery, nil, subset)
+		resp, err = s.client.DoRequest(http.MethodGet, apiPathQuery, nil, subset)
 		if err != nil {
 			return nil, resp, err
 		}

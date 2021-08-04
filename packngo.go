@@ -378,7 +378,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Connections = &ConnectionServiceOp{client: c}
 	c.DeviceIPs = &DeviceIPServiceOp{client: c}
 	c.DevicePorts = &DevicePortServiceOp{client: c}
-	c.Devices = &DeviceServiceOp{client: c}
+	c.Devices = &DeviceServiceOp{serviceOp: &serviceOp{client: c}} // TODO: NewDeviceServiceOp(c)
 	c.Emails = &EmailServiceOp{client: c}
 	c.Events = &EventServiceOp{client: c}
 	c.Facilities = &FacilityServiceOp{client: c}
@@ -386,7 +386,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Metros = &MetroServiceOp{client: c}
 	c.Notifications = &NotificationServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
-	c.Organizations = &OrganizationServiceOp{client: c}
+	c.Organizations = &OrganizationServiceOp{serviceOp: &serviceOp{client: c}}
 	c.Plans = &PlanServiceOp{client: c}
 	c.Ports = &PortServiceOp{client: c}
 	c.ProjectIPs = &ProjectIPServiceOp{client: c}

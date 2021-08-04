@@ -1,10 +1,7 @@
 package packngo
 
 import (
-	"net/http"
 	"path"
-
-	"github.com/packethost/packngo/href"
 )
 
 // API documentation https://metal.equinix.com/developers/api/organizations/
@@ -59,7 +56,7 @@ func (o *Organization) SetHref(href string) {
 
 func (o *Organization) SetID(id string) {
 	o.ID = id
-	o.Href = o.SetHref()
+	o.SetHref(path.Join(projectBasePath, id))
 }
 
 // OrganizationCreateRequest type used to create an Equinix Metal organization
@@ -90,7 +87,7 @@ func (o OrganizationUpdateRequest) String() string {
 
 // OrganizationServiceOp implements OrganizationService
 type OrganizationServiceOp struct {
-	client *Client
+	*serviceOp
 }
 
 // List returns the user's organizations
@@ -116,13 +113,6 @@ func (s *OrganizationServiceOp) List(opts *ListOptions) (orgs []Organization, re
 
 func (s *OrganizationServiceOp) DefaultIncludes() []string {
 	return []string{}
-}
-
-func (s *OrganizationServiceOp) Hydrate(resource href.Hrefer, opts *GetOptions) (*Response, error) {
-	opts.Including(s.DefaultIncludes()...)
-	apiPathQuery := opts.WithQuery(resource.GetHref())
-
-	return s.client.DoRequest(http.MethodGet, apiPathQuery, nil, resource)
 }
 
 // Get returns a organization by id

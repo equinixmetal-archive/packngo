@@ -400,7 +400,7 @@ func TestAccDeviceAssignGlobalIP(t *testing.T) {
 	}
 	t.Fatalf("assignment %s should be listed in device %s", assignment, d)
 
-	if *assignment.AssignedTo.Href != d.Href {
+	if *assignment.AssignedTo.Href != d.GetHref() {
 		t.Fatalf("device %s should be listed in assignment %s",
 			d, assignment)
 	}
@@ -587,7 +587,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	}
 	t.Fatalf("assignment %s should be listed in device %s", assignment, d)
 
-	if *assignment.AssignedTo.Href != d.Href {
+	if *assignment.AssignedTo.Href != d.GetHref() {
 		t.Fatalf("device %s should be listed in assignment %s",
 			d, assignment)
 	}
@@ -741,7 +741,7 @@ func TestAccDeviceAttachVolume(t *testing.T) {
 		t.Fatalf("wrong volume href in the attachment: %s, should be %s", a.Volume.Href, v.ID)
 	}
 
-	if path.Base(a.Device.Href) != d.ID {
+	if path.Base(a.Device.GetHref()) != d.ID {
 		t.Fatalf("wrong device href in the attachment: %s, should be %s", a.Device.Href, d.ID)
 	}
 

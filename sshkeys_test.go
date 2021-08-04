@@ -52,7 +52,7 @@ func TestAccSSHKeyList(t *testing.T) {
 
 	for _, k := range keys {
 		if k.ID == key.ID {
-			if len(k.Owner.Href) == 0 {
+			if len(k.Owner.GetHref()) == 0 {
 				t.Error("new Key doesn't have owner URL set")
 			}
 			return
@@ -81,7 +81,7 @@ func TestAccSSHKeyProjectList(t *testing.T) {
 
 	for _, k := range keys {
 		if k.ID == key.ID {
-			if len(k.Owner.Href) == 0 {
+			if len(k.Owner.GetHref()) == 0 {
 				t.Error("new Key doesn't have owner URL set")
 			}
 			return
@@ -104,7 +104,7 @@ func TestAccSSHKeyGet(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to retrieve created key")
 		}
-		if len(got.Owner.Href) == 0 {
+		if len(got.Owner.GetHref()) == 0 {
 			t.Error("new Key doesn't have owner URL set")
 		}
 
@@ -130,7 +130,7 @@ func TestAccSSHKeyCreate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("errored posting key: %v", err)
 	}
-	if len(key.Owner.Href) == 0 {
+	if len(key.Owner.GetHref()) == 0 {
 		t.Error("new Key doesn't have owner URL set")
 	}
 
