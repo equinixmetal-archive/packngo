@@ -51,9 +51,9 @@ const (
 	VLANAssignmentUnassigned VLANAssignmentState = "unassigned"
 )
 
-// VLANAssignment struct for VLANAssignment
+// VLANAssignment struct for VLANAssignmentService.Get represents a port VLAN assignment that has been enacted
 type VLANAssignment struct {
-	// ID is the VirtualNetwork.ID of the VLAN the assignment was made to
+	// ID of the assignment
 	ID string `json:"id,omitempty"`
 
 	CreatedAt Timestamp `json:"created_at,omitempty"`
@@ -75,6 +75,21 @@ type VLANAssignment struct {
 	VirtualNetwork *VirtualNetwork `json:"virtual_network,omitempty"`
 }
 
+// BatchedVLANAssignment represents the data requested in the batch before being processed. ID represents the VLAN ID, not the VLAN Assignment ID.
+type BatchedVLANAssignment struct {
+	// VirtualNetworkID is the VirtualNetwork.ID of the VLAN the assignment was made to
+	VirtualNetworkID string `json:"id,omitempty"`
+
+	// Native indicates the VLAN is the native VLAN on the port and packets for this vlan will be untagged
+	Native bool `json:"native,omitempty"`
+
+	// State of the assignment
+	State VLANAssignmentState `json:"state,omitempty"`
+
+	// VLAN is the VirtualNetwork.VXLAN of the VLAN the assignment was made to
+	VLAN int `json:"vlan,omitempty"`
+}
+
 // VLANAssignmentBatch struct for VLANAssignmentBatch
 type VLANAssignmentBatch struct {
 	ID              string                   `json:"id,omitempty"`
@@ -85,7 +100,7 @@ type VLANAssignmentBatch struct {
 	UpdatedAt       Timestamp                `json:"updated_at,omitempty"`
 	Port            *Port                    `json:"port,omitempty"`
 	Project         *Project                 `json:"project,omitempty"`
-	VLANAssignments []VLANAssignment         `json:"vlan_assignments,omitempty"`
+	VLANAssignments []BatchedVLANAssignment  `json:"vlan_assignments,omitempty"`
 }
 
 // VLANAssignmentBatchCreateRequest struct for VLANAssignmentBatch Create

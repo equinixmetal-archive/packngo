@@ -181,6 +181,15 @@ func TestAccVLANAssignmentServiceOp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// We must unassign the port when done testing because we can not delete the VLAN when in use
+	defer func() {
+		_, _, err := c.Ports.Unassign(bond0.ID, strconv.Itoa(vlans[1].VXLAN))
+		if err != nil {
+			t.Log(err)
+		}
+	}()
+
 	if b.Quantity != 2 {
 		t.Fatal("Exactly two attachments should be batched")
 	}
@@ -190,21 +199,9 @@ func TestAccVLANAssignmentServiceOp(t *testing.T) {
 	}
 
 	// verify batch can be fetched
-	b2, _, err := c.VLANAssignments.GetBatch(bond0.ID, b.ID, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	b2 := waitVLANAssignmentBatch(t, c, bond0.ID, b.ID)
 	if b2.CreatedAt != b.CreatedAt {
 		t.Fatal("Reloaded VLANAssignment batch create time should match original response")
-	}
-
-	// verify single assignment can be fetched
-	a2, _, err := c.VLANAssignments.Get(bond0.ID, b.VLANAssignments[0].ID, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if a2.CreatedAt != b.VLANAssignments[0].CreatedAt {
-		t.Fatal("Reloaded VLANAssignment create time should match original response")
 	}
 
 	// verify port vlan assignments can be listed
@@ -212,15 +209,18 @@ func TestAccVLANAssignmentServiceOp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	unseen := map[string]bool{
-		b.VLANAssignments[0].ID: true,
-		b.VLANAssignments[1].ID: true,
-	}
-	for _, a := range allAs {
-		delete(unseen, a.ID)
-	}
-	if len(unseen) != 0 {
+	// We do not expect "unassigned" vlan assignments to persist
+	if len(allAs) != 1 {
 		t.Fatal("unexpected or missing VLANAssignments in List results")
+	}
+
+	// verify single assignment can be fetched
+	a2, _, err := c.VLANAssignments.Get(bond0.ID, allAs[0].ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a2.CreatedAt != allAs[0].CreatedAt {
+		t.Fatal("Reloaded VLANAssignment create time should match original response")
 	}
 
 	// verify port vlan batch assignments can be listed
@@ -228,7 +228,7 @@ func TestAccVLANAssignmentServiceOp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	unseen = map[string]bool{
+	unseen := map[string]bool{
 		b2.ID: true,
 	}
 	for _, b := range allBs {
@@ -237,4 +237,26 @@ func TestAccVLANAssignmentServiceOp(t *testing.T) {
 	if len(unseen) != 0 {
 		t.Fatal("unexpected or missing Batch Assignments in ListBatch results")
 	}
+}
+
+func waitVLANAssignmentBatch(t *testing.T, c *Client, portID, id string) *VLANAssignmentBatch {
+	// 15 minutes = 180 * 5sec-retry
+	for i := 0; i < 180; i++ {
+		<-time.After(5 * time.Second)
+		b, _, err := c.VLANAssignments.GetBatch(portID, id, nil)
+		if err != nil {
+			t.Fatal(err)
+			return nil
+		}
+		if b.State == VLANAssignmentBatchCompleted {
+			return b
+		}
+		if b.State == VLANAssignmentBatchFailed {
+			t.Fatalf("vlan assignment batch %s provisioning failed: %s", id, strings.Join(b.ErrorMessages, "; "))
+			return nil
+		}
+	}
+
+	t.Fatal(fmt.Errorf("vlan assignment batch %s is still not complete after timeout", id))
+	return nil
 }
