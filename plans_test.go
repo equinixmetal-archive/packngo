@@ -32,6 +32,29 @@ func plansInFacilities(t *testing.T, plans []Plan) {
 	}
 }
 
+func TestAccPlansFilter(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+
+	c, stopRecord := setup(t)
+	defer stopRecord()
+	opts := &ListOptions{Includes: []string{"available_in"}}
+
+	optsOnDemand := opts.Filter("deployment_type", "on_demand")
+
+	onDemandPlans, _, err := c.Plans.List(optsOnDemand)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	allPlans, _, err := c.Plans.List(opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(onDemandPlans) >= len(allPlans) {
+		t.Fatalf("filtering of plans listing might not be working")
+	}
+}
+
 func TestAccPlansBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 

@@ -37,6 +37,9 @@ type GetOptions struct {
 	// their `Href` field.
 	Excludes []string `url:"exclude,omitempty,comma"`
 
+	// QueryParams for API URL, used for arbitrary filters
+	QueryParams map[string]string `url:"-"`
+
 	// Page is the page of results to retrieve for paginated result sets
 	Page int `url:"page,omitempty"`
 
@@ -107,6 +110,20 @@ func (g *GetOptions) CopyOrNew() *GetOptions {
 	return &ret
 }
 
+func (g *GetOptions) Filter(key, value string) *GetOptions {
+	return g.AddParam(key, value)
+}
+
+// AddParam adds key=value to URL path
+func (g *GetOptions) AddParam(key, value string) *GetOptions {
+	ret := g.CopyOrNew()
+	if ret.QueryParams == nil {
+		ret.QueryParams = map[string]string{}
+	}
+	ret.QueryParams[key] = value
+	return ret
+}
+
 // Including ensures that the variadic refs are included in a copy of the
 // options, resulting in expansion of the the referred sub-resources. Unknown
 // values within refs will be silently ignore by the API.
@@ -152,32 +169,46 @@ func nextPage(meta meta, opts *GetOptions) (path string) {
 	return ""
 }
 
+const (
+	IncludeParam       = "include"
+	ExcludeParam       = "exclude"
+	PageParam          = "page"
+	PerPageParam       = "per_page"
+	SearchParam        = "search"
+	SortByParam        = "sort_by"
+	SortDirectionParam = "sort_direction"
+)
+
 // Encode generates a URL query string ("?foo=bar")
 func (g *GetOptions) Encode() string {
 	if g == nil {
 		return ""
 	}
 	v := url.Values{}
+	for k, val := range g.QueryParams {
+		v.Add(k, val)
+	}
+	// the names parameters will rewrite arbitrary options
 	if g.Includes != nil && len(g.Includes) > 0 {
-		v.Add("include", strings.Join(g.Includes, ","))
+		v.Add(IncludeParam, strings.Join(g.Includes, ","))
 	}
 	if g.Excludes != nil && len(g.Excludes) > 0 {
-		v.Add("exclude", strings.Join(g.Excludes, ","))
+		v.Add(ExcludeParam, strings.Join(g.Excludes, ","))
 	}
 	if g.Page != 0 {
-		v.Add("page", strconv.Itoa(g.Page))
+		v.Add(PageParam, strconv.Itoa(g.Page))
 	}
 	if g.PerPage != 0 {
-		v.Add("per_page", strconv.Itoa(g.PerPage))
+		v.Add(PerPageParam, strconv.Itoa(g.PerPage))
 	}
 	if g.Search != "" {
-		v.Add("search", g.Search)
+		v.Add(SearchParam, g.Search)
 	}
 	if g.SortBy != "" {
-		v.Add("sort_by", g.SortBy)
+		v.Add(SortByParam, g.SortBy)
 	}
 	if g.SortDirection != "" {
-		v.Add("sort_direction", string(g.SortDirection))
+		v.Add(SortDirectionParam, string(g.SortDirection))
 	}
 	return v.Encode()
 }
