@@ -34,6 +34,7 @@ func (mc *MockClient) DoRequest(method, path string, body, v interface{}) (*Resp
 	return mc.fnDoRequest(method, path, body, v)
 }
 
+/* deadcode, for now
 func mockDoRequestWithHeader(doFn func(req *http.Request, v interface{}) (*Response, error), newRequestFn func(method, path string, body interface{}) (*http.Request, error)) func(string, map[string]string, string, interface{}, interface{}) (*Response, error) {
 	return func(method string, headers map[string]string, path string, body, v interface{}) (*Response, error) {
 		req, err := newRequestFn(method, path, body)
@@ -47,6 +48,8 @@ func mockDoRequestWithHeader(doFn func(req *http.Request, v interface{}) (*Respo
 		return doFn(req, v)
 	}
 }
+*/
+
 func mockNewRequest() func(string, string, interface{}) (*http.Request, error) {
 	baseURL := &url.URL{}
 	apiKey, consumerToken, userAgent := "", "", ""
