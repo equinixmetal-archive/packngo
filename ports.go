@@ -43,6 +43,8 @@ type BondData struct {
 // Port is a hardware port associated with a reserved or instantiated hardware
 // device.
 type Port struct {
+	*Href `json:",inline"`
+
 	// ID of the Port
 	ID string `json:"id"`
 
