@@ -37,8 +37,8 @@ type GetOptions struct {
 	// their `Href` field.
 	Excludes []string `url:"exclude,omitempty,comma"`
 
-	// Arbitrary params for API URL, used for arbitrary filters
-	ArbitraryOpts map[string]string `url:"-"`
+	// QueryParams for API URL, used for arbitrary filters
+	QueryParams map[string]string `url:"-"`
 
 	// Page is the page of results to retrieve for paginated result sets
 	Page int `url:"page,omitempty"`
@@ -111,16 +111,16 @@ func (g *GetOptions) CopyOrNew() *GetOptions {
 }
 
 func (g *GetOptions) Filter(key, value string) *GetOptions {
-	return g.AddOpt(key, value)
+	return g.AddParam(key, value)
 }
 
-// AddOpt adds key=value to URL path
-func (g *GetOptions) AddOpt(key, value string) *GetOptions {
+// AddParam adds key=value to URL path
+func (g *GetOptions) AddParam(key, value string) *GetOptions {
 	ret := g.CopyOrNew()
-	if ret.ArbitraryOpts == nil {
-		ret.ArbitraryOpts = map[string]string{}
+	if ret.QueryParams == nil {
+		ret.QueryParams = map[string]string{}
 	}
-	ret.ArbitraryOpts[key] = value
+	ret.QueryParams[key] = value
 	return ret
 }
 
@@ -185,7 +185,7 @@ func (g *GetOptions) Encode() string {
 		return ""
 	}
 	v := url.Values{}
-	for k, val := range g.ArbitraryOpts {
+	for k, val := range g.QueryParams {
 		v.Add(k, val)
 	}
 	// the names parameters will rewrite arbitrary options

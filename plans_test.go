@@ -53,8 +53,6 @@ func TestAccPlansFilter(t *testing.T) {
 	if len(onDemandPlans) >= len(allPlans) {
 		t.Fatalf("filtering of plans listing might not be working")
 	}
-	log.Println(len(onDemandPlans), len(allPlans))
-
 }
 
 func TestAccPlansBasic(t *testing.T) {
