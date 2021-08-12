@@ -16,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 const (
@@ -354,7 +356,11 @@ func NewClientWithAuth(consumerToken string, apiKey string, httpClient *http.Cli
 // for mocking the remote API
 func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.Client, apiBaseURL string) (*Client, error) {
 	if httpClient == nil {
-		httpClient = http.DefaultClient
+		// set up an OpenTelemetry http client with the otel transport wrapping the default
+		// this enables W3C TRACEPARENT propagation through requests and context
+		httpClient = &http.Client{
+			Transport: otelhttp.NewTransport(http.DefaultTransport),
+		}
 	}
 
 	u, err := url.Parse(apiBaseURL)
