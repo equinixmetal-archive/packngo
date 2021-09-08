@@ -380,14 +380,14 @@ type CPR struct {
 
 // DeviceCreateRequest type used to create an Equinix Metal device
 type DeviceCreateRequest struct {
-	Hostname              string     `json:"hostname"`
+	Hostname              string     `json:"hostname,omitempty"`
 	Plan                  string     `json:"plan"`
 	Facility              []string   `json:"facility,omitempty"`
 	Metro                 string     `json:"metro,omitempty"`
 	OS                    string     `json:"operating_system"`
-	BillingCycle          string     `json:"billing_cycle"`
+	BillingCycle          string     `json:"billing_cycle,omitempty"`
 	ProjectID             string     `json:"project_id"`
-	UserData              string     `json:"userdata"`
+	UserData              string     `json:"userdata,omitempty"`
 	Storage               *CPR       `json:"storage,omitempty"`
 	Tags                  []string   `json:"tags"`
 	Description           string     `json:"description,omitempty"`
