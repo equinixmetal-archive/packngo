@@ -104,6 +104,7 @@ type Client struct {
 	Devices                DeviceService
 	Emails                 EmailService
 	Events                 EventService
+	FabricServiceTokens    FabricServiceTokenService
 	Facilities             FacilityService
 	HardwareReservations   HardwareReservationService
 	Metros                 MetroService

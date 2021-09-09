@@ -63,6 +63,7 @@ type ConnectionPort struct {
 
 type Connection struct {
 	ID           string               `json:"id"`
+	ContactEmail string               `json:"contact_email,omitempty"`
 	Name         string               `json:"name,omitempty"`
 	Status       string               `json:"status,omitempty"`
 	Redundancy   ConnectionRedundancy `json:"redundancy,omitempty"`
@@ -75,21 +76,24 @@ type Connection struct {
 	Organization *Organization        `json:"organization,omitempty"`
 	Speed        int                  `json:"speed,omitempty"`
 	Token        string               `json:"token,omitempty"`
+	Tokens       []FabricServiceToken `json:"tokens,omitempty"`
 	Tags         []string             `json:"tags,omitempty"`
 	Ports        []ConnectionPort     `json:"ports,omitempty"`
 }
 
 type ConnectionCreateRequest struct {
-	Name        string               `json:"name,omitempty"`
-	Redundancy  ConnectionRedundancy `json:"redundancy,omitempty"`
-	Facility    string               `json:"facility,omitempty"`
-	Metro       string               `json:"metro,omitempty"`
-	Type        ConnectionType       `json:"type,omitempty"`
-	Mode        ConnectionMode       `json:"mode,omitempty"`
-	Description *string              `json:"description,omitempty"`
-	Project     string               `json:"project,omitempty"`
-	Speed       int                  `json:"speed,omitempty"`
-	Tags        []string             `json:"tags,omitempty"`
+	ContactEmail     string               `json:"contact_email,omitempty"`
+	Description      *string              `json:"description,omitempty"`
+	Facility         string               `json:"facility,omitempty"`
+	Metro            string               `json:"metro,omitempty"`
+	Mode             ConnectionMode       `json:"mode,omitempty"`
+	Name             string               `json:"name,omitempty"`
+	Project          string               `json:"project,omitempty"`
+	Redundancy       ConnectionRedundancy `json:"redundancy,omitempty"`
+	ServiceTokenType string               `json:"service_token_type,omitempty"`
+	Speed            int                  `json:"speed,omitempty"`
+	Tags             []string             `json:"tags,omitempty"`
+	Type             ConnectionType       `json:"type,omitempty"`
 }
 
 type ConnectionUpdateRequest struct {
