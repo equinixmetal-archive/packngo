@@ -2,7 +2,13 @@ package packngo
 
 import "path"
 
-const fabricServiceTokenBasePath = "/fabric-service-tokens"
+type FabricServiceTokenType string
+
+const (
+	fabricServiceTokenBasePath                        = "/fabric-service-tokens"
+	FabricServiceTokenASide    FabricServiceTokenType = "a_side"
+	FabricServiceTokenZSide    FabricServiceTokenType = "z_side"
+)
 
 // FabricServiceTokenService interface defines available metro methods
 type FabricServiceTokenService interface {
@@ -15,14 +21,14 @@ type fabricServiceTokensRoot struct {
 
 // FabricServiceToken represents an Equinix Metal metro
 type FabricServiceToken struct {
-	ID               string          `json:"id"`
-	Role             string          `json:"role,omitempty"`
-	State            string          `json:"state,omitempty"`
-	MaxAllowedSpeed  int             `json:"max_allowed_speed,omitempty"`
-	ServiceTokenType string          `json:"service_token_type,omitempty"`
-	Connection       *Connection     `json:"interconnection,omitempty"`
-	ConnectionPort   *ConnectionPort `json:"interconnection_port,omitempty"`
-	Organization     *Organization   `json:"organization,omitempty"`
+	ID               string                 `json:"id"`
+	Role             string                 `json:"role,omitempty"`
+	State            string                 `json:"state,omitempty"`
+	MaxAllowedSpeed  int                    `json:"max_allowed_speed,omitempty"`
+	ServiceTokenType FabricServiceTokenType `json:"service_token_type,omitempty"`
+	Connection       *Connection            `json:"interconnection,omitempty"`
+	ConnectionPort   *ConnectionPort        `json:"interconnection_port,omitempty"`
+	Organization     *Organization          `json:"organization,omitempty"`
 }
 
 func (f FabricServiceToken) String() string {

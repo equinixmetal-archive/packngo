@@ -50,15 +50,16 @@ type connectionsRoot struct {
 }
 
 type ConnectionPort struct {
-	ID              string             `json:"id"`
-	Name            string             `json:"name,omitempty"`
-	Status          string             `json:"status,omitempty"`
-	Role            ConnectionPortRole `json:"role,omitempty"`
-	Speed           int                `json:"speed,omitempty"`
-	Organization    *Organization      `json:"organization,omitempty"`
-	VirtualCircuits []VirtualCircuit   `json:"virtual_circuits,omitempty"`
-	LinkStatus      string             `json:"link_status,omitempty"`
-	Href            string             `json:"href,omitempty"`
+	Href            string               `json:"href,omitempty"`
+	ID              string               `json:"id"`
+	LinkStatus      string               `json:"link_status,omitempty"`
+	Name            string               `json:"name,omitempty"`
+	Organization    *Organization        `json:"organization,omitempty"`
+	Role            ConnectionPortRole   `json:"role,omitempty"`
+	Speed           int                  `json:"speed,omitempty"`
+	Status          string               `json:"status,omitempty"`
+	Tokens          []FabricServiceToken `json:"tokens,omitempty"`
+	VirtualCircuits []VirtualCircuit     `json:"virtual_circuits,omitempty"`
 }
 
 type Connection struct {
@@ -82,18 +83,18 @@ type Connection struct {
 }
 
 type ConnectionCreateRequest struct {
-	ContactEmail     string               `json:"contact_email,omitempty"`
-	Description      *string              `json:"description,omitempty"`
-	Facility         string               `json:"facility,omitempty"`
-	Metro            string               `json:"metro,omitempty"`
-	Mode             ConnectionMode       `json:"mode,omitempty"`
-	Name             string               `json:"name,omitempty"`
-	Project          string               `json:"project,omitempty"`
-	Redundancy       ConnectionRedundancy `json:"redundancy,omitempty"`
-	ServiceTokenType string               `json:"service_token_type,omitempty"`
-	Speed            int                  `json:"speed,omitempty"`
-	Tags             []string             `json:"tags,omitempty"`
-	Type             ConnectionType       `json:"type,omitempty"`
+	ContactEmail     string                 `json:"contact_email,omitempty"`
+	Description      *string                `json:"description,omitempty"`
+	Facility         string                 `json:"facility,omitempty"`
+	Metro            string                 `json:"metro,omitempty"`
+	Mode             ConnectionMode         `json:"mode,omitempty"`
+	Name             string                 `json:"name,omitempty"`
+	Project          string                 `json:"project,omitempty"`
+	Redundancy       ConnectionRedundancy   `json:"redundancy,omitempty"`
+	ServiceTokenType FabricServiceTokenType `json:"service_token_type,omitempty"`
+	Speed            int                    `json:"speed,omitempty"`
+	Tags             []string               `json:"tags,omitempty"`
+	Type             ConnectionType         `json:"type,omitempty"`
 }
 
 type ConnectionUpdateRequest struct {
