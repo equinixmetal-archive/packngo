@@ -15,10 +15,6 @@ type FabricServiceTokenService interface {
 	Get(string, *GetOptions) (*FabricServiceToken, *Response, error)
 }
 
-type fabricServiceTokensRoot struct {
-	FabricServiceTokens []FabricServiceToken `json:"fabric_service_tokens"`
-}
-
 // FabricServiceToken represents an Equinix Metal metro
 type FabricServiceToken struct {
 	ID               string                 `json:"id"`
