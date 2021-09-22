@@ -95,6 +95,7 @@ type ConnectionCreateRequest struct {
 	Speed            int                    `json:"speed,omitempty"`
 	Tags             []string               `json:"tags,omitempty"`
 	Type             ConnectionType         `json:"type,omitempty"`
+	VLANs            []string               `json:"vlans,omitempty"`
 }
 
 type ConnectionUpdateRequest struct {
