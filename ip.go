@@ -116,6 +116,9 @@ type AddressStruct struct {
 }
 
 func deleteFromIP(client *Client, resourceID string) (*Response, error) {
+	if validateErr := ValidateUUID(resourceID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(ipBasePath, resourceID)
 
 	return client.DoRequest("DELETE", apiPath, nil, nil)
@@ -138,12 +141,18 @@ type DeviceIPServiceOp struct {
 // This will remove the relationship between an IP and the device and will make the IP
 // address available to be assigned to another device.
 func (i *DeviceIPServiceOp) Unassign(assignmentID string) (*Response, error) {
+	if validateErr := ValidateUUID(assignmentID); validateErr != nil {
+		return nil, validateErr
+	}
 	return deleteFromIP(i.client, assignmentID)
 }
 
 // Assign assigns an IP address to a device.
 // The IP address must be in one of the IP ranges assigned to the device’s project.
 func (i *DeviceIPServiceOp) Assign(deviceID string, assignRequest *AddressStruct) (*IPAddressAssignment, *Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(deviceBasePath, deviceID, ipBasePath)
 	ipa := new(IPAddressAssignment)
 
@@ -157,6 +166,9 @@ func (i *DeviceIPServiceOp) Assign(deviceID string, assignRequest *AddressStruct
 
 // Get returns assignment by ID.
 func (i *DeviceIPServiceOp) Get(assignmentID string, opts *GetOptions) (*IPAddressAssignment, *Response, error) {
+	if validateErr := ValidateUUID(assignmentID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(ipBasePath, assignmentID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	ipa := new(IPAddressAssignment)
@@ -171,6 +183,9 @@ func (i *DeviceIPServiceOp) Get(assignmentID string, opts *GetOptions) (*IPAddre
 
 // List list all of the IP address assignments on a device
 func (i *DeviceIPServiceOp) List(deviceID string, opts *ListOptions) ([]IPAddressAssignment, *Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(deviceBasePath, deviceID, ipBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
@@ -196,6 +211,9 @@ type ProjectIPServiceOp struct {
 
 // Get returns reservation by ID.
 func (i *ProjectIPServiceOp) Get(reservationID string, opts *GetOptions) (*IPAddressReservation, *Response, error) {
+	if validateErr := ValidateUUID(reservationID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(ipBasePath, reservationID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	ipr := new(IPAddressReservation)
@@ -210,6 +228,9 @@ func (i *ProjectIPServiceOp) Get(reservationID string, opts *GetOptions) (*IPAdd
 
 // List provides a list of IP resevations for a single project.
 func (i *ProjectIPServiceOp) List(projectID string, opts *ListOptions) ([]IPAddressReservation, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(projectBasePath, projectID, ipBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	reservations := new(struct {
@@ -225,6 +246,9 @@ func (i *ProjectIPServiceOp) List(projectID string, opts *ListOptions) ([]IPAddr
 
 // Request requests more IP space for a project in order to have additional IP addresses to assign to devices.
 func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(projectBasePath, projectID, ipBasePath)
 	ipr := new(IPAddressReservation)
 
@@ -237,11 +261,17 @@ func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReser
 
 // Remove removes an IP reservation from the project.
 func (i *ProjectIPServiceOp) Remove(ipReservationID string) (*Response, error) {
+	if validateErr := ValidateUUID(ipReservationID); validateErr != nil {
+		return nil, validateErr
+	}
 	return deleteFromIP(i.client, ipReservationID)
 }
 
 // AvailableAddresses lists addresses available from a reserved block
 func (i *ProjectIPServiceOp) AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error) {
+	if validateErr := ValidateUUID(ipReservationID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPathQuery := fmt.Sprintf("%s/%s/available?cidr=%d", ipBasePath, ipReservationID, r.CIDR)
 	ar := new(AvailableResponse)
 

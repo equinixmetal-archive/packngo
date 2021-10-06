@@ -67,6 +67,9 @@ type CreateBGPSessionRequest struct {
 
 // Create function
 func (s *BGPSessionServiceOp) Create(deviceID string, request CreateBGPSessionRequest) (*BGPSession, *Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(deviceBasePath, deviceID, bgpSessionBasePath)
 	session := new(BGPSession)
 
@@ -80,6 +83,9 @@ func (s *BGPSessionServiceOp) Create(deviceID string, request CreateBGPSessionRe
 
 // Delete function
 func (s *BGPSessionServiceOp) Delete(id string) (*Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(bgpSessionBasePath, id)
 
 	return s.client.DoRequest("DELETE", apiPath, nil, nil)
@@ -87,6 +93,9 @@ func (s *BGPSessionServiceOp) Delete(id string) (*Response, error) {
 
 // Get function
 func (s *BGPSessionServiceOp) Get(id string, opts *GetOptions) (session *BGPSession, response *Response, err error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(bgpSessionBasePath, id)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	session = new(BGPSession)

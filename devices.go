@@ -186,6 +186,9 @@ func (b *BandwidthOpts) WithQuery(apiPath string) string {
 }
 
 func (d *DeviceServiceOp) GetBandwidth(deviceID string, opts *BandwidthOpts) (*BandwidthIO, *Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(deviceBasePath, deviceID, "bandwidth")
 	apiPathQuery := opts.WithQuery(endpointPath)
 	bw := new(bandwidthRoot)
@@ -468,6 +471,9 @@ type DeviceServiceOp struct {
 // Plan.Name, Plan.Slug, Facility.Code, Facility.Name, OS.Name, OS.Slug,
 // HardwareReservation.ID, HardwareReservation.ShortID
 func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []Device, resp *Response, err error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	opts = opts.Including("facility")
 	endpointPath := path.Join(projectBasePath, projectID, deviceBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
@@ -492,6 +498,9 @@ func (s *DeviceServiceOp) List(projectID string, opts *ListOptions) (devices []D
 
 // Get returns a device by id
 func (s *DeviceServiceOp) Get(deviceID string, opts *GetOptions) (*Device, *Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	opts = opts.Including("facility")
 	endpointPath := path.Join(deviceBasePath, deviceID)
 	apiPathQuery := opts.WithQuery(endpointPath)
@@ -517,6 +526,9 @@ func (s *DeviceServiceOp) Create(createRequest *DeviceCreateRequest) (*Device, *
 
 // Update updates an existing device
 func (s *DeviceServiceOp) Update(deviceID string, updateRequest *DeviceUpdateRequest) (*Device, *Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	opts := &GetOptions{}
 	opts = opts.Including("facility")
 	endpointPath := path.Join(deviceBasePath, deviceID)
@@ -533,6 +545,9 @@ func (s *DeviceServiceOp) Update(deviceID string, updateRequest *DeviceUpdateReq
 
 // Delete deletes a device
 func (s *DeviceServiceOp) Delete(deviceID string, force bool) (*Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(deviceBasePath, deviceID)
 	req := &DeviceDeleteRequest{Force: force}
 
@@ -541,6 +556,9 @@ func (s *DeviceServiceOp) Delete(deviceID string, force bool) (*Response, error)
 
 // Reboot reboots on a device
 func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "reboot"}
 
@@ -549,6 +567,9 @@ func (s *DeviceServiceOp) Reboot(deviceID string) (*Response, error) {
 
 // Reinstall reinstalls a device
 func (s *DeviceServiceOp) Reinstall(deviceID string, fields *DeviceReinstallFields) (*Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, validateErr
+	}
 	path := fmt.Sprintf("%s/%s/actions", deviceBasePath, deviceID)
 	action := &DeviceReinstallRequest{DeviceActionRequest{Type: "reinstall"}, fields}
 
@@ -557,6 +578,9 @@ func (s *DeviceServiceOp) Reinstall(deviceID string, fields *DeviceReinstallFiel
 
 // PowerOff powers on a device
 func (s *DeviceServiceOp) PowerOff(deviceID string) (*Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "power_off"}
 
@@ -565,6 +589,9 @@ func (s *DeviceServiceOp) PowerOff(deviceID string) (*Response, error) {
 
 // PowerOn powers on a device
 func (s *DeviceServiceOp) PowerOn(deviceID string) (*Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "power_on"}
 
@@ -577,6 +604,9 @@ type lockType struct {
 
 // Lock sets a device to "locked"
 func (s *DeviceServiceOp) Lock(deviceID string) (*Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(deviceBasePath, deviceID)
 	action := lockType{Locked: true}
 
@@ -585,6 +615,9 @@ func (s *DeviceServiceOp) Lock(deviceID string) (*Response, error) {
 
 // Unlock sets a device to "unlocked"
 func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(deviceBasePath, deviceID)
 	action := lockType{Locked: false}
 
@@ -592,6 +625,9 @@ func (s *DeviceServiceOp) Unlock(deviceID string) (*Response, error) {
 }
 
 func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) ([]BGPNeighbor, *Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	root := new(bgpNeighborsRoot)
 	endpointPath := path.Join(deviceBasePath, deviceID, bgpNeighborsBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
@@ -606,6 +642,9 @@ func (s *DeviceServiceOp) ListBGPNeighbors(deviceID string, opts *ListOptions) (
 
 // ListBGPSessions returns all BGP Sessions associated with the device
 func (s *DeviceServiceOp) ListBGPSessions(deviceID string, opts *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 
 	endpointPath := path.Join(deviceBasePath, deviceID, bgpSessionBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
@@ -629,6 +668,9 @@ func (s *DeviceServiceOp) ListBGPSessions(deviceID string, opts *ListOptions) (b
 
 // ListEvents returns list of device events
 func (s *DeviceServiceOp) ListEvents(deviceID string, opts *ListOptions) ([]Event, *Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(deviceBasePath, deviceID, eventBasePath)
 
 	return listEvents(s.client, apiPath, opts)

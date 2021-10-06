@@ -110,6 +110,9 @@ type VolumeServiceOp struct {
 
 // List returns the volumes for a project
 func (v *VolumeServiceOp) List(projectID string, opts *ListOptions) (volumes []Volume, resp *Response, err error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(projectBasePath, projectID, volumeBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	for {
@@ -131,6 +134,9 @@ func (v *VolumeServiceOp) List(projectID string, opts *ListOptions) (volumes []V
 
 // Get returns a volume by id
 func (v *VolumeServiceOp) Get(volumeID string, opts *GetOptions) (*Volume, *Response, error) {
+	if validateErr := ValidateUUID(volumeID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(volumeBasePath, volumeID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	volume := new(Volume)
@@ -145,6 +151,9 @@ func (v *VolumeServiceOp) Get(volumeID string, opts *GetOptions) (*Volume, *Resp
 
 // Update updates a volume
 func (v *VolumeServiceOp) Update(id string, updateRequest *VolumeUpdateRequest) (*Volume, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(volumeBasePath, id)
 	volume := new(Volume)
 
@@ -158,6 +167,9 @@ func (v *VolumeServiceOp) Update(id string, updateRequest *VolumeUpdateRequest) 
 
 // Delete deletes a volume
 func (v *VolumeServiceOp) Delete(volumeID string) (*Response, error) {
+	if validateErr := ValidateUUID(volumeID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(volumeBasePath, volumeID)
 
 	return v.client.DoRequest("DELETE", apiPath, nil, nil)
@@ -165,6 +177,9 @@ func (v *VolumeServiceOp) Delete(volumeID string) (*Response, error) {
 
 // Create creates a new volume for a project
 func (v *VolumeServiceOp) Create(createRequest *VolumeCreateRequest, projectID string) (*Volume, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	url := path.Join(projectBasePath, projectID, volumeBasePath)
 	volume := new(Volume)
 
@@ -180,6 +195,12 @@ func (v *VolumeServiceOp) Create(createRequest *VolumeCreateRequest, projectID s
 
 // Create Attachment, i.e. attach volume to a device
 func (v *VolumeAttachmentServiceOp) Create(volumeID, deviceID string) (*VolumeAttachment, *Response, error) {
+	if validateErr := ValidateUUID(volumeID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	url := path.Join(volumeBasePath, volumeID, attachmentsBasePath)
 	volAttachParam := map[string]string{
 		"device_id": deviceID,
@@ -195,6 +216,9 @@ func (v *VolumeAttachmentServiceOp) Create(volumeID, deviceID string) (*VolumeAt
 
 // Get gets attachment by id
 func (v *VolumeAttachmentServiceOp) Get(attachmentID string, opts *GetOptions) (*VolumeAttachment, *Response, error) {
+	if validateErr := ValidateUUID(attachmentID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(volumeBasePath, attachmentsBasePath, attachmentID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	volumeAttachment := new(VolumeAttachment)
@@ -209,6 +233,9 @@ func (v *VolumeAttachmentServiceOp) Get(attachmentID string, opts *GetOptions) (
 
 // Delete deletes attachment by id
 func (v *VolumeAttachmentServiceOp) Delete(attachmentID string) (*Response, error) {
+	if validateErr := ValidateUUID(attachmentID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(volumeBasePath, attachmentsBasePath, attachmentID)
 
 	return v.client.DoRequest("DELETE", apiPath, nil, nil)
@@ -216,6 +243,9 @@ func (v *VolumeAttachmentServiceOp) Delete(attachmentID string) (*Response, erro
 
 // Lock sets a volume to "locked"
 func (v *VolumeServiceOp) Lock(id string) (*Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(volumeBasePath, id)
 	action := lockType{Locked: true}
 
@@ -224,6 +254,9 @@ func (v *VolumeServiceOp) Lock(id string) (*Response, error) {
 
 // Unlock sets a volume to "unlocked"
 func (v *VolumeServiceOp) Unlock(id string) (*Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(volumeBasePath, id)
 	action := lockType{Locked: false}
 

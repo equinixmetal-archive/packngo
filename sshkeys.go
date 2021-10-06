@@ -79,6 +79,9 @@ func (s *SSHKeyServiceOp) list(url string) ([]SSHKey, *Response, error) {
 // ProjectList lists ssh keys of a project
 // Deprecated: Use ProjectServiceOp.ListSSHKeys
 func (s *SSHKeyServiceOp) ProjectList(projectID string) ([]SSHKey, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	return s.list(path.Join(projectBasePath, projectID, sshKeyBasePath))
 
 }
@@ -90,6 +93,9 @@ func (s *SSHKeyServiceOp) List() ([]SSHKey, *Response, error) {
 
 // Get returns an ssh key by id
 func (s *SSHKeyServiceOp) Get(sshKeyID string, opts *GetOptions) (*SSHKey, *Response, error) {
+	if validateErr := ValidateUUID(sshKeyID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(sshKeyBasePath, sshKeyID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	sshKey := new(SSHKey)
@@ -120,6 +126,9 @@ func (s *SSHKeyServiceOp) Create(createRequest *SSHKeyCreateRequest) (*SSHKey, *
 
 // Update updates an ssh key
 func (s *SSHKeyServiceOp) Update(id string, updateRequest *SSHKeyUpdateRequest) (*SSHKey, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	if updateRequest.Label == nil && updateRequest.Key == nil {
 		return nil, nil, fmt.Errorf("You must set either Label or Key string for SSH Key update")
 	}
@@ -137,6 +146,9 @@ func (s *SSHKeyServiceOp) Update(id string, updateRequest *SSHKeyUpdateRequest) 
 
 // Delete deletes an ssh key
 func (s *SSHKeyServiceOp) Delete(sshKeyID string) (*Response, error) {
+	if validateErr := ValidateUUID(sshKeyID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(sshKeyBasePath, sshKeyID)
 
 	return s.client.DoRequest("DELETE", apiPath, nil, nil)

@@ -65,6 +65,9 @@ func roundPlus(f float64, places int) float64 {
 }
 
 func (s *SpotMarketRequestServiceOp) Create(cr *SpotMarketRequestCreateRequest, pID string) (*SpotMarketRequest, *Response, error) {
+	if validateErr := ValidateUUID(pID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	opts := (&GetOptions{}).Including("devices", "project", "plan")
 	endpointPath := path.Join(projectBasePath, pID, spotMarketRequestBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
@@ -81,6 +84,9 @@ func (s *SpotMarketRequestServiceOp) Create(cr *SpotMarketRequestCreateRequest, 
 }
 
 func (s *SpotMarketRequestServiceOp) List(pID string, opts *ListOptions) ([]SpotMarketRequest, *Response, error) {
+	if validateErr := ValidateUUID(pID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	type smrRoot struct {
 		SMRs []SpotMarketRequest `json:"spot_market_requests"`
 	}
@@ -98,6 +104,9 @@ func (s *SpotMarketRequestServiceOp) List(pID string, opts *ListOptions) ([]Spot
 }
 
 func (s *SpotMarketRequestServiceOp) Get(id string, opts *GetOptions) (*SpotMarketRequest, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(spotMarketRequestBasePath, id)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	smr := new(SpotMarketRequest)
@@ -111,6 +120,9 @@ func (s *SpotMarketRequestServiceOp) Get(id string, opts *GetOptions) (*SpotMark
 }
 
 func (s *SpotMarketRequestServiceOp) Delete(id string, forceDelete bool) (*Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(spotMarketRequestBasePath, id)
 	var params *map[string]bool
 	if forceDelete {

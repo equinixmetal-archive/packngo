@@ -44,6 +44,9 @@ func (s *NotificationServiceOp) List(listOpt *ListOptions) ([]Notification, *Res
 
 // Get returns a notification by ID
 func (s *NotificationServiceOp) Get(notificationID string, opts *GetOptions) (*Notification, *Response, error) {
+	if validateErr := ValidateUUID(notificationID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(notificationBasePath, notificationID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	return getNotifications(s.client, apiPathQuery)
@@ -51,6 +54,9 @@ func (s *NotificationServiceOp) Get(notificationID string, opts *GetOptions) (*N
 
 // Marks notification as read by ID
 func (s *NotificationServiceOp) MarkAsRead(notificationID string) (*Notification, *Response, error) {
+	if validateErr := ValidateUUID(notificationID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(notificationBasePath, notificationID)
 	return markAsRead(s.client, apiPath)
 }

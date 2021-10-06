@@ -93,6 +93,9 @@ func (s *ProjectServiceOp) List(opts *ListOptions) (projects []Project, resp *Re
 
 // Get returns a project by id
 func (s *ProjectServiceOp) Get(projectID string, opts *GetOptions) (*Project, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(projectBasePath, projectID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	project := new(Project)
@@ -117,6 +120,9 @@ func (s *ProjectServiceOp) Create(createRequest *ProjectCreateRequest) (*Project
 
 // Update updates a project
 func (s *ProjectServiceOp) Update(id string, updateRequest *ProjectUpdateRequest) (*Project, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(projectBasePath, id)
 	project := new(Project)
 
@@ -130,6 +136,9 @@ func (s *ProjectServiceOp) Update(id string, updateRequest *ProjectUpdateRequest
 
 // Delete deletes a project
 func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(projectBasePath, projectID)
 
 	return s.client.DoRequest("DELETE", apiPath, nil, nil)
@@ -137,6 +146,9 @@ func (s *ProjectServiceOp) Delete(projectID string) (*Response, error) {
 
 // ListBGPSessions returns all BGP Sessions associated with the project
 func (s *ProjectServiceOp) ListBGPSessions(projectID string, opts *ListOptions) (bgpSessions []BGPSession, resp *Response, err error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(projectBasePath, projectID, bgpSessionBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
@@ -158,6 +170,9 @@ func (s *ProjectServiceOp) ListBGPSessions(projectID string, opts *ListOptions) 
 
 // ListSSHKeys returns all SSH Keys associated with the project
 func (s *ProjectServiceOp) ListSSHKeys(projectID string, opts *SearchOptions) (sshKeys []SSHKey, resp *Response, err error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 
 	endpointPath := path.Join(projectBasePath, projectID, sshKeyBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
@@ -176,6 +191,9 @@ func (s *ProjectServiceOp) ListSSHKeys(projectID string, opts *SearchOptions) (s
 
 // ListEvents returns list of project events
 func (s *ProjectServiceOp) ListEvents(projectID string, listOpt *ListOptions) ([]Event, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(projectBasePath, projectID, eventBasePath)
 
 	return listEvents(s.client, apiPath, listOpt)

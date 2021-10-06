@@ -37,6 +37,9 @@ type VirtualNetworkListResponse struct {
 }
 
 func (i *ProjectVirtualNetworkServiceOp) List(projectID string, opts *ListOptions) (*VirtualNetworkListResponse, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(projectBasePath, projectID, virtualNetworkBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	output := new(VirtualNetworkListResponse)
@@ -69,6 +72,9 @@ type VirtualNetworkCreateRequest struct {
 }
 
 func (i *ProjectVirtualNetworkServiceOp) Get(vlanID string, opts *GetOptions) (*VirtualNetwork, *Response, error) {
+	if validateErr := ValidateUUID(vlanID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(virtualNetworkBasePath, vlanID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	vlan := new(VirtualNetwork)
@@ -97,6 +103,9 @@ func (i *ProjectVirtualNetworkServiceOp) Create(input *VirtualNetworkCreateReque
 }
 
 func (i *ProjectVirtualNetworkServiceOp) Delete(virtualNetworkID string) (*Response, error) {
+	if validateErr := ValidateUUID(virtualNetworkID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(virtualNetworkBasePath, virtualNetworkID)
 
 	resp, err := i.client.DoRequest("DELETE", apiPath, nil, nil)

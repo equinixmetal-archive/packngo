@@ -47,6 +47,9 @@ type BGPConfig struct {
 
 // Create function
 func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigRequest) (*Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(projectBasePath, projectID, bgpConfigPostBasePath)
 
 	resp, err := s.client.DoRequest("POST", apiPath, request, nil)
@@ -59,6 +62,9 @@ func (s *BGPConfigServiceOp) Create(projectID string, request CreateBGPConfigReq
 
 // Get function
 func (s *BGPConfigServiceOp) Get(projectID string, opts *GetOptions) (bgpConfig *BGPConfig, resp *Response, err error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(projectBasePath, projectID, bgpConfigGetBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
@@ -74,6 +80,9 @@ func (s *BGPConfigServiceOp) Get(projectID string, opts *GetOptions) (bgpConfig 
 
 // Delete function TODO: this is not implemented in the Equinix Metal API
 // func (s *BGPConfigServiceOp) Delete(configID string) (resp *Response, err error) {
+// if validateErr := ValidateUUID(configID); validateErr != nil {
+//  return nil, validateErr
+// }
 // 	apiPath := fmt.Sprintf("%ss/%s", bgpConfigBasePath, configID)
 
 // 	resp, err = s.client.DoRequest("DELETE", apiPath, nil, nil)
