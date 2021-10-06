@@ -8,11 +8,11 @@ import "fmt"
 // based on uuid.Parse from https://github.com/google/uuid/blob/v1.3.0/uuid.go
 func ValidateUUID(s string) error {
 	if len(s) != 36 {
-		return fmt.Errorf("ID %s is not 36 char long", s)
+		return fmt.Errorf("ID \"%s\" is not 36 chars long", s)
 	}
 	// it must be of the form  xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 	if s[8] != '-' || s[13] != '-' || s[18] != '-' || s[23] != '-' {
-		return fmt.Errorf("ID %s is in invalid format", s)
+		return fmt.Errorf("ID \"%s\" is in invalid format", s)
 	}
 	for _, x := range [16]int{
 		0, 2, 4, 6,
@@ -22,7 +22,7 @@ func ValidateUUID(s string) error {
 		24, 26, 28, 30, 32, 34} {
 		_, ok := xtob(s[x], s[x+1])
 		if !ok {
-			return fmt.Errorf("ID %s invalid UUID format", s)
+			return fmt.Errorf("ID \"%s\" invalid UUID format", s)
 		}
 	}
 	return nil
