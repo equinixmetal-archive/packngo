@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const testProjectId = "61afce48-8006-4c9d-addb-949b46899ad8"
+
 func TestAccProjectBasic(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
 
@@ -382,6 +384,7 @@ func TestProjectServiceOp_ListSSHKeys(t *testing.T) {
 			}},
 			wantResp:    &Response{},
 			wantSSHKeys: []SSHKey{{Label: "foo"}},
+			args:        args{projectID: testProjectId},
 		},
 		{
 			name: "ErrorIsHandled",

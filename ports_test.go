@@ -11,8 +11,8 @@ import (
 
 var (
 	errBoom              = errors.New("boom")
-	testPortID           = "12345"
-	testVirtualNetworkID = "abcdef"
+	testPortID           = "ede2a6be-2f5f-45c1-8c4e-fe369af906e3"
+	testVirtualNetworkID = "7c6600a9-d2ca-42a6-a45b-3490e952bc44"
 )
 
 // reverse a string slice
