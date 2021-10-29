@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"regexp"
 )
 
 var (
@@ -151,6 +152,15 @@ func stringifyValue(w io.Writer, val reflect.Value) error {
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+// validate UUID
+func ValidateUUID(uuid string) error {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
+	if !r.MatchString(uuid) {
+		return fmt.Errorf("%s is not a valid UUID", uuid)
 	}
 	return nil
 }
