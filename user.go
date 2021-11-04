@@ -122,6 +122,9 @@ func (s *UserServiceOp) Current() (*User, *Response, error) {
 }
 
 func (s *UserServiceOp) Get(userID string, opts *GetOptions) (*User, *Response, error) {
+	if validateErr := ValidateUUID(userID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(usersBasePath, userID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	user := new(User)

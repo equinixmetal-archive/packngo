@@ -106,6 +106,12 @@ type DisbondRequest struct {
 
 // Assign adds a VLAN to a port
 func (i *PortServiceOp) Assign(portID, vlanID string) (*Port, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(vlanID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(portBasePath, portID, "assign")
 	par := &PortAssignRequest{VirtualNetworkID: vlanID}
 
@@ -114,6 +120,12 @@ func (i *PortServiceOp) Assign(portID, vlanID string) (*Port, *Response, error) 
 
 // AssignNative assigns a virtual network to the port as a "native VLAN"
 func (i *PortServiceOp) AssignNative(portID, vlanID string) (*Port, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(vlanID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(portBasePath, portID, "native-vlan")
 	par := &PortAssignRequest{VirtualNetworkID: vlanID}
 	return i.portAction(apiPath, par)
@@ -121,6 +133,9 @@ func (i *PortServiceOp) AssignNative(portID, vlanID string) (*Port, *Response, e
 
 // UnassignNative removes native VLAN from the supplied port
 func (i *PortServiceOp) UnassignNative(portID string) (*Port, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(portBasePath, portID, "native-vlan")
 	port := new(Port)
 
@@ -134,6 +149,12 @@ func (i *PortServiceOp) UnassignNative(portID string) (*Port, *Response, error) 
 
 // Unassign removes a VLAN from the port
 func (i *PortServiceOp) Unassign(portID, vlanID string) (*Port, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(vlanID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(portBasePath, portID, "unassign")
 	par := &PortAssignRequest{VirtualNetworkID: vlanID}
 
@@ -142,6 +163,9 @@ func (i *PortServiceOp) Unassign(portID, vlanID string) (*Port, *Response, error
 
 // Bond enables bonding for one or all ports
 func (i *PortServiceOp) Bond(portID string, bulkEnable bool) (*Port, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	br := &BondRequest{BulkEnable: bulkEnable}
 	apiPath := path.Join(portBasePath, portID, "bond")
 	return i.portAction(apiPath, br)
@@ -149,6 +173,9 @@ func (i *PortServiceOp) Bond(portID string, bulkEnable bool) (*Port, *Response, 
 
 // Disbond disables bonding for one or all ports
 func (i *PortServiceOp) Disbond(portID string, bulkEnable bool) (*Port, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	dr := &DisbondRequest{BulkDisable: bulkEnable}
 	apiPath := path.Join(portBasePath, portID, "disbond")
 	return i.portAction(apiPath, dr)
@@ -169,6 +196,9 @@ func (i *PortServiceOp) portAction(apiPath string, req interface{}) (*Port, *Res
 //
 // portID is the UUID of a Bonding Port
 func (i *PortServiceOp) ConvertToLayerTwo(portID string) (*Port, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(portBasePath, portID, "convert", "layer-2")
 	port := new(Port)
 
@@ -182,6 +212,9 @@ func (i *PortServiceOp) ConvertToLayerTwo(portID string) (*Port, *Response, erro
 
 // ConvertToLayerThree converts a bond port to Layer 3. VLANs must first be unassigned.
 func (i *PortServiceOp) ConvertToLayerThree(portID string, ips []AddressRequest) (*Port, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(portBasePath, portID, "convert", "layer-3")
 	port := new(Port)
 
@@ -199,6 +232,9 @@ func (i *PortServiceOp) ConvertToLayerThree(portID string, ips []AddressRequest)
 
 // Get returns a port by id
 func (s *PortServiceOp) Get(portID string, opts *GetOptions) (*Port, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(portBasePath, portID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	port := new(Port)

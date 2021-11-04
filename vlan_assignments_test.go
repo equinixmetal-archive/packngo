@@ -13,6 +13,12 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+const (
+	testAssignmentId = "1f6ca206-da6b-43f6-aa6a-2a0f777d9f16"
+	testPortId       = "a8841b6d-1047-46c2-bd21-51c021f7c844"
+	testVnId         = "91c05d6d-6e6c-4692-9172-da63acdbe30a"
+)
+
 func mockAssignedPortBody(assignmentid, portid, vnid string) string {
 	return fmt.Sprintf(`{
 		"id":"%s",
@@ -48,11 +54,12 @@ func TestVLANAssignmentServiceOp_Get(t *testing.T) {
 			fields: fields{
 				client: (func() *MockClient {
 
-					raw := mockAssignedPortBody("bar", "foo", "vlan")
+					raw := mockAssignedPortBody(
+						testAssignmentId, testPortId, testVnId)
 					mockNR := mockNewRequest()
 					mockDo := func(req *http.Request, obj interface{}) (*Response, error) {
 						// baseURL is not needed here
-						expectedPath := path.Join(portBasePath, "foo", portVLANAssignmentsPath, "bar")
+						expectedPath := path.Join(portBasePath, testPortId, portVLANAssignmentsPath, testAssignmentId)
 						if expectedPath != req.URL.Path {
 							return nil, fmt.Errorf("wrong url")
 						}
@@ -68,13 +75,13 @@ func TestVLANAssignmentServiceOp_Get(t *testing.T) {
 					}
 				})(),
 			},
-			args: args{portID: "foo", assignmentID: "bar"},
+			args: args{portID: testPortId, assignmentID: testAssignmentId},
 			want: &VLANAssignment{
-				ID:             "bar",
+				ID:             testAssignmentId,
 				CreatedAt:      Timestamp{Time: func() time.Time { t, _ := time.Parse(time.RFC3339, "2021-05-28T16:02:33Z"); return t }()},
 				UpdatedAt:      Timestamp{Time: func() time.Time { t, _ := time.Parse(time.RFC3339, "2021-05-28T16:02:33Z"); return t }()},
-				VirtualNetwork: &VirtualNetwork{Href: "/virtual-networks/vlan"},
-				Port:           &Port{Href: &Href{Href: "/ports/foo"}},
+				VirtualNetwork: &VirtualNetwork{Href: "/virtual-networks/" + testVnId},
+				Port:           &Port{Href: &Href{Href: "/ports/" + testPortId}},
 				VLAN:           1234,
 				State:          VLANAssignmentAssigned,
 			},

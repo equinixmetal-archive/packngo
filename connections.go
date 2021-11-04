@@ -119,11 +119,17 @@ func (s *ConnectionServiceOp) create(apiUrl string, createRequest *ConnectionCre
 }
 
 func (s *ConnectionServiceOp) OrganizationCreate(id string, createRequest *ConnectionCreateRequest) (*Connection, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiUrl := path.Join(organizationBasePath, id, connectionBasePath)
 	return s.create(apiUrl, createRequest)
 }
 
 func (s *ConnectionServiceOp) ProjectCreate(id string, createRequest *ConnectionCreateRequest) (*Connection, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiUrl := path.Join(projectBasePath, id, connectionBasePath)
 	return s.create(apiUrl, createRequest)
 }
@@ -151,21 +157,36 @@ func (s *ConnectionServiceOp) list(url string, opts *GetOptions) (connections []
 }
 
 func (s *ConnectionServiceOp) OrganizationList(id string, opts *GetOptions) ([]Connection, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiUrl := path.Join(organizationBasePath, id, connectionBasePath)
 	return s.list(apiUrl, opts)
 }
 
 func (s *ConnectionServiceOp) ProjectList(id string, opts *GetOptions) ([]Connection, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiUrl := path.Join(projectBasePath, id, connectionBasePath)
 	return s.list(apiUrl, opts)
 }
 
 func (s *ConnectionServiceOp) Delete(id string) (*Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(connectionBasePath, id)
 	return s.client.DoRequest("DELETE", apiPath, nil, nil)
 }
 
 func (s *ConnectionServiceOp) Port(connID, portID string, opts *GetOptions) (*ConnectionPort, *Response, error) {
+	if validateErr := ValidateUUID(connID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(connectionBasePath, connID, portBasePath, portID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	port := new(ConnectionPort)
@@ -177,6 +198,9 @@ func (s *ConnectionServiceOp) Port(connID, portID string, opts *GetOptions) (*Co
 }
 
 func (s *ConnectionServiceOp) Get(id string, opts *GetOptions) (*Connection, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(connectionBasePath, id)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	connection := new(Connection)
@@ -188,6 +212,9 @@ func (s *ConnectionServiceOp) Get(id string, opts *GetOptions) (*Connection, *Re
 }
 
 func (s *ConnectionServiceOp) Update(id string, updateRequest *ConnectionUpdateRequest, opts *GetOptions) (*Connection, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(connectionBasePath, id)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	connection := new(Connection)
@@ -200,6 +227,9 @@ func (s *ConnectionServiceOp) Update(id string, updateRequest *ConnectionUpdateR
 }
 
 func (s *ConnectionServiceOp) Ports(connID string, opts *GetOptions) ([]ConnectionPort, *Response, error) {
+	if validateErr := ValidateUUID(connID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(connectionBasePath, connID, portBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	ports := new(connectionPortsRoot)
@@ -212,16 +242,31 @@ func (s *ConnectionServiceOp) Ports(connID string, opts *GetOptions) ([]Connecti
 }
 
 func (s *ConnectionServiceOp) Events(id string, opts *GetOptions) ([]Event, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(connectionBasePath, id, eventBasePath)
 	return listEvents(s.client, apiPath, opts)
 }
 
 func (s *ConnectionServiceOp) PortEvents(connID, portID string, opts *GetOptions) ([]Event, *Response, error) {
+	if validateErr := ValidateUUID(connID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(connectionBasePath, connID, portBasePath, portID, eventBasePath)
 	return listEvents(s.client, apiPath, opts)
 }
 
 func (s *ConnectionServiceOp) VirtualCircuits(connID, portID string, opts *GetOptions) (vcs []VirtualCircuit, resp *Response, err error) {
+	if validateErr := ValidateUUID(connID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(connectionBasePath, connID, portBasePath, portID, virtualCircuitBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	for {

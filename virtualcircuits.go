@@ -88,28 +88,49 @@ func (s *VirtualCircuitServiceOp) do(method, apiPathQuery string, req interface{
 }
 
 func (s *VirtualCircuitServiceOp) Update(vcID string, req *VCUpdateRequest, opts *GetOptions) (*VirtualCircuit, *Response, error) {
+	if validateErr := ValidateUUID(vcID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(virtualCircuitBasePath, vcID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	return s.do("PUT", apiPathQuery, req)
 }
 
 func (s *VirtualCircuitServiceOp) Events(id string, opts *GetOptions) ([]Event, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(virtualCircuitBasePath, id, eventBasePath)
 	return listEvents(s.client, apiPath, opts)
 }
 
 func (s *VirtualCircuitServiceOp) Get(id string, opts *GetOptions) (*VirtualCircuit, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(virtualCircuitBasePath, id)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	return s.do("GET", apiPathQuery, nil)
 }
 
 func (s *VirtualCircuitServiceOp) Delete(id string) (*Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(virtualCircuitBasePath, id)
 	return s.client.DoRequest("DELETE", apiPath, nil, nil)
 }
 
 func (s *VirtualCircuitServiceOp) Create(projectID, connID, portID string, request *VCCreateRequest, opts *GetOptions) (*VirtualCircuit, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(connID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(projectBasePath, projectID, connectionBasePath, connID, portBasePath, portID, virtualCircuitBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	return s.do("POST", apiPathQuery, request)

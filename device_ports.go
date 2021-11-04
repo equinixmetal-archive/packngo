@@ -64,6 +64,9 @@ func (i *DevicePortServiceOp) AssignNative(par *PortAssignRequest) (*Port, *Resp
 //
 // Deprecated: use PortServiceOp.UnassignNative
 func (i *DevicePortServiceOp) UnassignNative(portID string) (*Port, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	return i.client.Ports.UnassignNative(portID)
 }
 
@@ -145,6 +148,9 @@ func (i *DevicePortServiceOp) PortToLayerThree(deviceID, portName string) (*Port
 //
 // Deprecated: use Device.GetNetworkType
 func (i *DevicePortServiceOp) DeviceNetworkType(deviceID string) (string, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return "", validateErr
+	}
 	d, _, err := i.client.Devices.Get(deviceID, nil)
 	if err != nil {
 		return "", err
@@ -290,6 +296,9 @@ func (i *DevicePortServiceOp) ConvertDevice(d *Device, targetType string) error 
 // Deprecated: use DevicePortServiceOp.ConvertDevice which this function thinly
 // wraps.
 func (i *DevicePortServiceOp) DeviceToNetworkType(deviceID string, targetType string) (*Device, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, validateErr
+	}
 	d, _, err := i.client.Devices.Get(deviceID, nil)
 	if err != nil {
 		return nil, err

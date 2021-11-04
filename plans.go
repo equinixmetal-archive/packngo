@@ -136,10 +136,16 @@ func (s *PlanServiceOp) List(opts *ListOptions) ([]Plan, *Response, error) {
 
 // ProjectList method returns plans available in a project
 func (s *PlanServiceOp) ProjectList(projectID string, opts *ListOptions) ([]Plan, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	return planList(s.client, path.Join(projectBasePath, projectID, planBasePath), opts)
 }
 
 // OrganizationList method returns plans available in an organization
 func (s *PlanServiceOp) OrganizationList(organizationID string, opts *ListOptions) ([]Plan, *Response, error) {
+	if validateErr := ValidateUUID(organizationID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	return planList(s.client, path.Join(organizationBasePath, organizationID, planBasePath), opts)
 }

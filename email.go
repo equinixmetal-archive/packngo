@@ -39,6 +39,9 @@ type EmailServiceOp struct {
 
 // Get retrieves an email by id
 func (s *EmailServiceOp) Get(emailID string, opts *GetOptions) (*Email, *Response, error) {
+	if validateErr := ValidateUUID(emailID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(emailBasePath, emailID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	email := new(Email)
@@ -65,6 +68,9 @@ func (s *EmailServiceOp) Create(request *EmailRequest) (*Email, *Response, error
 
 // Delete removes the email address from the current user account
 func (s *EmailServiceOp) Delete(emailID string) (*Response, error) {
+	if validateErr := ValidateUUID(emailID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(emailBasePath, emailID)
 
 	resp, err := s.client.DoRequest("DELETE", apiPath, nil, nil)
@@ -77,6 +83,9 @@ func (s *EmailServiceOp) Delete(emailID string) (*Response, error) {
 
 // Update email parameters
 func (s *EmailServiceOp) Update(emailID string, request *EmailRequest) (*Email, *Response, error) {
+	if validateErr := ValidateUUID(emailID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	email := new(Email)
 	apiPath := path.Join(emailBasePath, emailID)
 

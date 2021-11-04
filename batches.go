@@ -55,6 +55,9 @@ type BatchServiceOp struct {
 
 // Get returns batch details
 func (s *BatchServiceOp) Get(batchID string, opts *GetOptions) (*Batch, *Response, error) {
+	if validateErr := ValidateUUID(batchID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(batchBasePath, batchID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	batch := new(Batch)
@@ -69,6 +72,9 @@ func (s *BatchServiceOp) Get(batchID string, opts *GetOptions) (*Batch, *Respons
 
 // List returns batches on a project
 func (s *BatchServiceOp) List(projectID string, opts *ListOptions) (batches []Batch, resp *Response, err error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(projectBasePath, projectID, batchBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	subset := new(batchesList)
@@ -83,6 +89,9 @@ func (s *BatchServiceOp) List(projectID string, opts *ListOptions) (batches []Ba
 
 // Create function to create batch of device instances
 func (s *BatchServiceOp) Create(projectID string, request *BatchCreateRequest) ([]Batch, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(projectBasePath, projectID, "devices", "batch")
 
 	batches := new(batchesList)
@@ -97,6 +106,9 @@ func (s *BatchServiceOp) Create(projectID string, request *BatchCreateRequest) (
 
 // Delete function to remove an instance batch
 func (s *BatchServiceOp) Delete(id string, removeDevices bool) (*Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, validateErr
+	}
 	// API doc days the remove_associated_instances params shout be in the body
 	// https://metal.equinix.com/developers/api/batches/#delete-the-batch
 	// .. does this even work?

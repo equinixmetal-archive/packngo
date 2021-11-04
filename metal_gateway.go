@@ -36,6 +36,9 @@ type MetalGatewayServiceOp struct {
 }
 
 func (s *MetalGatewayServiceOp) List(projectID string, opts *ListOptions) (metalGateways []MetalGateway, resp *Response, err error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	type metalGatewaysRoot struct {
 		MetalGateways []MetalGateway `json:"metal_gateways"`
 		Meta          meta           `json:"meta"`
@@ -69,6 +72,9 @@ type MetalGatewayCreateRequest struct {
 }
 
 func (s *MetalGatewayServiceOp) Get(metalGatewayID string, opts *GetOptions) (*MetalGateway, *Response, error) {
+	if validateErr := ValidateUUID(metalGatewayID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(metalGatewayBasePath, metalGatewayID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	metalGateway := new(MetalGateway)
@@ -82,6 +88,9 @@ func (s *MetalGatewayServiceOp) Get(metalGatewayID string, opts *GetOptions) (*M
 }
 
 func (s *MetalGatewayServiceOp) Create(projectID string, input *MetalGatewayCreateRequest) (*MetalGateway, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(projectBasePath, projectID, metalGatewayBasePath)
 	output := new(MetalGateway)
 
@@ -94,6 +103,9 @@ func (s *MetalGatewayServiceOp) Create(projectID string, input *MetalGatewayCrea
 }
 
 func (s *MetalGatewayServiceOp) Delete(metalGatewayID string) (*Response, error) {
+	if validateErr := ValidateUUID(metalGatewayID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(metalGatewayBasePath, metalGatewayID)
 
 	resp, err := s.client.DoRequest("DELETE", apiPath, nil, nil)

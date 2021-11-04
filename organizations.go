@@ -103,6 +103,9 @@ func (s *OrganizationServiceOp) List(opts *ListOptions) (orgs []Organization, re
 
 // Get returns a organization by id
 func (s *OrganizationServiceOp) Get(organizationID string, opts *GetOptions) (*Organization, *Response, error) {
+	if validateErr := ValidateUUID(organizationID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(organizationBasePath, organizationID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	organization := new(Organization)
@@ -129,6 +132,9 @@ func (s *OrganizationServiceOp) Create(createRequest *OrganizationCreateRequest)
 
 // Update updates an organization
 func (s *OrganizationServiceOp) Update(id string, updateRequest *OrganizationUpdateRequest) (*Organization, *Response, error) {
+	if validateErr := ValidateUUID(id); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(organizationBasePath, id)
 	organization := new(Organization)
 
@@ -142,6 +148,9 @@ func (s *OrganizationServiceOp) Update(id string, updateRequest *OrganizationUpd
 
 // Delete deletes an organizationID
 func (s *OrganizationServiceOp) Delete(organizationID string) (*Response, error) {
+	if validateErr := ValidateUUID(organizationID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(organizationBasePath, organizationID)
 
 	return s.client.DoRequest("DELETE", apiPath, nil, nil)
@@ -149,6 +158,9 @@ func (s *OrganizationServiceOp) Delete(organizationID string) (*Response, error)
 
 // ListPaymentMethods returns PaymentMethods for an organization
 func (s *OrganizationServiceOp) ListPaymentMethods(organizationID string) ([]PaymentMethod, *Response, error) {
+	if validateErr := ValidateUUID(organizationID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(organizationBasePath, organizationID, paymentMethodBasePath)
 	root := new(paymentMethodsRoot)
 
@@ -162,6 +174,9 @@ func (s *OrganizationServiceOp) ListPaymentMethods(organizationID string) ([]Pay
 
 // ListEvents returns list of organization events
 func (s *OrganizationServiceOp) ListEvents(organizationID string, listOpt *ListOptions) ([]Event, *Response, error) {
+	if validateErr := ValidateUUID(organizationID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(organizationBasePath, organizationID, eventBasePath)
 
 	return listEvents(s.client, apiPath, listOpt)

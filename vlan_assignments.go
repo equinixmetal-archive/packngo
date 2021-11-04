@@ -117,6 +117,9 @@ type VLANAssignmentCreateRequest struct {
 
 // List returns VLANAssignmentBatches
 func (s *VLANAssignmentServiceOp) ListBatch(portID string, opts *ListOptions) (results []VLANAssignmentBatch, resp *Response, err error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, portVLANAssignmentsBatchPath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
@@ -138,6 +141,12 @@ func (s *VLANAssignmentServiceOp) ListBatch(portID string, opts *ListOptions) (r
 
 // Get returns a VLANAssignmentBatch by id
 func (s *VLANAssignmentServiceOp) GetBatch(portID, batchID string, opts *GetOptions) (*VLANAssignmentBatch, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(batchID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, portVLANAssignmentsBatchPath, batchID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	batch := new(VLANAssignmentBatch)
@@ -150,6 +159,9 @@ func (s *VLANAssignmentServiceOp) GetBatch(portID, batchID string, opts *GetOpti
 
 // Create creates VLANAssignmentBatch objects
 func (s *VLANAssignmentServiceOp) CreateBatch(portID string, request *VLANAssignmentBatchCreateRequest, opts *GetOptions) (*VLANAssignmentBatch, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, portVLANAssignmentsBatchPath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	batch := new(VLANAssignmentBatch)
@@ -162,6 +174,9 @@ func (s *VLANAssignmentServiceOp) CreateBatch(portID string, request *VLANAssign
 
 // List returns VLANAssignment
 func (s *VLANAssignmentServiceOp) List(portID string, opts *ListOptions) (results []VLANAssignment, resp *Response, err error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
@@ -183,6 +198,12 @@ func (s *VLANAssignmentServiceOp) List(portID string, opts *ListOptions) (result
 
 // Get returns a VLANAssignment by id
 func (s *VLANAssignmentServiceOp) Get(portID, assignmentID string, opts *GetOptions) (*VLANAssignment, *Response, error) {
+	if validateErr := ValidateUUID(portID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	if validateErr := ValidateUUID(assignmentID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(portBasePath, portID, portVLANAssignmentsPath, assignmentID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	VLANAssignment := new(VLANAssignment)

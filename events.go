@@ -41,6 +41,9 @@ func (s *EventServiceOp) List(listOpt *ListOptions) ([]Event, *Response, error) 
 
 // Get returns an event by ID
 func (s *EventServiceOp) Get(eventID string, getOpt *GetOptions) (*Event, *Response, error) {
+	if validateErr := ValidateUUID(eventID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	apiPath := path.Join(eventBasePath, eventID)
 	return get(s.client, apiPath, getOpt)
 }

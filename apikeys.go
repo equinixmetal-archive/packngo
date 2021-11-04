@@ -89,6 +89,9 @@ func (s *APIKeyServiceOp) list(url string, opts *ListOptions) ([]APIKey, *Respon
 // ProjectList lists the API keys associated with a project having `projectID`
 // match `Project.ID`.
 func (s *APIKeyServiceOp) ProjectList(projectID string, opts *ListOptions) ([]APIKey, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
 	endpointPath := path.Join(projectBasePath, projectID, apiKeyBasePath)
 	return s.list(endpointPath, opts)
 }
@@ -112,6 +115,12 @@ func (s *APIKeyServiceOp) UserList(opts *ListOptions) ([]APIKey, *Response, erro
 // for a match. Therefor, the Response is not returned and a custom error will
 // be returned when the key is not found.
 func (s *APIKeyServiceOp) ProjectGet(projectID, apiKeyID string, opts *GetOptions) (*APIKey, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, validateErr
+	}
+	if validateErr := ValidateUUID(apiKeyID); validateErr != nil {
+		return nil, validateErr
+	}
 	pkeys, _, err := s.ProjectList(projectID, opts)
 	if err != nil {
 		return nil, err
@@ -133,6 +142,9 @@ func (s *APIKeyServiceOp) ProjectGet(projectID, apiKeyID string, opts *GetOption
 // for a match. Therefor, the Response is not returned and a custom error will
 // be returned when the key is not found.
 func (s *APIKeyServiceOp) UserGet(apiKeyID string, opts *GetOptions) (*APIKey, error) {
+	if validateErr := ValidateUUID(apiKeyID); validateErr != nil {
+		return nil, validateErr
+	}
 	ukeys, _, err := s.UserList(opts)
 	if err != nil {
 		return nil, err
@@ -171,6 +183,9 @@ func (s *APIKeyServiceOp) Create(createRequest *APIKeyCreateRequest) (*APIKey, *
 //
 // Project API keys can not be used to delete themselves.
 func (s *APIKeyServiceOp) Delete(apiKeyID string) (*Response, error) {
+	if validateErr := ValidateUUID(apiKeyID); validateErr != nil {
+		return nil, validateErr
+	}
 	apiPath := path.Join(userBasePath, apiKeyBasePath, apiKeyID)
 	return s.client.DoRequest("DELETE", apiPath, nil, nil)
 }
