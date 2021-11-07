@@ -14,6 +14,7 @@
   "plan": "baremetal_1",
   "class": "c1.small.x86",
   "facility": "ewr1",
+  "private_subnets": ["192.168.5.0/24", "172.16.0.0/12"],
   "tags": [],
   "ssh_keys": [
     "ssh-rsa AAAAB3N1234567890 user@host"
