@@ -13,6 +13,7 @@
   },
   "plan": "baremetal_1",
   "class": "c1.small.x86",
+  "metro": "ny",
   "facility": "ewr1",
   "tags": [],
   "ssh_keys": [
