@@ -68,6 +68,21 @@ type User struct {
 	Staff                 bool    `json:"staff,omitempty"`
 }
 
+// UserLite is an abbreviated listing of an Equinix Metal user
+type UserLite struct {
+	ID             string     `json:"id"`
+	ShortID        string     `json:"short_id"`
+	FirstName      string     `json:"first_name,omitempty"`
+	LastName       string     `json:"last_name,omitempty"`
+	FullName       string     `json:"full_name,omitempty"`
+	Email          string     `json:"email,omitempty"`
+	CreatedAt      *Timestamp `json:"created_at,omitempty"`
+	UpdatedAt      *Timestamp `json:"updated_at,omitempty"`
+	Level          string     `json:"level,omitempty"`
+	AvatarThumbURL string     `json:"avatar_thumb_url,omitempty"`
+	URL            string     `json:"href,omitempty"`
+}
+
 // UserUpdateRequest struct for UserService.Update
 type UserUpdateRequest struct {
 	FirstName   *string      `json:"first_name,omitempty"`
