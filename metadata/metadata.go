@@ -113,6 +113,7 @@ type CurrentDevice struct {
 	Hostname   string                 `json:"hostname"`
 	IQN        string                 `json:"iqn"`
 	Plan       string                 `json:"plan"`
+	Metro      string                 `json:"metro"`
 	Facility   string                 `json:"facility"`
 	Tags       []string               `json:"tags"`
 	SSHKeys    []string               `json:"ssh_keys"`

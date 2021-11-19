@@ -36,6 +36,8 @@ func Test_Deserialization(t *testing.T) {
 
 	assert.Equal(t, "9307dc37-7f39-400b-9cd2-009087434a95", device.ID)
 	assert.Equal(t, "spcqvzylz6-worker-2409003", device.Hostname)
+	assert.Equal(t, "ewr1", device.Facility)
+	assert.Equal(t, "ny", device.Metro)
 
 	volumes := device.Volumes
 	assert.Equal(t, 1, len(volumes))
