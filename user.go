@@ -70,7 +70,7 @@ type User struct {
 
 // UserLite is an abbreviated listing of an Equinix Metal user
 type UserLite struct {
-        *Href `json:",inline"`
+	*Href          `json:",inline"`
 	ID             string     `json:"id"`
 	ShortID        string     `json:"short_id"`
 	FirstName      string     `json:"first_name,omitempty"`
@@ -81,7 +81,6 @@ type UserLite struct {
 	UpdatedAt      *Timestamp `json:"updated_at,omitempty"`
 	Level          string     `json:"level,omitempty"`
 	AvatarThumbURL string     `json:"avatar_thumb_url,omitempty"`
-	URL            string     `json:"href,omitempty"`
 }
 
 // UserUpdateRequest struct for UserService.Update
