@@ -49,6 +49,7 @@ type Device struct {
 	Description         *string                `json:"description,omitempty"`
 	State               string                 `json:"state,omitempty"`
 	Created             string                 `json:"created_at,omitempty"`
+	CreatedBy           *UserLite              `json:"created_by,omitempty"`
 	Updated             string                 `json:"updated_at,omitempty"`
 	Locked              bool                   `json:"locked,omitempty"`
 	BillingCycle        string                 `json:"billing_cycle,omitempty"`
