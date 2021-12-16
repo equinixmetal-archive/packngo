@@ -69,6 +69,19 @@ type ParentBlock struct {
 	Href    *string `json:"href,omitempty"`
 }
 
+type IPReservationState string
+
+const (
+	// IPReservationStatePending fixed string representation of pending
+	IPReservationStatePending IPReservationState = "pending"
+
+	// IPReservationStateCreated fixed string representation of created
+	IPReservationStateCreated IPReservationState = "created"
+
+	// IPReservationStateDenied fixed string representation of denied
+	IPReservationStateDenied IPReservationState = "denied"
+)
+
 // IPAddressReservation is created when user sends IP reservation request for a project (considering it's within quota).
 type IPAddressReservation struct {
 	IpAddressCommon
@@ -77,6 +90,7 @@ type IPAddressReservation struct {
 	Available   string                 `json:"available"`
 	Addon       bool                   `json:"addon"`
 	Bill        bool                   `json:"bill"`
+	State       IPReservationState     `json:"state"`
 	Description *string                `json:"details"`
 }
 
