@@ -17,10 +17,12 @@ To import this library into your Go project:
 import "github.com/packethost/packngo"
 ```
 
-Reference a particular version with:
+**Note:** A minimum of Go 1.14 is required for development.
+
+Download module  with:
 
 ```sh
-go get github.com/packethost/packngo@v0.2.0
+go get github.com/packethost/packngo
 ```
 
 ## Stability and Compatibility
