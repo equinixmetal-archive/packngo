@@ -105,7 +105,7 @@ func TestAccConnectionProject(t *testing.T) {
 		t.Fatal("There should be some events for the test connection")
 	}
 
-	_, err = c.Connections.Delete(conn.ID)
+	_, err = c.Connections.Delete(conn.ID, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,8 +163,149 @@ func TestAccConnectionOrganization(t *testing.T) {
 		t.Fatalf("The test Organization Connection with ID %s was not created", conn.ID)
 	}
 
-	_, err = c.Connections.Delete(conn.ID)
+	_, err = c.Connections.Delete(conn.ID, true)
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestAccConnectionFabricTokenRedundant(t *testing.T) {
+
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	cr := VirtualNetworkCreateRequest{
+		ProjectID:   projectID,
+		Description: "vlan1",
+		Metro:       testMetro(),
+	}
+
+	vlan1, _, err := c.ProjectVirtualNetworks.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cr.Description = "vlan2"
+	vlan2, _, err := c.ProjectVirtualNetworks.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	connReq := ConnectionCreateRequest{
+		Name:             "testconn_redundant",
+		Redundancy:       ConnectionRedundant,
+		Metro:            testMetro(),
+		Type:             ConnectionShared,
+		ServiceTokenType: FabricServiceTokenASide,
+		VLANs:            []int{vlan1.VXLAN, vlan2.VXLAN},
+		ContactEmail:     "nobody@hmail.com",
+		Speed:            500000000,
+		Project:          projectID,
+	}
+
+	co, _, err := c.Connections.ProjectCreate(projectID, &connReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	co, _, err = c.Connections.Get(co.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if co.Ports[0].VirtualCircuits[0].VNID != vlan1.VXLAN {
+		t.Fatalf("VNID of first port is not the same as VLAN1 VNID")
+	}
+
+	if co.Ports[1].VirtualCircuits[0].VNID != vlan2.VXLAN {
+		t.Fatalf("VNID of second port is not the same as VLAN2 VNID")
+	}
+
+	maybeVlan1, _, err := c.ProjectVirtualNetworks.GetByVXLAN(projectID, vlan1.VXLAN, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if maybeVlan1.ID != vlan1.ID {
+		t.Fatalf("VLAN1 VNID does not match VLAN ID fetched by vxlan")
+	}
+
+	_, err = c.Connections.Delete(co.ID, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = c.ProjectVirtualNetworks.Delete(vlan1.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = c.ProjectVirtualNetworks.Delete(vlan2.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
+
+func TestAccConnectionFabricTokenSingle(t *testing.T) {
+
+	skipUnlessAcceptanceTestsAllowed(t)
+	t.Parallel()
+	c, projectID, teardown := setupWithProject(t)
+	defer teardown()
+
+	cr := VirtualNetworkCreateRequest{
+		ProjectID:   projectID,
+		Description: "vlan1",
+		Metro:       testMetro(),
+	}
+
+	vlan1, _, err := c.ProjectVirtualNetworks.Create(&cr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	connReq := ConnectionCreateRequest{
+		Name:             "testconn_single",
+		Redundancy:       ConnectionPrimary,
+		Metro:            testMetro(),
+		Type:             ConnectionShared,
+		ServiceTokenType: FabricServiceTokenASide,
+		VLANs:            []int{vlan1.VXLAN},
+		ContactEmail:     "nobody@hmail.com",
+		Speed:            500000000,
+		Project:          projectID,
+	}
+
+	co, _, err := c.Connections.ProjectCreate(projectID, &connReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	co, _, err = c.Connections.Get(co.ID, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if co.Ports[0].VirtualCircuits[0].VNID != vlan1.VXLAN {
+		t.Fatalf("VNID of first port is not the same as VLAN1 VNID")
+	}
+
+	maybeVlan1, _, err := c.ProjectVirtualNetworks.GetByVXLAN(projectID, vlan1.VXLAN, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if maybeVlan1.ID != vlan1.ID {
+		t.Fatalf("VLAN1 VNID does not match VLAN ID fetched by vxlan")
+	}
+
+	_, err = c.Connections.Delete(co.ID, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = c.ProjectVirtualNetworks.Delete(vlan1.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }
