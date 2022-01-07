@@ -11,7 +11,6 @@ type ProjectVirtualNetworkService interface {
 	List(projectID string, opts *ListOptions) (*VirtualNetworkListResponse, *Response, error)
 	Create(*VirtualNetworkCreateRequest) (*VirtualNetwork, *Response, error)
 	Get(string, *GetOptions) (*VirtualNetwork, *Response, error)
-	GetByVXLAN(string, int, *GetOptions) (*VirtualNetwork, *Response, error)
 	Delete(virtualNetworkID string) (*Response, error)
 }
 
@@ -115,24 +114,4 @@ func (i *ProjectVirtualNetworkServiceOp) Delete(virtualNetworkID string) (*Respo
 	}
 
 	return resp, nil
-}
-
-// list project vlans and return the one with matching vxlan
-func (i *ProjectVirtualNetworkServiceOp) GetByVXLAN(projectID string, vxlan int, opts *GetOptions) (*VirtualNetwork, *Response, error) {
-	endpointPath := path.Join(projectBasePath, projectID, virtualNetworkBasePath)
-	apiPathQuery := opts.WithQuery(endpointPath)
-	vlanList := new(VirtualNetworkListResponse)
-
-	resp, err := i.client.DoRequest("GET", apiPathQuery, nil, vlanList)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	for _, vlan := range vlanList.VirtualNetworks {
-		if vlan.VXLAN == vxlan {
-			return &vlan, resp, nil
-		}
-	}
-
-	return nil, resp, nil
 }

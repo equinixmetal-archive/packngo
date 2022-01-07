@@ -1,8 +1,23 @@
 package packngo
 
 import (
+	"fmt"
 	"testing"
 )
+
+// helper for Connection test
+func getVLANByMetroVXLAN(client *Client, projectID, metro string, vxlan int) (*VirtualNetwork, *Response, error) {
+	vlans, _, err := client.ProjectVirtualNetworks.List(projectID, &ListOptions{Includes: []string{"metro"}})
+	if err != nil {
+		return nil, nil, err
+	}
+	for _, vlan := range vlans.VirtualNetworks {
+		if vlan.Metro.Code == metro && vlan.VXLAN == vxlan {
+			return &vlan, nil, nil
+		}
+	}
+	return nil, nil, fmt.Errorf("VLAN %s/%d not found", metro, vxlan)
+}
 
 func TestAccConnectionProject(t *testing.T) {
 	skipUnlessAcceptanceTestsAllowed(t)
@@ -222,10 +237,12 @@ func TestAccConnectionFabricTokenRedundant(t *testing.T) {
 		t.Fatalf("VNID of second port is not the same as VLAN2 VNID")
 	}
 
-	maybeVlan1, _, err := c.ProjectVirtualNetworks.GetByVXLAN(projectID, vlan1.VXLAN, nil)
+	maybeVlan1, _, err := getVLANByMetroVXLAN(c, projectID, testMetro(), vlan1.VXLAN)
+
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if maybeVlan1.ID != vlan1.ID {
 		t.Fatalf("VLAN1 VNID does not match VLAN ID fetched by vxlan")
 	}
@@ -290,7 +307,7 @@ func TestAccConnectionFabricTokenSingle(t *testing.T) {
 		t.Fatalf("VNID of first port is not the same as VLAN1 VNID")
 	}
 
-	maybeVlan1, _, err := c.ProjectVirtualNetworks.GetByVXLAN(projectID, vlan1.VXLAN, nil)
+	maybeVlan1, _, err := getVLANByMetroVXLAN(c, projectID, testMetro(), vlan1.VXLAN)
 	if err != nil {
 		t.Fatal(err)
 	}
