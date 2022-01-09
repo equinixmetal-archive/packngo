@@ -1,7 +1,10 @@
 package packngo
 
 import (
+	"errors"
+	"fmt"
 	"path"
+	"time"
 )
 
 type ConnectionRedundancy string
@@ -19,6 +22,8 @@ const (
 	ConnectionPortSecondary ConnectionPortRole   = "secondary"
 	ConnectionModeStandard  ConnectionMode       = "standard"
 	ConnectionModeTunnel    ConnectionMode       = "tunnel"
+	ConnectionDeleteTimeout                      = 60 * time.Second
+	ConnectionDeleteCheck                        = 2 * time.Second
 )
 
 type ConnectionService interface {
@@ -27,7 +32,7 @@ type ConnectionService interface {
 	Update(string, *ConnectionUpdateRequest, *GetOptions) (*Connection, *Response, error)
 	OrganizationList(string, *GetOptions) ([]Connection, *Response, error)
 	ProjectList(string, *GetOptions) ([]Connection, *Response, error)
-	Delete(string) (*Response, error)
+	Delete(string, bool) (*Response, error)
 	Get(string, *GetOptions) (*Connection, *Response, error)
 	Events(string, *GetOptions) ([]Event, *Response, error)
 	PortEvents(string, string, *GetOptions) ([]Event, *Response, error)
@@ -50,46 +55,54 @@ type connectionsRoot struct {
 }
 
 type ConnectionPort struct {
-	ID              string             `json:"id"`
-	Name            string             `json:"name,omitempty"`
-	Status          string             `json:"status,omitempty"`
-	Role            ConnectionPortRole `json:"role,omitempty"`
-	Speed           int                `json:"speed,omitempty"`
-	Organization    *Organization      `json:"organization,omitempty"`
-	VirtualCircuits []VirtualCircuit   `json:"virtual_circuits,omitempty"`
-	LinkStatus      string             `json:"link_status,omitempty"`
-	Href            string             `json:"href,omitempty"`
+	*Href        `json:",inline"`
+	ID           string             `json:"id"`
+	LinkStatus   string             `json:"link_status,omitempty"`
+	Name         string             `json:"name,omitempty"`
+	Organization *Organization      `json:"organization,omitempty"`
+	Role         ConnectionPortRole `json:"role,omitempty"`
+	// Speed is the maximum allowed throughput. This value inherits changes made in the Equinix Fabric API.
+	Speed           uint64               `json:"speed,omitempty"`
+	Status          string               `json:"status,omitempty"`
+	Tokens          []FabricServiceToken `json:"tokens,omitempty"`
+	VirtualCircuits []VirtualCircuit     `json:"virtual_circuits,omitempty"`
 }
 
 type Connection struct {
-	ID           string               `json:"id"`
-	Name         string               `json:"name,omitempty"`
-	Status       string               `json:"status,omitempty"`
-	Redundancy   ConnectionRedundancy `json:"redundancy,omitempty"`
-	Facility     *Facility            `json:"facility,omitempty"`
-	Metro        *Metro               `json:"metro,omitempty"`
-	Type         ConnectionType       `json:"type,omitempty"`
-	Mode         *ConnectionMode      `json:"mode,omitempty"`
-	Description  string               `json:"description,omitempty"`
-	Project      *Project             `json:"project,omitempty"`
-	Organization *Organization        `json:"organization,omitempty"`
-	Speed        int                  `json:"speed,omitempty"`
-	Token        string               `json:"token,omitempty"`
-	Tags         []string             `json:"tags,omitempty"`
-	Ports        []ConnectionPort     `json:"ports,omitempty"`
+	ID               string               `json:"id"`
+	ContactEmail     string               `json:"contact_email,omitempty"`
+	Name             string               `json:"name,omitempty"`
+	Status           string               `json:"status,omitempty"`
+	Redundancy       ConnectionRedundancy `json:"redundancy,omitempty"`
+	Facility         *Facility            `json:"facility,omitempty"`
+	Metro            *Metro               `json:"metro,omitempty"`
+	Type             ConnectionType       `json:"type,omitempty"`
+	Mode             *ConnectionMode      `json:"mode,omitempty"`
+	Description      string               `json:"description,omitempty"`
+	Project          *Project             `json:"project,omitempty"`
+	Organization     *Organization        `json:"organization,omitempty"`
+	Speed            uint64               `json:"speed,omitempty"`
+	Token            string               `json:"token,omitempty"`
+	Tokens           []FabricServiceToken `json:"service_tokens,omitempty"`
+	Tags             []string             `json:"tags,omitempty"`
+	Ports            []ConnectionPort     `json:"ports,omitempty"`
+	ServiceTokenType string               `json:"service_token_type,omitempty"`
 }
 
 type ConnectionCreateRequest struct {
-	Name        string               `json:"name,omitempty"`
-	Redundancy  ConnectionRedundancy `json:"redundancy,omitempty"`
-	Facility    string               `json:"facility,omitempty"`
-	Metro       string               `json:"metro,omitempty"`
-	Type        ConnectionType       `json:"type,omitempty"`
-	Mode        ConnectionMode       `json:"mode,omitempty"`
-	Description *string              `json:"description,omitempty"`
-	Project     string               `json:"project,omitempty"`
-	Speed       int                  `json:"speed,omitempty"`
-	Tags        []string             `json:"tags,omitempty"`
+	ContactEmail     string                 `json:"contact_email,omitempty"`
+	Description      *string                `json:"description,omitempty"`
+	Facility         string                 `json:"facility,omitempty"`
+	Metro            string                 `json:"metro,omitempty"`
+	Mode             ConnectionMode         `json:"mode,omitempty"`
+	Name             string                 `json:"name,omitempty"`
+	Project          string                 `json:"project,omitempty"`
+	Redundancy       ConnectionRedundancy   `json:"redundancy,omitempty"`
+	ServiceTokenType FabricServiceTokenType `json:"service_token_type,omitempty"`
+	Speed            uint64                 `json:"speed,omitempty"`
+	Tags             []string               `json:"tags,omitempty"`
+	Type             ConnectionType         `json:"type,omitempty"`
+	VLANs            []int                  `json:"vlans,omitempty"`
 }
 
 type ConnectionUpdateRequest struct {
@@ -172,12 +185,42 @@ func (s *ConnectionServiceOp) ProjectList(id string, opts *GetOptions) ([]Connec
 	return s.list(apiUrl, opts)
 }
 
-func (s *ConnectionServiceOp) Delete(id string) (*Response, error) {
+func (s *ConnectionServiceOp) Delete(id string, wait bool) (*Response, error) {
 	if validateErr := ValidateUUID(id); validateErr != nil {
 		return nil, validateErr
 	}
 	apiPath := path.Join(connectionBasePath, id)
-	return s.client.DoRequest("DELETE", apiPath, nil, nil)
+	connection := new(Connection)
+
+	resp, err := s.client.DoRequest("DELETE", apiPath, nil, connection)
+	if err != nil {
+		return resp, err
+	}
+	// We really miss context here.
+	if wait {
+		timeout := time.After(ConnectionDeleteTimeout)
+		//ticker := time.Tick(ConnectionDeleteCheck)
+		ticker := time.NewTicker(ConnectionDeleteCheck)
+		for {
+			select {
+			case <-ticker.C:
+				c, resp2, err := s.Get(id, nil)
+				if resp2.StatusCode == 404 {
+					// Connection has been deleted
+					return resp, nil
+				}
+				if err != nil {
+					return resp, err
+				}
+				if c.Status != "deleting" {
+					return resp, fmt.Errorf("Connection %s is in undexpected state %s", id, c.Status)
+				}
+			case <-timeout:
+				return resp, errors.New("Timeout waiting for connection to be deleted")
+			}
+		}
+	}
+	return resp, nil
 }
 
 func (s *ConnectionServiceOp) Port(connID, portID string, opts *GetOptions) (*ConnectionPort, *Response, error) {
