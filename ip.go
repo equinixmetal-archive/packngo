@@ -36,8 +36,14 @@ type ProjectIPService interface {
 	List(projectID string, opts *ListOptions) ([]IPAddressReservation, *Response, error)
 	Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error)
 	Remove(ipReservationID string) (*Response, error)
+	Update(assignmentID string, updateRequest *IPAddressUpdateRequest) (*IPAddressReservation, *Response, error)
 	AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error)
 }
+
+var (
+	_ DeviceIPService  = (*DeviceIPServiceOp)(nil)
+	_ ProjectIPService = (*ProjectIPServiceOp)(nil)
+)
 
 type IpAddressCommon struct { //nolint:golint
 	ID            string       `json:"id"`
@@ -85,13 +91,16 @@ const (
 // IPAddressReservation is created when user sends IP reservation request for a project (considering it's within quota).
 type IPAddressReservation struct {
 	IpAddressCommon
-	Assignments []*IPAddressAssignment `json:"assignments"`
-	Facility    *Facility              `json:"facility,omitempty"`
-	Available   string                 `json:"available"`
-	Addon       bool                   `json:"addon"`
-	Bill        bool                   `json:"bill"`
-	State       IPReservationState     `json:"state"`
-	Description *string                `json:"details"`
+	Assignments  []*IPAddressAssignment `json:"assignments"`
+	Facility     *Facility              `json:"facility,omitempty"`
+	Available    string                 `json:"available"`
+	Addon        bool                   `json:"addon"`
+	Bill         bool                   `json:"bill"`
+	State        IPReservationState     `json:"state"`
+	Description  *string                `json:"details"`
+	Enabled      bool                   `json:"enabled"`
+	MetalGateway *MetalGateway          `json:"metal_gateway,omitempty"`
+	RequestedBy  *UserLite              `json:"requested_by,omitempty"`
 }
 
 // AvailableResponse is a type for listing of available addresses from a reserved block.
@@ -108,6 +117,13 @@ type AvailableRequest struct {
 type IPAddressAssignment struct {
 	IpAddressCommon
 	AssignedTo Href `json:"assigned_to"`
+}
+
+// IPAddressUpdateRequest represents the body of an IPAddress patch
+type IPAddressUpdateRequest struct {
+	Tags        *[]string   `json:"tags,omitempty"`
+	Description *string     `json:"details,omitempty"`
+	CustomData  interface{} `json:"customdata,omitempty"`
 }
 
 // IPReservationRequest represents the body of a reservation request.
@@ -270,6 +286,25 @@ func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReser
 	if err != nil {
 		return nil, resp, err
 	}
+	return ipr, resp, err
+}
+
+// Update updates an existing IP reservation.
+func (i *ProjectIPServiceOp) Update(reservationID string, updateRequest *IPAddressUpdateRequest) (*IPAddressReservation, *Response, error) {
+	if validateErr := ValidateUUID(reservationID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	opts := &GetOptions{}
+	endpointPath := path.Join(ipBasePath, reservationID)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	ipr := new(IPAddressReservation)
+
+	resp, err := i.client.DoRequest("PATCH", apiPathQuery, updateRequest, ipr)
+
+	if err != nil {
+		return nil, resp, err
+	}
+
 	return ipr, resp, err
 }
 
