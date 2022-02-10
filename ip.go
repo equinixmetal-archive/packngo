@@ -99,7 +99,7 @@ type IPAddressReservation struct {
 	State        IPReservationState     `json:"state"`
 	Description  *string                `json:"details"`
 	Enabled      bool                   `json:"enabled"`
-	MetalGateway *MetalGateway          `json:"metal_gateway,omitempty"`
+	MetalGateway *MetalGatewayLite      `json:"metal_gateway,omitempty"`
 	RequestedBy  *UserLite              `json:"requested_by,omitempty"`
 }
 
