@@ -36,7 +36,7 @@ type ProjectIPService interface {
 	List(projectID string, opts *ListOptions) ([]IPAddressReservation, *Response, error)
 	Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error)
 	Remove(ipReservationID string) (*Response, error)
-	Update(assignmentID string, updateRequest *IPAddressUpdateRequest) (*IPAddressReservation, *Response, error)
+	Update(assignmentID string, updateRequest *IPAddressUpdateRequest, opt *GetOptions) (*IPAddressReservation, *Response, error)
 	AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error)
 }
 
@@ -290,11 +290,13 @@ func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReser
 }
 
 // Update updates an existing IP reservation.
-func (i *ProjectIPServiceOp) Update(reservationID string, updateRequest *IPAddressUpdateRequest) (*IPAddressReservation, *Response, error) {
+func (i *ProjectIPServiceOp) Update(reservationID string, updateRequest *IPAddressUpdateRequest, opts *GetOptions) (*IPAddressReservation, *Response, error) {
 	if validateErr := ValidateUUID(reservationID); validateErr != nil {
 		return nil, nil, validateErr
 	}
-	opts := &GetOptions{}
+	if opts == nil {
+		opts = &GetOptions{}
+	}
 	endpointPath := path.Join(ipBasePath, reservationID)
 	apiPathQuery := opts.WithQuery(endpointPath)
 	ipr := new(IPAddressReservation)
