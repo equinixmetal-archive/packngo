@@ -416,6 +416,7 @@ type DeviceCreateRequest struct {
 	Features       map[string]string        `json:"features,omitempty"`
 	IPAddresses    []IPAddressCreateRequest `json:"ip_addresses,omitempty"`
 	NoSSHKeys      bool                     `json:"no_ssh_keys,omitempty"`
+	ServerID       string                   `json:"server_id,omitempty"`
 }
 
 // DeviceUpdateRequest type used to update an Equinix Metal device
