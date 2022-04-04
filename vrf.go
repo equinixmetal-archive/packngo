@@ -48,6 +48,23 @@ type VRFCreateRequest struct {
 	IPBlocks []string `json:"ip_blocks,omitempty"`
 }
 
+type VRFUpdateRequest struct {
+	// Name is the name of the VRF. It must be unique per project.
+	Name *string `json:"name,omitempty"`
+
+	// Description of the VRF to be created.
+	Description *string `json:"description,omitempty"`
+
+	// LocalASN is the ASN of the local network.
+	LocalASN *int `json:"local_asn,omitempty"`
+
+	// IPBlocks is a list of all IPv4 and IPv6 Ranges that will be available to
+	// BGP Peers. IPv4 addresses must be /8 or smaller with a minimum size of
+	// /29. IPv6 must be /56 or smaller with a minimum size of /64. Ranges must
+	// not overlap other ranges within the VRF.
+	IPBlocks *[]string `json:"ip_blocks,omitempty"`
+}
+
 type VRFServiceOp struct {
 	client *Client
 }
@@ -110,6 +127,25 @@ func (s *VRFServiceOp) Create(projectID string, input *VRFCreateRequest) (*VRF, 
 	}
 
 	return output, resp, nil
+}
+
+// Update updates an existing VRF
+func (s *VRFServiceOp) Update(vrfID string, updateRequest *VRFUpdateRequest) (*VRF, *Response, error) {
+	if validateErr := ValidateUUID(vrfID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	opts := &GetOptions{}
+	endpointPath := path.Join(vrfBasePath, vrfID)
+	apiPathQuery := opts.WithQuery(endpointPath)
+
+	vrf := new(VRF)
+
+	resp, err := s.client.DoRequest("PUT", apiPathQuery, updateRequest, vrf)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return vrf, resp, err
 }
 
 func (s *VRFServiceOp) Delete(vrfID string) (*Response, error) {
