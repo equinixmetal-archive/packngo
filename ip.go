@@ -9,18 +9,22 @@ const ipBasePath = "/ips"
 
 const (
 	// PublicIPv4 fixed string representation of public ipv4
-	PublicIPv4 = "public_ipv4"
+	PublicIPv4 IPReservationType = "public_ipv4"
 	// PrivateIPv4 fixed string representation of private ipv4
-	PrivateIPv4 = "private_ipv4"
+	PrivateIPv4 IPReservationType = "private_ipv4"
 	// GlobalIPv4 fixed string representation of global ipv4
-	GlobalIPv4 = "global_ipv4"
+	GlobalIPv4 IPReservationType = "global_ipv4"
 	// PublicIPv6 fixed string representation of public ipv6
-	PublicIPv6 = "public_ipv6"
+	PublicIPv6 IPReservationType = "public_ipv6"
 	// PrivateIPv6 fixed string representation of private ipv6
-	PrivateIPv6 = "private_ipv6"
+	PrivateIPv6 IPReservationType = "private_ipv6"
 	// GlobalIPv6 fixed string representation of global ipv6
-	GlobalIPv6 = "global_ipv6"
+	GlobalIPv6 IPReservationType = "global_ipv6"
+	// VRFIPRange fixed string representation of vrf (virtual routing and forwarding). This may be any VRF supported range, including public and RFC-1918 IPv4 and IPv6 ranges.
+	VRFIPRange IPReservationType = "vrf"
 )
+
+type IPReservationType string
 
 // DeviceIPService handles assignment of addresses from reserved blocks to instances in a project.
 type DeviceIPService interface {
@@ -34,7 +38,8 @@ type DeviceIPService interface {
 type ProjectIPService interface {
 	Get(reservationID string, getOpt *GetOptions) (*IPAddressReservation, *Response, error)
 	List(projectID string, opts *ListOptions) ([]IPAddressReservation, *Response, error)
-	Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error)
+	Create(projectID string, ipReservationReq *IPReservationCreateRequest) (*IPAddressReservation, *Response, error)
+	Delete(ipReservationID string) (*Response, error)
 	Remove(ipReservationID string) (*Response, error)
 	Update(assignmentID string, updateRequest *IPAddressUpdateRequest, opt *GetOptions) (*IPAddressReservation, *Response, error)
 	AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error)
@@ -46,25 +51,27 @@ var (
 )
 
 type IpAddressCommon struct { //nolint:golint
-	ID            string       `json:"id"`
-	Address       string       `json:"address"`
-	Gateway       string       `json:"gateway"`
-	Network       string       `json:"network"`
-	AddressFamily int          `json:"address_family"`
-	Netmask       string       `json:"netmask"`
-	Public        bool         `json:"public"`
-	CIDR          int          `json:"cidr"`
-	Created       string       `json:"created_at,omitempty"`
-	Updated       string       `json:"updated_at,omitempty"`
-	Href          string       `json:"href"`
-	Management    bool         `json:"management"`
-	Manageable    bool         `json:"manageable"`
-	Metro         *Metro       `json:"metro,omitempty"`
-	Project       Href         `json:"project"`
-	Global        bool         `json:"global_ip"`
-	Tags          []string     `json:"tags,omitempty"`
-	ParentBlock   *ParentBlock `json:"parent_block,omitempty"`
-	CustomData    interface{}  `json:"customdata,omitempty"`
+	ID            string            `json:"id"`
+	Address       string            `json:"address"`
+	Gateway       string            `json:"gateway"`
+	Network       string            `json:"network"`
+	AddressFamily int               `json:"address_family"`
+	Netmask       string            `json:"netmask"`
+	Public        bool              `json:"public"`
+	CIDR          int               `json:"cidr"`
+	Created       string            `json:"created_at,omitempty"`
+	Updated       string            `json:"updated_at,omitempty"`
+	Href          string            `json:"href"`
+	Management    bool              `json:"management"`
+	Manageable    bool              `json:"manageable"`
+	Metro         *Metro            `json:"metro,omitempty"`
+	Project       Href              `json:"project"`
+	Global        bool              `json:"global_ip"`
+	Tags          []string          `json:"tags,omitempty"`
+	ParentBlock   *ParentBlock      `json:"parent_block,omitempty"`
+	CustomData    interface{}       `json:"customdata,omitempty"`
+	Type          IPReservationType `json:"type"`
+	VRF           *VRF              `json:"vrf,omitempty"`
 }
 
 // ParentBlock is the network block for the parent of an IP address
@@ -126,18 +133,43 @@ type IPAddressUpdateRequest struct {
 	CustomData  interface{} `json:"customdata,omitempty"`
 }
 
-// IPReservationRequest represents the body of a reservation request.
-type IPReservationRequest struct {
-	Type        string      `json:"type"`
-	Quantity    int         `json:"quantity"`
-	Description string      `json:"details,omitempty"`
-	Facility    *string     `json:"facility,omitempty"`
-	Metro       *string     `json:"metro,omitempty"`
-	Tags        []string    `json:"tags,omitempty"`
-	CustomData  interface{} `json:"customdata,omitempty"`
-	// FailOnApprovalRequired if the IP request cannot be approved automatically, rather than sending to
-	// the longer Equinix Metal approval process, fail immediately with a 422 error
+// IPReservationRequest represents the body of an IP reservation request
+// Deprecated: use IPReservationCreateRequest
+type IPReservationRequest = IPReservationCreateRequest
+
+// IPReservationCreateRequest represents the body of an IP reservation request.
+type IPReservationCreateRequest struct {
+	// Type of IP reservation.
+	Type        IPReservationType `json:"type"`
+	Quantity    int               `json:"quantity"`
+	Description string            `json:"details,omitempty"`
+	Facility    *string           `json:"facility,omitempty"`
+	Metro       *string           `json:"metro,omitempty"`
+	Tags        []string          `json:"tags,omitempty"`
+	CustomData  interface{}       `json:"customdata,omitempty"`
+	// FailOnApprovalRequired if the IP request cannot be approved
+	// automatically, rather than sending to the longer Equinix Metal approval
+	// process, fail immediately with a 422 error
 	FailOnApprovalRequired bool `json:"fail_on_approval_required,omitempty"`
+
+	// Comments in support of the request for additional addresses when the
+	// request must be manually approved.
+	Comments string `json:"comments,omitempty"`
+
+	// VRFID is the ID of the VRF to associate and draw the IP range from.
+	// * Required when Type is VRFIPRange, not valid otherwise
+	// * Network and CIDR are required when set
+	// * Metro and Facility are not required when set
+	VRFID string `json:"vrf_id,omitempty"`
+
+	// Network an unreserved network address from an existing VRF ip_range.
+	// * Required when Type is VRFIPRange, not valid otherwise
+	Network string `json:"network,omitempty"`
+
+	// CIDR the size of the network to reserve from an existing VRF ip_range.
+	// * Required when Type is VRFIPRange, not valid otherwise
+	// * Minimum range is 22-29, with 30-31 supported and necessary for virtual-circuits
+	CIDR int `json:"cidr,omitempty"`
 }
 
 // AddressStruct is a helper type for request/response with dict like {"address": ... }
@@ -219,7 +251,7 @@ func (i *DeviceIPServiceOp) List(deviceID string, opts *ListOptions) ([]IPAddres
 	endpointPath := path.Join(deviceBasePath, deviceID, ipBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
-	//ipList represents collection of IP Address reservations
+	// ipList represents collection of IP Address reservations
 	type ipList struct {
 		IPs []IPAddressAssignment `json:"ip_addresses,omitempty"`
 	}
@@ -257,6 +289,8 @@ func (i *ProjectIPServiceOp) Get(reservationID string, opts *GetOptions) (*IPAdd
 }
 
 // List provides a list of IP resevations for a single project.
+// opts be filtered to limit the type of reservations returned:
+// opts.Filter("type", "vrf")
 func (i *ProjectIPServiceOp) List(projectID string, opts *ListOptions) ([]IPAddressReservation, *Response, error) {
 	if validateErr := ValidateUUID(projectID); validateErr != nil {
 		return nil, nil, validateErr
@@ -274,8 +308,9 @@ func (i *ProjectIPServiceOp) List(projectID string, opts *ListOptions) ([]IPAddr
 	return reservations.Reservations, resp, nil
 }
 
-// Request requests more IP space for a project in order to have additional IP addresses to assign to devices.
-func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error) {
+// Create creates a request for more IP space for a project in order to have
+// additional IP addresses to assign to devices.
+func (i *ProjectIPServiceOp) Create(projectID string, ipReservationReq *IPReservationCreateRequest) (*IPAddressReservation, *Response, error) {
 	if validateErr := ValidateUUID(projectID); validateErr != nil {
 		return nil, nil, validateErr
 	}
@@ -287,6 +322,14 @@ func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReser
 		return nil, resp, err
 	}
 	return ipr, resp, err
+}
+
+// Request requests more IP space for a project in order to have additional IP
+// addresses to assign to devices.
+//
+// Deprecated: Use Create instead.
+func (i *ProjectIPServiceOp) Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error) {
+	return i.Create(projectID, ipReservationReq)
 }
 
 // Update updates an existing IP reservation.
@@ -302,7 +345,6 @@ func (i *ProjectIPServiceOp) Update(reservationID string, updateRequest *IPAddre
 	ipr := new(IPAddressReservation)
 
 	resp, err := i.client.DoRequest("PATCH", apiPathQuery, updateRequest, ipr)
-
 	if err != nil {
 		return nil, resp, err
 	}
@@ -310,12 +352,18 @@ func (i *ProjectIPServiceOp) Update(reservationID string, updateRequest *IPAddre
 	return ipr, resp, err
 }
 
-// Remove removes an IP reservation from the project.
-func (i *ProjectIPServiceOp) Remove(ipReservationID string) (*Response, error) {
+// Delete removes the requests for specific IP within a project
+func (i *ProjectIPServiceOp) Delete(ipReservationID string) (*Response, error) {
 	if validateErr := ValidateUUID(ipReservationID); validateErr != nil {
 		return nil, validateErr
 	}
 	return deleteFromIP(i.client, ipReservationID)
+}
+
+// Remove removes an IP reservation from the project.
+// Deprecated: Use Delete instead.
+func (i *ProjectIPServiceOp) Remove(ipReservationID string) (*Response, error) {
+	return i.Delete(ipReservationID)
 }
 
 // AvailableAddresses lists addresses available from a reserved block
@@ -331,5 +379,4 @@ func (i *ProjectIPServiceOp) AvailableAddresses(ipReservationID string, r *Avail
 		return nil, resp, err
 	}
 	return ar.Available, resp, nil
-
 }
