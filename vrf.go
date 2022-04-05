@@ -12,6 +12,7 @@ type VRFService interface {
 	List(projectID string, opts *ListOptions) ([]VRF, *Response, error)
 	Create(projectID string, input *VRFCreateRequest) (*VRF, *Response, error)
 	Get(vrfID string, opts *GetOptions) (*VRF, *Response, error)
+	ListIPs(vrfID string, opts *GetOptions) ([]IPAddressReservation, *Response, error)
 	Delete(vrfID string) (*Response, error)
 }
 
@@ -96,6 +97,28 @@ func (s *VRFServiceOp) List(projectID string, opts *ListOptions) (vrfs []VRF, re
 		}
 		return
 	}
+}
+
+func (s *VRFServiceOp) ListIPs(vrfID string, opts *ListOptions) (ips []IPAddressReservation, resp *Response, err error) {
+	if validateErr := ValidateUUID(vrfID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	endpointPath := path.Join(vrfBasePath, vrfID, ipBasePath)
+	apiPathQuery := opts.WithQuery(endpointPath)
+
+	// ipList represents collection of IP Address reservations
+	type ipList struct {
+		IPs []IPAddressReservation `json:"ip_addresses,omitempty"`
+	}
+
+	results := new(ipList)
+
+	resp, err = s.client.DoRequest("GET", apiPathQuery, nil, results)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return results.IPs, resp, err
 }
 
 func (s *VRFServiceOp) Get(vrfID string, opts *GetOptions) (*VRF, *Response, error) {
