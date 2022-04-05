@@ -1,8 +1,8 @@
 package packngo
 
 import (
-	"fmt"
 	"path"
+	"strconv"
 )
 
 const ipBasePath = "/ips"
@@ -371,7 +371,13 @@ func (i *ProjectIPServiceOp) AvailableAddresses(ipReservationID string, r *Avail
 	if validateErr := ValidateUUID(ipReservationID); validateErr != nil {
 		return nil, nil, validateErr
 	}
-	apiPathQuery := fmt.Sprintf("%s/%s/available?cidr=%d", ipBasePath, ipReservationID, r.CIDR)
+
+	opts := &GetOptions{}
+	opts.Filter("cidr", strconv.Itoa(r.CIDR))
+
+	endpointPath := path.Join(ipBasePath, ipReservationID, "available")
+	apiPathQuery := opts.WithQuery(endpointPath)
+
 	ar := new(AvailableResponse)
 
 	resp, err := i.client.DoRequest("GET", apiPathQuery, r, ar)
