@@ -42,11 +42,11 @@ type VRFCreateRequest struct {
 	// LocalASN is the ASN of the local network.
 	LocalASN int `json:"local_asn,omitempty"`
 
-	// IPBlocks is a list of all IPv4 and IPv6 Ranges that will be available to
+	// IPRanges is a list of all IPv4 and IPv6 Ranges that will be available to
 	// BGP Peers. IPv4 addresses must be /8 or smaller with a minimum size of
 	// /29. IPv6 must be /56 or smaller with a minimum size of /64. Ranges must
 	// not overlap other ranges within the VRF.
-	IPBlocks []string `json:"ip_blocks,omitempty"`
+	IPRanges []string `json:"ip_ranges,omitempty"`
 }
 
 type VRFUpdateRequest struct {
@@ -59,11 +59,11 @@ type VRFUpdateRequest struct {
 	// LocalASN is the ASN of the local network.
 	LocalASN *int `json:"local_asn,omitempty"`
 
-	// IPBlocks is a list of all IPv4 and IPv6 Ranges that will be available to
+	// IPRanges is a list of all IPv4 and IPv6 Ranges that will be available to
 	// BGP Peers. IPv4 addresses must be /8 or smaller with a minimum size of
 	// /29. IPv6 must be /56 or smaller with a minimum size of /64. Ranges must
 	// not overlap other ranges within the VRF.
-	IPBlocks *[]string `json:"ip_blocks,omitempty"`
+	IPRanges *[]string `json:"ip_ranges,omitempty"`
 }
 
 type VRFServiceOp struct {

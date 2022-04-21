@@ -125,6 +125,7 @@ type Client struct {
 	VLANAssignments        VLANAssignmentService
 	VolumeAttachments      VolumeAttachmentService
 	Volumes                VolumeService
+	VRFs                   VRFService
 
 	// DevicePorts
 	//
