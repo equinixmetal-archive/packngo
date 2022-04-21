@@ -11,6 +11,7 @@ const (
 type VRFService interface {
 	List(projectID string, opts *ListOptions) ([]VRF, *Response, error)
 	Create(projectID string, input *VRFCreateRequest) (*VRF, *Response, error)
+	Update(vrfID string, update *VRFUpdateRequest) (*VRF, *Response, error)
 	Get(vrfID string, opts *GetOptions) (*VRF, *Response, error)
 	ListIPs(vrfID string, opts *GetOptions) ([]IPAddressReservation, *Response, error)
 	Delete(vrfID string) (*Response, error)
