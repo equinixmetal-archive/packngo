@@ -8,33 +8,31 @@ import (
 	"time"
 )
 
-var (
-	// managementIPS is a block of public ipv4 and ipv6, with private ipv4. all
-	// with management enabled. This is standard in Layer3 configurations.
-	managementIPS = []*IPAddressAssignment{
-		{
-			IpAddressCommon: IpAddressCommon{
-				Management:    true,
-				AddressFamily: 4,
-				Public:        true,
-			},
+// managementIPS is a block of public ipv4 and ipv6, with private ipv4. all
+// with management enabled. This is standard in Layer3 configurations.
+var managementIPS = []*IPAddressAssignment{
+	{
+		IpAddressCommon: IpAddressCommon{
+			Management:    true,
+			AddressFamily: 4,
+			Public:        true,
 		},
-		{
-			IpAddressCommon: IpAddressCommon{
-				Management:    true,
-				AddressFamily: 6,
-				Public:        true,
-			},
+	},
+	{
+		IpAddressCommon: IpAddressCommon{
+			Management:    true,
+			AddressFamily: 6,
+			Public:        true,
 		},
-		{
-			IpAddressCommon: IpAddressCommon{
-				Management:    true,
-				AddressFamily: 4,
-				Public:        false,
-			},
+	},
+	{
+		IpAddressCommon: IpAddressCommon{
+			Management:    true,
+			AddressFamily: 4,
+			Public:        false,
 		},
-	}
-)
+	},
+}
 
 func waitDeviceActive(t *testing.T, c *Client, id string) *Device {
 	// 15 minutes = 180 * 5sec-retry
@@ -241,7 +239,6 @@ func TestAccDeviceBasic(t *testing.T) {
 		if ipa.Public && (ipa.AddressFamily == 4) {
 			if ipa.Address != networkInfo.PublicIPv4 {
 				t.Fatalf("strange public IPv4 from GetNetworkInfo, should be %s, is %s", ipa.Address, networkInfo.PublicIPv4)
-
 			}
 		}
 	}
@@ -253,7 +250,6 @@ func TestAccDeviceBasic(t *testing.T) {
 	if len(dl) != 1 {
 		t.Fatalf("Device List should contain exactly one device, was: %v", dl)
 	}
-
 }
 
 func TestAccDevicePXE(t *testing.T) {
@@ -354,7 +350,7 @@ func TestAccDeviceAssignGlobalIP(t *testing.T) {
 		Description: "packngo test",
 	}
 
-	reservation, _, err := c.ProjectIPs.Request(projectID, &req)
+	reservation, _, err := c.ProjectIPs.Create(projectID, &req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -390,7 +386,6 @@ func TestAccDeviceAssignGlobalIP(t *testing.T) {
 	if reservation.Assignments[0].Href != assignment.Href {
 		t.Fatalf("assignment %s should be listed in reservation resource %s",
 			assignment.Href, reservation)
-
 	}
 
 	for _, ipa := range d.Network {
@@ -452,7 +447,7 @@ func TestAccDeviceCreateWithReservedIP(t *testing.T) {
 		Facility:    &fac,
 	}
 
-	reservation, _, err := c.ProjectIPs.Request(projectID, &req)
+	reservation, _, err := c.ProjectIPs.Create(projectID, &req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -468,8 +463,10 @@ func TestAccDeviceCreateWithReservedIP(t *testing.T) {
 		IPAddresses: []IPAddressCreateRequest{
 			// NOTE: only one public IPv4 entry is allowed here
 			{AddressFamily: 4, Public: false},
-			{AddressFamily: 4, Public: true,
-				Reservations: []string{reservation.ID}, CIDR: 31},
+			{
+				AddressFamily: 4, Public: true,
+				Reservations: []string{reservation.ID}, CIDR: 31,
+			},
 		},
 	}
 
@@ -525,7 +522,7 @@ func TestAccDeviceAssignIP(t *testing.T) {
 		Facility:    &fac,
 	}
 
-	reservation, _, err := c.ProjectIPs.Request(projectID, &req)
+	reservation, _, err := c.ProjectIPs.Create(projectID, &req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -577,7 +574,6 @@ func TestAccDeviceAssignIP(t *testing.T) {
 	if reservation.Assignments[0].Href != assignment.Href {
 		t.Fatalf("assignment %s should be listed in reservation resource %s",
 			assignment.Href, reservation)
-
 	}
 
 	for _, ipa := range d.Network {
@@ -1075,7 +1071,6 @@ func TestAccDeviceCreateFacilities(t *testing.T) {
 	if !placedInRequestedFacility {
 		t.Fatal("Did not properly assign facility to device")
 	}
-
 }
 
 func TestAccDeviceIPAddresses(t *testing.T) {
@@ -1134,7 +1129,6 @@ func TestAccDeviceIPAddresses(t *testing.T) {
 	if len(dl) != 1 {
 		t.Fatalf("Device List should contain exactly one device, was: %v", dl)
 	}
-
 }
 
 func TestDevice_NumOfBonds(t *testing.T) {
@@ -1191,7 +1185,8 @@ func TestDevice_GetNetworkType(t *testing.T) {
 	}{
 		{
 			name: "GetNetworkType_bm0_provisioning", // t1.small.x86
-			fields: fields{Plan: &Plan{Slug: "baremetal_0"},
+			fields: fields{
+				Plan: &Plan{Slug: "baremetal_0"},
 				NetworkPorts: []Port{{
 					Type: "NetworkBondPort",
 					Name: "bond0",
@@ -1217,7 +1212,8 @@ func TestDevice_GetNetworkType(t *testing.T) {
 		},
 		{
 			name: "GetNetworkType_bm0_ready", // t1.small.x86 post-provision
-			fields: fields{Plan: &Plan{Slug: "baremetal_0"},
+			fields: fields{
+				Plan:    &Plan{Slug: "baremetal_0"},
 				Network: managementIPS,
 				NetworkPorts: []Port{{
 					Type: "NetworkBondPort",
@@ -1244,7 +1240,8 @@ func TestDevice_GetNetworkType(t *testing.T) {
 		},
 		{
 			name: "GetNetworkType_bm1", // c1.small.x86
-			fields: fields{Plan: &Plan{Slug: "baremetal_1"},
+			fields: fields{
+				Plan: &Plan{Slug: "baremetal_1"},
 				NetworkPorts: []Port{{
 					Type: "NetworkBondPort",
 					Name: "bond0",
@@ -1264,12 +1261,14 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					Data: PortData{
 						Bonded: true,
 					},
-				}}},
+				}},
+			},
 			want: NetworkTypeL3,
 		},
 		{
 			name: "GetNetworkType_bm1e_provisioning", // x1.small.x86
-			fields: fields{Plan: &Plan{Slug: "baremetal_1e"},
+			fields: fields{
+				Plan:    &Plan{Slug: "baremetal_1e"},
 				Network: managementIPS,
 				NetworkPorts: []Port{{
 					Type: "NetworkBondPort",
@@ -1290,12 +1289,14 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					Data: PortData{
 						Bonded: true,
 					},
-				}}},
+				}},
+			},
 			want: NetworkTypeHybrid,
 		},
 		{
 			name: "GetNetworkType_bm1e_provisioning", // x1.small.x86
-			fields: fields{Plan: &Plan{Slug: "baremetal_1e"},
+			fields: fields{
+				Plan: &Plan{Slug: "baremetal_1e"},
 				NetworkPorts: []Port{{
 					Type: "NetworkBondPort",
 					Name: "bond0",
@@ -1315,7 +1316,8 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					Data: PortData{
 						Bonded: false,
 					},
-				}}},
+				}},
+			},
 			want: NetworkTypeHybrid,
 		},
 		{
@@ -1414,53 +1416,56 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					Data: PortData{
 						Bonded: true,
 					},
-				}}},
+				}},
+			},
 			want: NetworkTypeL3,
 		},
 		{
 			name: "GetNetworkType_FourNics_Bonded_WithManagement", // n2-xlarge l3
 			fields: fields{
 				Network: managementIPS,
-				NetworkPorts: []Port{{
-					Type: "NetworkBondPort",
-					Name: "bond0",
-					Data: PortData{
-						Bonded: true,
-					},
-					NetworkType: "layer3",
-				}, {
-					Type: "NetworkBondPort",
-					Name: "bond1",
-					Data: PortData{
-						Bonded: true,
-					},
-					NetworkType: "layer3",
-				}, {
-					Type: "NetworkPort",
-					Name: "eth0",
-					Data: PortData{
-						Bonded: true,
-					},
-				}, {
-					Type: "NetworkPort",
-					Name: "eth1",
-					Data: PortData{
-						Bonded: true,
-					},
-				}, {
-					Type: "NetworkPort",
-					Name: "eth2",
-					Data: PortData{
-						Bonded: true,
-					},
-				}, {
-					Type: "NetworkPort",
-					Name: "eth3",
-					Data: PortData{
-						Bonded: true,
+				NetworkPorts: []Port{
+					{
+						Type: "NetworkBondPort",
+						Name: "bond0",
+						Data: PortData{
+							Bonded: true,
+						},
+						NetworkType: "layer3",
+					}, {
+						Type: "NetworkBondPort",
+						Name: "bond1",
+						Data: PortData{
+							Bonded: true,
+						},
+						NetworkType: "layer3",
+					}, {
+						Type: "NetworkPort",
+						Name: "eth0",
+						Data: PortData{
+							Bonded: true,
+						},
+					}, {
+						Type: "NetworkPort",
+						Name: "eth1",
+						Data: PortData{
+							Bonded: true,
+						},
+					}, {
+						Type: "NetworkPort",
+						Name: "eth2",
+						Data: PortData{
+							Bonded: true,
+						},
+					}, {
+						Type: "NetworkPort",
+						Name: "eth3",
+						Data: PortData{
+							Bonded: true,
+						},
 					},
 				},
-				}},
+			},
 			want: NetworkTypeL3,
 		},
 
@@ -1468,46 +1473,48 @@ func TestDevice_GetNetworkType(t *testing.T) {
 			name: "GetNetworkType_FourNics_Bonded_NoIPs", // n2-xlarge l2-bonded
 			fields: fields{
 				Network: []*IPAddressAssignment{},
-				NetworkPorts: []Port{{
-					Type: "NetworkBondPort",
-					Name: "bond0",
-					Data: PortData{
-						Bonded: true,
-					},
-					NetworkType: "layer2-bonded",
-				}, {
-					Type: "NetworkBondPort",
-					Name: "bond1",
-					Data: PortData{
-						Bonded: true,
-					},
-					NetworkType: "layer2-bonded",
-				}, {
-					Type: "NetworkPort",
-					Name: "eth0",
-					Data: PortData{
-						Bonded: true,
-					},
-				}, {
-					Type: "NetworkPort",
-					Name: "eth1",
-					Data: PortData{
-						Bonded: true,
-					},
-				}, {
-					Type: "NetworkPort",
-					Name: "eth2",
-					Data: PortData{
-						Bonded: true,
-					},
-				}, {
-					Type: "NetworkPort",
-					Name: "eth3",
-					Data: PortData{
-						Bonded: true,
+				NetworkPorts: []Port{
+					{
+						Type: "NetworkBondPort",
+						Name: "bond0",
+						Data: PortData{
+							Bonded: true,
+						},
+						NetworkType: "layer2-bonded",
+					}, {
+						Type: "NetworkBondPort",
+						Name: "bond1",
+						Data: PortData{
+							Bonded: true,
+						},
+						NetworkType: "layer2-bonded",
+					}, {
+						Type: "NetworkPort",
+						Name: "eth0",
+						Data: PortData{
+							Bonded: true,
+						},
+					}, {
+						Type: "NetworkPort",
+						Name: "eth1",
+						Data: PortData{
+							Bonded: true,
+						},
+					}, {
+						Type: "NetworkPort",
+						Name: "eth2",
+						Data: PortData{
+							Bonded: true,
+						},
+					}, {
+						Type: "NetworkPort",
+						Name: "eth3",
+						Data: PortData{
+							Bonded: true,
+						},
 					},
 				},
-				}},
+			},
 			want: NetworkTypeL2Bonded,
 		},
 		{
@@ -1600,7 +1607,8 @@ func TestDevice_GetNetworkType(t *testing.T) {
 					Data: PortData{
 						Bonded: false,
 					},
-				}}},
+				}},
+			},
 			want: NetworkTypeHybrid,
 		},
 	}
@@ -1679,7 +1687,6 @@ func TestAccDeviceMetroBasic(t *testing.T) {
 		if ipa.Public && (ipa.AddressFamily == 4) {
 			if ipa.Address != networkInfo.PublicIPv4 {
 				t.Fatalf("strange public IPv4 from GetNetworkInfo, should be %s, is %s", ipa.Address, networkInfo.PublicIPv4)
-
 			}
 		}
 	}
@@ -1691,7 +1698,6 @@ func TestAccDeviceMetroBasic(t *testing.T) {
 	if len(dl) != 1 {
 		t.Fatalf("Device List should contain exactly one device, was: %v", dl)
 	}
-
 }
 
 func TestDatapoint_UnmarshalJSON(t *testing.T) {
@@ -1710,7 +1716,8 @@ func TestDatapoint_UnmarshalJSON(t *testing.T) {
 			Rate: func(f float64) *float64 {
 				return &f
 			}(1),
-			When: Timestamp{Time: time.Date(2021, time.Month(1), 1, 0, 0, 0, 0, time.UTC)}},
+			When: Timestamp{Time: time.Date(2021, time.Month(1), 1, 0, 0, 0, 0, time.UTC)},
+		},
 		wantErr: false,
 	}}
 

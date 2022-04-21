@@ -29,6 +29,7 @@ type MetalGateway struct {
 	Href           string                `json:"href"`
 	CreatedAt      string                `json:"created_at,omitempty"`
 	UpdatedAt      string                `json:"updated_at,omitempty"`
+	VRF            *VRF                  `json:"vrf,omitempty"`
 }
 
 // MetalGatewayLite struct representation of a Metal Gateway
@@ -76,13 +77,17 @@ func (s *MetalGatewayServiceOp) List(projectID string, opts *ListOptions) (metal
 		}
 		return
 	}
-
 }
 
 type MetalGatewayCreateRequest struct {
-	VirtualNetworkID      string `json:"virtual_network_id"`
-	IPReservationID       string `json:"ip_reservation_id,omitempty"`
-	PrivateIPv4SubnetSize int    `json:"private_ipv4_subnet_size,omitempty"`
+	// VirtualNetworkID virtual network UUID.
+	VirtualNetworkID string `json:"virtual_network_id"`
+
+	// IPReservationID (optional) IP Reservation UUID (Public or VRF). Required for VRF.
+	IPReservationID string `json:"ip_reservation_id,omitempty"`
+
+	// PrivateIPv4SubnetSize (optional) Power of 2 between 8 and 128 (8, 16, 32, 64, 128). Invalid for VRF.
+	PrivateIPv4SubnetSize int `json:"private_ipv4_subnet_size,omitempty"`
 }
 
 func (s *MetalGatewayServiceOp) Get(metalGatewayID string, opts *GetOptions) (*MetalGateway, *Response, error) {

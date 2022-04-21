@@ -38,7 +38,7 @@ func TestAccPublicIPReservation(t *testing.T) {
 		FailOnApprovalRequired: true,
 	}
 
-	res, _, err := c.ProjectIPs.Request(projectID, &req)
+	res, _, err := c.ProjectIPs.Create(projectID, &req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func TestAccGlobalIPReservation(t *testing.T) {
 		Description: description,
 	}
 
-	res, _, err := c.ProjectIPs.Request(projectID, &req)
+	res, _, err := c.ProjectIPs.Create(projectID, &req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -225,7 +225,7 @@ func TestAccPublicIPReservationFailFast(t *testing.T) {
 		FailOnApprovalRequired: true,
 	}
 
-	_, resp, err := c.ProjectIPs.Request(projectID, &req)
+	_, resp, err := c.ProjectIPs.Create(projectID, &req)
 	if err == nil {
 		t.Fatal("should have had an error 422")
 	}
@@ -269,7 +269,7 @@ func TestAccPublicMetroIPReservation(t *testing.T) {
 		FailOnApprovalRequired: true,
 	}
 
-	res, _, err := c.ProjectIPs.Request(projectID, &req)
+	res, _, err := c.ProjectIPs.Create(projectID, &req)
 	if err != nil {
 		t.Fatal(err)
 	}
