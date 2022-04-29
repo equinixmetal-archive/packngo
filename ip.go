@@ -38,8 +38,11 @@ type DeviceIPService interface {
 type ProjectIPService interface {
 	Get(reservationID string, getOpt *GetOptions) (*IPAddressReservation, *Response, error)
 	List(projectID string, opts *ListOptions) ([]IPAddressReservation, *Response, error)
+	// Deprecated Use Create instead of Request
+	Request(projectID string, ipReservationReq *IPReservationRequest) (*IPAddressReservation, *Response, error)
 	Create(projectID string, ipReservationReq *IPReservationCreateRequest) (*IPAddressReservation, *Response, error)
 	Delete(ipReservationID string) (*Response, error)
+	// Deprecated Use Delete instead of Remove
 	Remove(ipReservationID string) (*Response, error)
 	Update(assignmentID string, updateRequest *IPAddressUpdateRequest, opt *GetOptions) (*IPAddressReservation, *Response, error)
 	AvailableAddresses(ipReservationID string, r *AvailableRequest) ([]string, *Response, error)
