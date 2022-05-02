@@ -6,6 +6,7 @@ import (
 
 var bgpSessionBasePath = "/bgp/sessions"
 var bgpNeighborsBasePath = "/bgp/neighbors"
+var bgpDiscoverBasePath = "/bgp/discover"
 
 // BGPSessionService interface defines available BGP session methods
 type BGPSessionService interface {

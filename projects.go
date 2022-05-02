@@ -14,6 +14,7 @@ type ProjectService interface {
 	Update(string, *ProjectUpdateRequest) (*Project, *Response, error)
 	Delete(string) (*Response, error)
 	ListBGPSessions(projectID string, listOpt *ListOptions) ([]BGPSession, *Response, error)
+	DiscoverBGPSessions(projectID string, getOpt *GetOptions) (*BGPDiscoverResponse, *Response, error)
 	ListEvents(string, *ListOptions) ([]Event, *Response, error)
 	ListSSHKeys(projectID string, searchOpt *SearchOptions) ([]SSHKey, *Response, error)
 }
@@ -36,6 +37,11 @@ type Project struct {
 	URL             string        `json:"href,omitempty"`
 	PaymentMethod   PaymentMethod `json:"payment_method,omitempty"`
 	BackendTransfer bool          `json:"backend_transfer_enabled"`
+}
+
+// BGPDiscoverResponse struct is returned from the bgp/discover endpoint
+type BGPDiscoverResponse struct {
+	UpdatedAt Timestamp `json:"updated_at"`
 }
 
 func (p Project) String() string {
@@ -197,4 +203,20 @@ func (s *ProjectServiceOp) ListEvents(projectID string, listOpt *ListOptions) ([
 	apiPath := path.Join(projectBasePath, projectID, eventBasePath)
 
 	return listEvents(s.client, apiPath, listOpt)
+}
+
+// Discover refreshes BGP session status
+func (p *ProjectServiceOp) DiscoverBGPSessions(projectID string, opts *GetOptions) (*BGPDiscoverResponse, *Response, error) {
+	if validateErr := ValidateUUID(projectID); validateErr != nil {
+		return nil, nil, validateErr
+	}
+	endpointPath := path.Join(bgpDiscoverBasePath, projectID)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	discovery := new(BGPDiscoverResponse)
+	response, err := p.client.DoRequest("POST", apiPathQuery, nil, discovery)
+	if err != nil {
+		return nil, response, err
+	}
+
+	return discovery, response, err
 }
