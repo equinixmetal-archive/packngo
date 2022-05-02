@@ -5,7 +5,6 @@ import (
 )
 
 func TestAccMetalGatewaySubnetSize(t *testing.T) {
-
 	skipUnlessAcceptanceTestsAllowed(t)
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
@@ -59,7 +58,6 @@ func TestAccMetalGatewaySubnetSize(t *testing.T) {
 }
 
 func TestAccMetalGatewayExistingReservation(t *testing.T) {
-
 	skipUnlessAcceptanceTestsAllowed(t)
 	c, projectID, teardown := setupWithProject(t)
 	defer teardown()
@@ -84,7 +82,7 @@ func TestAccMetalGatewayExistingReservation(t *testing.T) {
 		Metro:                  &metro,
 		FailOnApprovalRequired: true,
 	}
-	ipRes, _, err := c.ProjectIPs.Request(projectID, &ipcr)
+	ipRes, _, err := c.ProjectIPs.Create(projectID, &ipcr)
 	if err != nil {
 		t.Fatal(err)
 	}
