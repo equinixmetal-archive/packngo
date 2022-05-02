@@ -87,10 +87,11 @@ type virtualCircuitsRoot struct {
 }
 
 type VirtualCircuit struct {
-	ID             string          `json:"id"`
-	Name           string          `json:"name,omitempty"`
-	Description    string          `json:"description,omitempty"`
-	Speed          string          `json:"speed,omitempty"`
+	ID          string `json:"id"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	// Speed of the VirtualCircuit in bps
+	Speed          int             `json:"speed,omitempty"`
 	Status         VCStatus        `json:"status,omitempty"`
 	VNID           int             `json:"vnid,omitempty"`
 	NniVNID        int             `json:"nni_vnid,omitempty"`
