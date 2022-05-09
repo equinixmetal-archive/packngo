@@ -17,7 +17,7 @@ func TestAccOrgList(t *testing.T) {
 	addr := Address {
 		Address: "test",
 		ZipCode: "12345",
-		Country: "US",
+		Country: "GB",
 		City:    &city,
 	}
 	ocr := OrganizationCreateRequest{
@@ -67,7 +67,7 @@ func TestAccOrgBasic(t *testing.T) {
 	addr := Address{
 		Address: "test",
 		ZipCode: "12345",
-		Country: "US",
+		Country: "GB",
 		City:    &city,
 	}
 	ocr := OrganizationCreateRequest{
@@ -93,7 +93,7 @@ func TestAccOrgBasic(t *testing.T) {
 	oAddr := Address{
 		Address: "test 2",
 		ZipCode: "54321",
-		Country: "bar",
+		Country: "ES",
 		City:    &oCity,
 	}
 	pur := OrganizationUpdateRequest{
@@ -142,7 +142,7 @@ func TestAccOrgListPaymentMethods(t *testing.T) {
 	addr := Address{
 		Address: "test",
 		ZipCode: "12345",
-		Country: "US",
+		Country: "GB",
 		City:    &city,
 	}
 	ocr := OrganizationCreateRequest{
