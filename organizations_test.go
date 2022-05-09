@@ -13,11 +13,19 @@ func TestAccOrgList(t *testing.T) {
 	defer organizationTeardown(c)
 
 	rs := testProjectPrefix + randString8()
+	city := "foo"
+	addr := Address {
+		Address: "test",
+		ZipCode: "12345",
+		Country: "US",
+		City:    &city,
+	}
 	ocr := OrganizationCreateRequest{
 		Name:        rs,
 		Description: "Managed by Packngo.",
 		Website:     "http://example.com",
 		Twitter:     "foo",
+		Address:     addr,
 	}
 	org, _, err := c.Organizations.Create(&ocr)
 	if err != nil {
@@ -55,11 +63,19 @@ func TestAccOrgBasic(t *testing.T) {
 	defer organizationTeardown(c)
 
 	rs := testProjectPrefix + randString8()
+	city := "foo"
+	addr := Address{
+		Address: "test",
+		ZipCode: "12345",
+		Country: "US",
+		City:    &city,
+	}
 	ocr := OrganizationCreateRequest{
 		Name:        rs,
 		Description: "Managed by Packngo.",
 		Website:     "http://example.com",
 		Twitter:     "foo",
+		Address:     addr,
 	}
 	p, _, err := c.Organizations.Create(&ocr)
 	if err != nil {
@@ -71,13 +87,21 @@ func TestAccOrgBasic(t *testing.T) {
 
 	rs = testProjectPrefix + randString8()
 	oDesc := "Managed by Packngo."
-	oWeb := "http://quux.example.com"
-	oTwi := "bar"
+	oWeb  := "http://quux.example.com"
+	oTwi  := "bar"
+	oCity := "bar"
+	oAddr := Address{
+		Address: "test 2",
+		ZipCode: "54321",
+		Country: "bar",
+		City:    &oCity,
+	}
 	pur := OrganizationUpdateRequest{
 		Name:        &rs,
 		Description: &oDesc,
 		Website:     &oWeb,
 		Twitter:     &oTwi,
+		Address:     &oAddr,
 	}
 	org, _, err := c.Organizations.Update(p.ID, &pur)
 	if err != nil {
@@ -114,11 +138,19 @@ func TestAccOrgListPaymentMethods(t *testing.T) {
 	defer organizationTeardown(c)
 
 	rs := testProjectPrefix + randString8()
+	city := "foo"
+	addr := Address{
+		Address: "test",
+		ZipCode: "12345",
+		Country: "US",
+		City:    &city,
+	}
 	ocr := OrganizationCreateRequest{
 		Name:        rs,
 		Description: "Managed by Packngo.",
 		Website:     "http://example.com",
 		Twitter:     "foo",
+		Address:     addr,
 	}
 	org, _, err := c.Organizations.Create(&ocr)
 	if err != nil {
