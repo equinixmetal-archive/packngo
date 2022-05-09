@@ -51,11 +51,12 @@ func (o Organization) String() string {
 
 // OrganizationCreateRequest type used to create an Equinix Metal organization
 type OrganizationCreateRequest struct {
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	Website     string `json:"website,omitempty"`
-	Twitter     string `json:"twitter,omitempty"`
-	Logo        string `json:"logo,omitempty"`
+	Name        string  `json:"name"`
+	Description string  `json:"description,omitempty"`
+	Website     string  `json:"website,omitempty"`
+	Twitter     string  `json:"twitter,omitempty"`
+	Logo        string  `json:"logo,omitempty"`
+	Address     Address `json:"address,omitempty"`
 }
 
 func (o OrganizationCreateRequest) String() string {
@@ -64,11 +65,12 @@ func (o OrganizationCreateRequest) String() string {
 
 // OrganizationUpdateRequest type used to update an Equinix Metal organization
 type OrganizationUpdateRequest struct {
-	Name        *string `json:"name,omitempty"`
-	Description *string `json:"description,omitempty"`
-	Website     *string `json:"website,omitempty"`
-	Twitter     *string `json:"twitter,omitempty"`
-	Logo        *string `json:"logo,omitempty"`
+	Name        *string  `json:"name,omitempty"`
+	Description *string  `json:"description,omitempty"`
+	Website     *string  `json:"website,omitempty"`
+	Twitter     *string  `json:"twitter,omitempty"`
+	Logo        *string  `json:"logo,omitempty"`
+	Address     *Address `json:"address,omitempty"`
 }
 
 func (o OrganizationUpdateRequest) String() string {
