@@ -17,24 +17,52 @@ type planRoot struct {
 
 // Plan represents an Equinix Metal service plan
 type Plan struct {
-	ID                string     `json:"id"`
-	Slug              string     `json:"slug,omitempty"`
-	Name              string     `json:"name,omitempty"`
-	Description       string     `json:"description,omitempty"`
-	Line              string     `json:"line,omitempty"`
-	Legacy            bool       `json:"legacy,omitempty"`
-	Specs             *Specs     `json:"specs,omitempty"`
-	Pricing           *Pricing   `json:"pricing,omitempty"`
-	DeploymentTypes   []string   `json:"deployment_types"`
-	Class             string     `json:"class"`
-	AvailableIn       []Facility `json:"available_in"`
-	AvailableInMetros []Metro    `json:"available_in_metros"`
+	ID                 string              `json:"id"`
+	Slug               string              `json:"slug,omitempty"`
+	Name               string              `json:"name,omitempty"`
+	Description        string              `json:"description,omitempty"`
+	Line               string              `json:"line,omitempty"`
+	Legacy             bool                `json:"legacy,omitempty"`
+	Specs              *Specs              `json:"specs,omitempty"`
+	Pricing            *Pricing            `json:"pricing,omitempty"`
+	DeploymentTypes    []string            `json:"deployment_types"`
+	Class              string              `json:"class"`
+	AvailableIn        []Facility          `json:"available_in"`
+	AvailableInMetros  []Metro             `json:"available_in_metros"`
+	ReservationPricing *ReservationPricing `json:"reservation_pricing,omitempty"`
 
 	Href string `json:"href,omitempty"`
 }
 
 func (p Plan) String() string {
 	return Stringify(p)
+}
+
+// ReservationPricing - The reserved pricing for a plan
+type ReservationPricing struct {
+	OneYear   *OneYear   `json:"one_year"`
+	ThreeYear *ThreeYear `json:"three_year"`
+	SP        *SP        `json:"sp"`
+}
+
+//SP - The Sao Paulo reserved pricing for a plan
+type SP struct {
+	OneYear   *OneYear   `json:"one_year"`
+	ThreeYear *ThreeYear `json:"three_year"`
+}
+
+//OneYear The One year reserved pricing for a plan
+type OneYear struct {
+	Month float32 `json:"month"`
+}
+
+//ThreeYear The One year reserved pricing for a plan
+type ThreeYear struct {
+	Month float32 `json:"month"`
+}
+
+func (r ReservationPricing) String() string {
+	return Stringify(r)
 }
 
 // Specs - the server specs for a plan
