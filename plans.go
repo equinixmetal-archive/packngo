@@ -1,6 +1,9 @@
 package packngo
 
-import "path"
+import (
+	"encoding/json"
+	"path"
+)
 
 const planBasePath = "/plans"
 
@@ -38,31 +41,44 @@ func (p Plan) String() string {
 	return Stringify(p)
 }
 
+type MetroPricing map[string]AnnualReservationPricing
+
 // ReservationPricing - The reserved pricing for a plan
 type ReservationPricing struct {
-	OneYear   *OneYear   `json:"one_year"`
-	ThreeYear *ThreeYear `json:"three_year"`
-	SP        *SP        `json:"sp"`
-}
-
-//SP - The Sao Paulo reserved pricing for a plan
-type SP struct {
-	OneYear   *OneYear   `json:"one_year"`
-	ThreeYear *ThreeYear `json:"three_year"`
-}
-
-//OneYear The One year reserved pricing for a plan
-type OneYear struct {
-	Month float32 `json:"month"`
-}
-
-//ThreeYear The One year reserved pricing for a plan
-type ThreeYear struct {
-	Month float32 `json:"month"`
+	AnnualReservationPricing
+	Metros MetroPricing
 }
 
 func (r ReservationPricing) String() string {
 	return Stringify(r)
+}
+
+// UnmarshalJSON - Custom unmarshal function to set up the ReservationPricing object
+func (r *ReservationPricing) UnmarshalJSON(data []byte) error {
+	var a AnnualReservationPricing
+	var m MetroPricing
+	// Leverage the built in unmarshalling to sort out all the fields
+	json.Unmarshal(data, &a)
+	json.Unmarshal(data, &m)
+
+	// Remove three_year and one_year from the metropricing object
+	delete(m, "three_year")
+	delete(m, "one_year")
+
+	// Pass the objects to the parent
+	r.Metros = m
+	r.AnnualReservationPricing = a
+
+	return nil
+}
+
+type AnnualReservationPricing struct {
+	OneYear   *Pricing `json:"one_year"`
+	ThreeYear *Pricing `json:"three_year"`
+}
+
+func (m AnnualReservationPricing) String() string {
+	return Stringify(m)
 }
 
 // Specs - the server specs for a plan
