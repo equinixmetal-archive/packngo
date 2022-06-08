@@ -13,7 +13,7 @@ const (
 // FabricServiceToken represents an Equinix Metal metro
 type FabricServiceToken struct {
 	*Href            `json:",inline"`
-	ExpiresAt        Timestamp              `json:"expires_at,omitempty"`
+	ExpiresAt        *Timestamp             `json:"expires_at,omitempty"`
 	ID               string                 `json:"id"`
 	MaxAllowedSpeed  uint64                 `json:"max_allowed_speed,omitempty"`
 	Role             ConnectionPortRole     `json:"role,omitempty"`
