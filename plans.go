@@ -57,10 +57,16 @@ func (r ReservationPricing) String() string {
 func (r *ReservationPricing) UnmarshalJSON(data []byte) error {
 	var a AnnualReservationPricing
 	var m MetroPricing
-	// Leverage the built in unmarshalling to sort out all the fields
-	json.Unmarshal(data, &a)
-	json.Unmarshal(data, &m)
 
+	// Leverage the built in unmarshalling to sort out all the fields
+	err := json.Unmarshal(data, &a)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, &m)
+	if err != nil {
+		return err
+	}
 	// Remove three_year and one_year from the metropricing object
 	delete(m, "three_year")
 	delete(m, "one_year")
