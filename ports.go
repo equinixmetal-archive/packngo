@@ -119,6 +119,8 @@ func (i *PortServiceOp) Assign(portID, vlanID string) (*Port, *Response, error) 
 }
 
 // AssignNative assigns a virtual network to the port as a "native VLAN"
+// The VLAN being assigned MUST first be added as a vlan using Assign() before 
+// you may assign it as the native VLAN
 func (i *PortServiceOp) AssignNative(portID, vlanID string) (*Port, *Response, error) {
 	if validateErr := ValidateUUID(portID); validateErr != nil {
 		return nil, nil, validateErr
