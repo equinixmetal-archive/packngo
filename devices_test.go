@@ -170,7 +170,10 @@ func TestAccDeviceReinstall(t *testing.T) {
 
 	waitDeviceActive(t, c, dID)
 
-	rf := DeviceReinstallFields{DeprovisionFast: true}
+	rf := DeviceReinstallFields{
+		DeprovisionFast: true,
+		OperatingSystem: "ubuntu_20_04",
+	}
 
 	_, err = c.Devices.Reinstall(dID, &rf)
 	if err != nil {
