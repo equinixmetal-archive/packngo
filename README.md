@@ -1,6 +1,6 @@
 # packngo
 
-[![](https://img.shields.io/badge/stability-maintained-green.svg)](https://github.com/packethost/standards/blob/master/maintained-statement.md)
+[![Maintained](https://img.shields.io/badge/stability-maintained-green.svg)](https://github.com/equinix-labs/equinix-labs/blob/main/maintained-statement.md)
 [![Release](https://img.shields.io/github/v/release/packethost/packngo)](https://github.com/packethost/packngo/releases/latest)
 [![GoDoc](https://godoc.org/github.com/packethost/packngo?status.svg)](https://godoc.org/github.com/packethost/packngo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/packethost/packngo)](https://goreportcard.com/report/github.com/packethost/packngo)
@@ -27,7 +27,7 @@ go get github.com/packethost/packngo
 
 ## Stability and Compatibility
 
-This repository is [Maintained](https://github.com/packethost/standards/blob/master/maintained-statement.md) meaning that this software is supported by Equinix Metal and its community - available to use in production environments.
+This repository is [Maintained](https://github.com/equinix-labs/equinix-labs/blob/main/maintained-statement.md) meaning that this software is supported by Equinix Metal and its community - available to use in production environments.
 
 Packngo is currently provided with a major version of [v0](https://blog.golang.org/v2-go-modules). We'll try to avoid breaking changes to this library, but they will certainly happen as we work towards a stable v1 library. See [CHANGELOG.md](CHANGELOG.md) for details on the latest additions, removals, fixes, and breaking changes.
 
@@ -67,7 +67,7 @@ func main() {
 
 ```
 
-This library is used by the official [terraform-provider-packet](https://github.com/packethost/terraform-provider-packet).
+This library is used by the official [terraform-provider-equinix](https://github.com/equinix/terraform-provider-equinix).
 
 You can also learn a lot from the `*_test.go` sources. Almost all out tests touch the Equinix Metal API, so you can see how auth, querying and POSTing works. For example [devices_test.go](devices_test.go).
 
