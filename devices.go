@@ -443,8 +443,9 @@ type DeviceDeleteRequest struct {
 	Force bool `json:"force_delete"`
 }
 type DeviceReinstallFields struct {
-	PreserveData    bool `json:"preserve_data,omitempty"`
-	DeprovisionFast bool `json:"deprovision_fast,omitempty"`
+	OperatingSystem  string `json:"operating_system,omitempty"`
+	PreserveData     bool   `json:"preserve_data,omitempty"`
+	DeprovisionFast  bool   `json:"deprovision_fast,omitempty"`
 }
 
 type DeviceReinstallRequest struct {
