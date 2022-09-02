@@ -1,6 +1,9 @@
 package packngo
 
-import "path"
+import (
+	"encoding/json"
+	"path"
+)
 
 const planBasePath = "/plans"
 
@@ -17,24 +20,71 @@ type planRoot struct {
 
 // Plan represents an Equinix Metal service plan
 type Plan struct {
-	ID                string     `json:"id"`
-	Slug              string     `json:"slug,omitempty"`
-	Name              string     `json:"name,omitempty"`
-	Description       string     `json:"description,omitempty"`
-	Line              string     `json:"line,omitempty"`
-	Legacy            bool       `json:"legacy,omitempty"`
-	Specs             *Specs     `json:"specs,omitempty"`
-	Pricing           *Pricing   `json:"pricing,omitempty"`
-	DeploymentTypes   []string   `json:"deployment_types"`
-	Class             string     `json:"class"`
-	AvailableIn       []Facility `json:"available_in"`
-	AvailableInMetros []Metro    `json:"available_in_metros"`
+	ID                 string              `json:"id"`
+	Slug               string              `json:"slug,omitempty"`
+	Name               string              `json:"name,omitempty"`
+	Description        string              `json:"description,omitempty"`
+	Line               string              `json:"line,omitempty"`
+	Legacy             bool                `json:"legacy,omitempty"`
+	Specs              *Specs              `json:"specs,omitempty"`
+	Pricing            *Pricing            `json:"pricing,omitempty"`
+	DeploymentTypes    []string            `json:"deployment_types"`
+	Class              string              `json:"class"`
+	AvailableIn        []Facility          `json:"available_in"`
+	AvailableInMetros  []Metro             `json:"available_in_metros"`
+	ReservationPricing *ReservationPricing `json:"reservation_pricing,omitempty"`
 
 	Href string `json:"href,omitempty"`
 }
 
 func (p Plan) String() string {
 	return Stringify(p)
+}
+
+type MetroPricing map[string]AnnualReservationPricing
+
+// ReservationPricing - The reserved pricing for a plan
+type ReservationPricing struct {
+	AnnualReservationPricing
+	Metros MetroPricing
+}
+
+func (r ReservationPricing) String() string {
+	return Stringify(r)
+}
+
+// UnmarshalJSON - Custom unmarshal function to set up the ReservationPricing object
+func (r *ReservationPricing) UnmarshalJSON(data []byte) error {
+	var a AnnualReservationPricing
+	var m MetroPricing
+
+	// Leverage the built in unmarshalling to sort out all the fields
+	err := json.Unmarshal(data, &a)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, &m)
+	if err != nil {
+		return err
+	}
+	// Remove three_year and one_year from the metropricing object
+	delete(m, "three_year")
+	delete(m, "one_year")
+
+	// Pass the objects to the parent
+	r.Metros = m
+	r.AnnualReservationPricing = a
+
+	return nil
+}
+
+type AnnualReservationPricing struct {
+	OneYear   *Pricing `json:"one_year"`
+	ThreeYear *Pricing `json:"three_year"`
+}
+
+func (m AnnualReservationPricing) String() string {
+	return Stringify(m)
 }
 
 // Specs - the server specs for a plan
