@@ -4,14 +4,17 @@ import (
 	"path"
 )
 
-const usersBasePath = "/users"
-const userBasePath = "/user"
+const (
+	usersBasePath = "/users"
+	userBasePath  = "/user"
+)
 
 // UserService interface defines available user methods
 type UserService interface {
+	Create(*UserCreateRequest) (*User, *Response, error)
+	Current() (*User, *Response, error)
 	List(*ListOptions) ([]User, *Response, error)
 	Get(string, *GetOptions) (*User, *Response, error)
-	Current() (*User, *Response, error)
 	Update(*UserUpdateRequest) (*User, *Response, error)
 }
 
@@ -83,6 +86,17 @@ type UserLite struct {
 	AvatarThumbURL string     `json:"avatar_thumb_url,omitempty"`
 }
 
+// UserCreateRequest struct for UserService.Create
+type UserCreateRequest struct {
+	InvitationID string         `json:"invitation_id,omitempty"`
+	Nonce        string         `json:"nonce,omitempty"`
+	FirstName    string         `json:"first_name,omitempty"`
+	LastName     string         `json:"last_name,omitempty"`
+	Password     string         `json:"password,omitempty"`
+	Customdata   *interface{}   `json:"customdata,omitempty"`
+	Emails       []EmailRequest `json:"emails,omitempty"`
+}
+
 // UserUpdateRequest struct for UserService.Update
 type UserUpdateRequest struct {
 	FirstName   *string      `json:"first_name,omitempty"`
@@ -122,6 +136,23 @@ func (s *UserServiceOp) List(opts *ListOptions) (users []User, resp *Response, e
 		}
 		return
 	}
+}
+
+// Create a User with the given UserCreateRequest. New user VerificationStage
+// will be AccountCreated, unless UserCreateRequest contains an valid
+// InvitationID and Nonce in which case the VerificationStage will be Verified.
+func (s *UserServiceOp) Create(createRequest *UserCreateRequest) (*User, *Response, error) {
+	opts := &GetOptions{}
+	endpointPath := path.Join(usersBasePath)
+	apiPathQuery := opts.WithQuery(endpointPath)
+	user := new(User)
+
+	resp, err := s.client.DoRequest("POST", apiPathQuery, createRequest, user)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return user, resp, err
 }
 
 // Returns the user object for the currently logged-in user.

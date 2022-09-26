@@ -106,6 +106,7 @@ type Client struct {
 	Events                 EventService
 	Facilities             FacilityService
 	HardwareReservations   HardwareReservationService
+	Invitations            InvitationService
 	Metros                 MetroService
 	Notifications          NotificationService
 	OperatingSystems       OSService
@@ -339,7 +340,6 @@ func NewClient() (*Client, error) {
 	}
 	c := NewClientWithAuth("packngo lib", apiToken, nil)
 	return c, nil
-
 }
 
 // NewClientWithAuth initializes and returns a Client, use this to get an API Client to operate on
@@ -377,6 +377,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Events = &EventServiceOp{client: c}
 	c.Facilities = &FacilityServiceOp{client: c}
 	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
+	c.Invitations = &InvitationServiceOp{client: c}
 	c.Metros = &MetroServiceOp{client: c}
 	c.Notifications = &NotificationServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
@@ -403,7 +404,6 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 }
 
 func checkResponse(r *http.Response) error {
-
 	if s := r.StatusCode; s >= 200 && s <= 299 {
 		// response is good, return
 		return nil
