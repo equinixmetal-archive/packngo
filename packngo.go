@@ -107,6 +107,7 @@ type Client struct {
 	Facilities             FacilityService
 	HardwareReservations   HardwareReservationService
 	Invitations            InvitationService
+	Members                MemberService
 	Metros                 MetroService
 	Notifications          NotificationService
 	OperatingSystems       OSService
@@ -378,6 +379,7 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.Facilities = &FacilityServiceOp{client: c}
 	c.HardwareReservations = &HardwareReservationServiceOp{client: c}
 	c.Invitations = &InvitationServiceOp{client: c}
+	c.Members = &MemberServiceOp{client: c}
 	c.Metros = &MetroServiceOp{client: c}
 	c.Notifications = &NotificationServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
