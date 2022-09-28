@@ -61,7 +61,7 @@ type InvitationServiceOp struct {
 
 var _ InvitationService = (*InvitationServiceOp)(nil)
 
-// Get method gets a invitation by invitationID
+// Lists open invitations to the project
 func (s *InvitationServiceOp) List(organizationID string, opts *ListOptions) (invitations []Invitation, resp *Response, err error) {
 	endpointPath := path.Join(organizationBasePath, organizationID, invitationsBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
