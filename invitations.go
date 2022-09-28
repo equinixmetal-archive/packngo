@@ -88,7 +88,7 @@ func (s *InvitationServiceOp) List(organizationID string, opts *ListOptions) (in
 // InvitationID and Nonce in which case the VerificationStage will be Verified.
 func (s *InvitationServiceOp) Create(organizationID string, createRequest *InvitationCreateRequest, opts *GetOptions) (*Invitation, *Response, error) {
 	endpointPath := path.Join(organizationBasePath, organizationID, invitationsBasePath)
-	apiPathQuery := opts.Including("invited_by", "invitable", "projects").WithQuery(endpointPath)
+	apiPathQuery := opts.WithQuery(endpointPath)
 	invitation := new(Invitation)
 
 	resp, err := s.client.DoRequest("POST", apiPathQuery, createRequest, invitation)
