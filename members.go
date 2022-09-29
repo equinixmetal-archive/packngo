@@ -16,11 +16,21 @@ type membersRoot struct {
 	Meta    meta     `json:"meta"`
 }
 
+type MemberRole string
+
+const (
+	MemberRoleOwner               MemberRole = "owner"
+	MemberRoleAdmin               MemberRole = "admin"
+	MemberRoleCollaborator        MemberRole = "collaborator"
+	MemberRoleLimitedCollaborator MemberRole = "limited_collaborator"
+	MemberRoleBilling             MemberRole = "billing"
+)
+
 // Member is the returned from organization/id/members
 type Member struct {
 	*Href         `json:",inline"`
 	ID            string       `json:"id"`
-	Roles         []string     `json:"roles"`
+	Roles         []MemberRole `json:"roles"`
 	ProjectsCount int          `json:"projects_count"`
 	User          User         `json:"user"`
 	Organization  Organization `json:"organization"`

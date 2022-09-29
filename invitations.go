@@ -26,25 +26,25 @@ type invitationsRoot struct {
 // Invitation represents an Equinix Metal invitation
 type Invitation struct {
 	*Href        `json:",inline"`
-	ID           string     `json:"id,omitempty"`
-	Invitation   Href       `json:"invitation,omitempty"`
-	InvitedBy    Href       `json:"invited_by,omitempty"`
-	Invitee      string     `json:"invitee,omitempty"`
-	Nonce        string     `json:"nonce,omitempty"`
-	Organization Href       `json:"organization,omitempty"`
-	Projects     []Href     `json:"projects,omitempty"`
-	Roles        []string   `json:"roles,omitempty"`
-	CreatedAt    *Timestamp `json:"created_at,omitempty"`
-	UpdatedAt    *Timestamp `json:"updated_at,omitempty"`
+	ID           string       `json:"id,omitempty"`
+	Invitation   Href         `json:"invitation,omitempty"`
+	InvitedBy    Href         `json:"invited_by,omitempty"`
+	Invitee      string       `json:"invitee,omitempty"`
+	Nonce        string       `json:"nonce,omitempty"`
+	Organization Href         `json:"organization,omitempty"`
+	Projects     []Href       `json:"projects,omitempty"`
+	Roles        []MemberRole `json:"roles,omitempty"`
+	CreatedAt    *Timestamp   `json:"created_at,omitempty"`
+	UpdatedAt    *Timestamp   `json:"updated_at,omitempty"`
 }
 
 // InvitationCreateRequest struct for InvitationService.Create
 type InvitationCreateRequest struct {
 	// Invitee is the email address of the recipient
-	Invitee     string   `json:"invitee"`
-	Message     string   `json:"message,omitempty"`
-	ProjectsIDs []string `json:"projects_ids,omitempty"`
-	Roles       []string `json:"roles,omitempty"`
+	Invitee     string       `json:"invitee"`
+	Message     string       `json:"message,omitempty"`
+	ProjectsIDs []string     `json:"projects_ids,omitempty"`
+	Roles       []MemberRole `json:"roles,omitempty"`
 }
 
 // InvitationUpdateRequest struct for InvitationService.Update
