@@ -41,8 +41,9 @@ type Organization struct {
 	LogoThumb    string    `json:"logo_thumb,omitempty"`
 	Projects     []Project `json:"projects,omitempty"`
 	URL          string    `json:"href,omitempty"`
-	Users        []User    `json:"members,omitempty"`
+	Members      []Member  `json:"members,omitempty"`
 	Owners       []User    `json:"owners,omitempty"`
+	PrimaryOwner User      `json:"primary_owner,omitempty"`
 }
 
 func (o Organization) String() string {
