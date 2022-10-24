@@ -376,7 +376,7 @@ func (i *ProjectIPServiceOp) AvailableAddresses(ipReservationID string, r *Avail
 	}
 
 	opts := &GetOptions{}
-	opts.Filter("cidr", strconv.Itoa(r.CIDR))
+	opts = opts.Filter("cidr", strconv.Itoa(r.CIDR))
 
 	endpointPath := path.Join(ipBasePath, ipReservationID, "available")
 	apiPathQuery := opts.WithQuery(endpointPath)
