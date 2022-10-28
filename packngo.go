@@ -90,6 +90,7 @@ type Client struct {
 	UserAgent     string
 	ConsumerToken string
 	APIKey        string
+	apiKeySet     bool
 	header        http.Header
 
 	RateLimit Rate
@@ -424,12 +425,14 @@ func NewClient(opts ...ClientOpt) (*Client, error) {
 		}
 	}
 
-	if c.APIKey == "" {
+	if !c.apiKeySet {
 		c.APIKey = os.Getenv(authTokenEnvVar)
-	}
 
-	if c.APIKey == "" {
-		return nil, fmt.Errorf("you must export %s", authTokenEnvVar)
+		if c.APIKey == "" {
+			return nil, fmt.Errorf("you must export %s", authTokenEnvVar)
+		}
+
+		c.apiKeySet = true
 	}
 
 	return c, nil

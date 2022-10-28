@@ -13,6 +13,7 @@ func WithAuth(consumerToken string, apiKey string) ClientOpt {
 	return func(c *Client) error {
 		c.ConsumerToken = consumerToken
 		c.APIKey = apiKey
+		c.apiKeySet = true
 
 		return nil
 	}
