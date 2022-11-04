@@ -3,7 +3,6 @@ package packngo
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"path"
 	"strconv"
 	"strings"
@@ -52,30 +51,26 @@ func TestVLANAssignmentServiceOp_Get(t *testing.T) {
 		{
 			name: "Simple",
 			fields: fields{
-				client: (func() *MockClient {
+				client: &MockClient{
+					fnDoRequest: func(method, pathURL string, body, v interface{}) (*Response, error) {
+						raw := mockAssignedPortBody(testAssignmentId, testPortId, testVnId)
 
-					raw := mockAssignedPortBody(
-						testAssignmentId, testPortId, testVnId)
-					mockNR := mockNewRequest()
-					mockDo := func(req *http.Request, obj interface{}) (*Response, error) {
 						// baseURL is not needed here
 						expectedPath := path.Join(portBasePath, testPortId, portVLANAssignmentsPath, testAssignmentId)
-						if expectedPath != req.URL.Path {
+						if expectedPath != pathURL {
 							return nil, fmt.Errorf("wrong url")
 						}
-						if err := json.NewDecoder(strings.NewReader(raw)).Decode(obj); err != nil {
+						if err := json.NewDecoder(strings.NewReader(raw)).Decode(v); err != nil {
 							return nil, err
 						}
 
-						return mockResponse(200, raw, req), nil
-					}
-
-					return &MockClient{
-						fnDoRequest: mockDoRequest(mockNR, mockDo),
-					}
-				})(),
+						return mockResponse(200, raw, nil), nil
+					},
+				},
 			},
 			args: args{portID: testPortId, assignmentID: testAssignmentId},
+			// TODO: This is testing the code residing inside (json.Decoder).Decode(), which is already exhaustively tested.
+			// What needs testing is the code residing inside VLANAssignmentServiceOp.Get().
 			want: &VLANAssignment{
 				ID:             testAssignmentId,
 				CreatedAt:      Timestamp{Time: func() time.Time { t, _ := time.Parse(time.RFC3339, "2021-05-28T16:02:33Z"); return t }()},

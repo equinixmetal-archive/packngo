@@ -90,6 +90,8 @@ type Client struct {
 	UserAgent     string
 	ConsumerToken string
 	APIKey        string
+	apiKeySet     bool
+	header        http.Header
 
 	RateLimit Rate
 
@@ -176,12 +178,11 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 
 	req.Close = true
 
-	req.Header.Add("X-Auth-Token", c.APIKey)
-	req.Header.Add("X-Consumer-Token", c.ConsumerToken)
+	req.Header = c.header.Clone()
+	req.Header.Set("X-Auth-Token", c.APIKey)
+	req.Header.Set("X-Consumer-Token", c.ConsumerToken)
+	req.Header.Set("User-Agent", c.UserAgent)
 
-	req.Header.Add("Content-Type", mediaType)
-	req.Header.Add("Accept", mediaType)
-	req.Header.Add("User-Agent", c.UserAgent)
 	return req, nil
 }
 
@@ -333,16 +334,6 @@ func (c *Client) DoRequestWithHeader(method string, headers map[string]string, p
 	return c.Do(req, v)
 }
 
-// NewClient initializes and returns a Client
-func NewClient() (*Client, error) {
-	apiToken := os.Getenv(authTokenEnvVar)
-	if apiToken == "" {
-		return nil, fmt.Errorf("you must export %s", authTokenEnvVar)
-	}
-	c := NewClientWithAuth("packngo lib", apiToken, nil)
-	return c, nil
-}
-
 // NewClientWithAuth initializes and returns a Client, use this to get an API Client to operate on
 // N.B.: Equinix Metal's API certificate requires Go 1.5+ to successfully parse. If you are using
 // an older version of Go, pass in a custom http.Client with a custom TLS configuration
@@ -359,12 +350,37 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 		httpClient = http.DefaultClient
 	}
 
-	u, err := url.Parse(apiBaseURL)
+	return NewClient(WithAuth(consumerToken, apiKey), WithHTTPClient(httpClient), WithBaseURL(apiBaseURL))
+}
+
+// NewClient initializes and returns a Client. The opts are functions such as WithAuth,
+// WithHTTPClient, etc.
+//
+// An example:
+//
+//	c, err := NewClient()
+//
+// An alternative example, which avoids reading PACKET_AUTH_TOKEN environment variable:
+//
+//	c, err := NewClient(WithAuth("packngo lib", packetAuthToken))
+func NewClient(opts ...ClientOpt) (*Client, error) {
+	// set defaults, then let caller override them
+	c := &Client{
+		client:        http.DefaultClient,
+		UserAgent:     UserAgent,
+		ConsumerToken: "packngo lib",
+		header:        http.Header{},
+	}
+
+	c.header.Set("Content-Type", mediaType)
+	c.header.Set("Accept", mediaType)
+
+	var err error
+	c.BaseURL, err = url.Parse(baseURL)
 	if err != nil {
 		return nil, err
 	}
 
-	c := &Client{client: httpClient, BaseURL: u, UserAgent: UserAgent, ConsumerToken: consumerToken, APIKey: apiKey}
 	c.APIKeys = &APIKeyServiceOp{client: c}
 	c.BGPConfig = &BGPConfigServiceOp{client: c}
 	c.BGPSessions = &BGPSessionServiceOp{client: c}
@@ -401,6 +417,23 @@ func NewClientWithBaseURL(consumerToken string, apiKey string, httpClient *http.
 	c.VRFs = &VRFServiceOp{client: c}
 	c.VLANAssignments = &VLANAssignmentServiceOp{client: c}
 	c.debug = os.Getenv(debugEnvVar) != ""
+
+	for _, fn := range opts {
+		err := fn(c)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if !c.apiKeySet {
+		c.APIKey = os.Getenv(authTokenEnvVar)
+
+		if c.APIKey == "" {
+			return nil, fmt.Errorf("you must export %s", authTokenEnvVar)
+		}
+
+		c.apiKeySet = true
+	}
 
 	return c, nil
 }
