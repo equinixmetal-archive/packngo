@@ -20,7 +20,8 @@ import (
 
 const (
 	authTokenEnvVar = "PACKET_AUTH_TOKEN"
-	baseURL         = "https://api.equinix.com/metal/v1/"
+	urlEnvVar       = "PACKET_API_URL"
+	defaultURL      = "https://api.equinix.com/metal/v1/"
 	mediaType       = "application/json"
 	debugEnvVar     = "PACKNGO_DEBUG"
 
@@ -339,7 +340,10 @@ func (c *Client) DoRequestWithHeader(method string, headers map[string]string, p
 // an older version of Go, pass in a custom http.Client with a custom TLS configuration
 // that sets "InsecureSkipVerify" to "true"
 func NewClientWithAuth(consumerToken string, apiKey string, httpClient *http.Client) *Client {
-	client, _ := NewClientWithBaseURL(consumerToken, apiKey, httpClient, baseURL)
+	client, err := NewClient(WithAuth(consumerToken, apiKey), WithHTTPClient(httpClient))
+	if err != nil {
+		log.Printf("WARNING: NewClientWithAuth error %q suppressed", err)
+	}
 	return client
 }
 
@@ -376,7 +380,11 @@ func NewClient(opts ...ClientOpt) (*Client, error) {
 	c.header.Set("Accept", mediaType)
 
 	var err error
-	c.BaseURL, err = url.Parse(baseURL)
+	apiURL := os.Getenv(urlEnvVar)
+	if apiURL == "" {
+		apiURL = defaultURL
+	}
+	c.BaseURL, err = url.Parse(apiURL)
 	if err != nil {
 		return nil, err
 	}

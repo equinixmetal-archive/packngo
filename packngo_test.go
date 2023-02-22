@@ -19,7 +19,6 @@ import (
 )
 
 const (
-	apiURLEnvVar      = "PACKET_API_URL"
 	packngoAccTestVar = "PACKNGO_TEST_ACTUAL_API"
 	testProjectPrefix = "PACKNGO_TEST_DELME_2d768716_"
 	testFacilityVar   = "PACKNGO_TEST_FACILITY"
@@ -98,7 +97,6 @@ func setupWithProject(t *testing.T) (*Client, string, func()) {
 		}
 		stopRecord()
 	}
-
 }
 
 func skipUnlessAcceptanceTestsAllowed(t *testing.T) {
@@ -156,9 +154,9 @@ func setup(t *testing.T) (*Client, func()) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	apiURL := os.Getenv(apiURLEnvVar)
+	apiURL := os.Getenv(urlEnvVar)
 	if apiURL == "" {
-		apiURL = baseURL
+		apiURL = defaultURL
 	}
 	r, stopRecord := testRecorder(t, name, mode)
 	httpClient := http.DefaultClient
@@ -216,7 +214,6 @@ func TestAccInvalidCredentials(t *testing.T) {
 	if !matched {
 		t.Fatalf("Unexpected error string: %s", expectedErr)
 	}
-
 }
 
 func Test_dumpDeprecation(t *testing.T) {

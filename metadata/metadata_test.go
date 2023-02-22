@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,5 +47,4 @@ func Test_Deserialization(t *testing.T) {
 	assert.Equal(t, "10.144.51.11", volumes[0].IPs[1].String())
 	assert.Equal(t, 10, volumes[0].Capacity.Size)
 	assert.Equal(t, "gb", volumes[0].Capacity.Unit)
-
 }
