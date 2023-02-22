@@ -180,6 +180,18 @@ type AddressStruct struct {
 	Address string `json:"address"`
 }
 
+// deviceIPsRoot represents the response collection of IP Addresses assigned to a device
+type deviceIPsRoot struct {
+	IPAddresses []IPAddressAssignment `json:"ip_addresses,omitempty"`
+	Meta        meta                  `json:"meta"`
+}
+
+// projectIPsRoot represents the response collection of IP Addresses assigned to a project
+type projectIPsRoot struct {
+	Reservations []IPAddressReservation `json:"ip_addresses"`
+	Meta         meta                   `json:"meta"`
+}
+
 func deleteFromIP(client *Client, resourceID string) (*Response, error) {
 	if validateErr := ValidateUUID(resourceID); validateErr != nil {
 		return nil, validateErr
@@ -246,27 +258,28 @@ func (i *DeviceIPServiceOp) Get(assignmentID string, opts *GetOptions) (*IPAddre
 	return ipa, resp, err
 }
 
-// List list all of the IP address assignments on a device
-func (i *DeviceIPServiceOp) List(deviceID string, opts *ListOptions) ([]IPAddressAssignment, *Response, error) {
+// List lists all of the IP address assignments on a device
+func (i *DeviceIPServiceOp) List(deviceID string, opts *ListOptions) (ips []IPAddressAssignment, resp *Response, err error) {
 	if validateErr := ValidateUUID(deviceID); validateErr != nil {
 		return nil, nil, validateErr
 	}
 	endpointPath := path.Join(deviceBasePath, deviceID, ipBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
 
-	// ipList represents collection of IP Address reservations
-	type ipList struct {
-		IPs []IPAddressAssignment `json:"ip_addresses,omitempty"`
+	for {
+		subset := new(deviceIPsRoot)
+		resp, err := i.client.DoRequest("GET", apiPathQuery, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+		ips = append(ips, subset.IPAddresses...)
+
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
+			continue
+		}
+
+		return ips, resp, err
 	}
-
-	ips := new(ipList)
-
-	resp, err := i.client.DoRequest("GET", apiPathQuery, nil, ips)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return ips.IPs, resp, err
 }
 
 // ProjectIPServiceOp is interface for IP assignment methods.
@@ -294,21 +307,27 @@ func (i *ProjectIPServiceOp) Get(reservationID string, opts *GetOptions) (*IPAdd
 // List provides a list of IP resevations for a single project.
 // opts be filtered to limit the type of reservations returned:
 // opts.Filter("type", "vrf")
-func (i *ProjectIPServiceOp) List(projectID string, opts *ListOptions) ([]IPAddressReservation, *Response, error) {
+func (i *ProjectIPServiceOp) List(projectID string, opts *ListOptions) (ips []IPAddressReservation, resp *Response, err error) {
 	if validateErr := ValidateUUID(projectID); validateErr != nil {
 		return nil, nil, validateErr
 	}
 	endpointPath := path.Join(projectBasePath, projectID, ipBasePath)
 	apiPathQuery := opts.WithQuery(endpointPath)
-	reservations := new(struct {
-		Reservations []IPAddressReservation `json:"ip_addresses"`
-	})
 
-	resp, err := i.client.DoRequest("GET", apiPathQuery, nil, reservations)
-	if err != nil {
-		return nil, resp, err
+	for {
+		subset := new(projectIPsRoot)
+		resp, err := i.client.DoRequest("GET", apiPathQuery, nil, subset)
+		if err != nil {
+			return nil, resp, err
+		}
+		ips = append(ips, subset.Reservations...)
+
+		if apiPathQuery = nextPage(subset.Meta, opts); apiPathQuery != "" {
+			continue
+		}
+
+		return ips, resp, err
 	}
-	return reservations.Reservations, resp, nil
 }
 
 // Create creates a request for more IP space for a project in order to have
