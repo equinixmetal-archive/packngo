@@ -82,6 +82,15 @@ func TestAccBGPSession(t *testing.T) {
 	if cs.Sessions[0].ID != sessionID {
 		t.Fatal("BGP Session ID mismatch")
 	}
+
+	updatedSession, _, err := c.BGPSessions.Update(bgpSession.ID, UpdateBGPSessionRequest{DefaultRoute: false})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if updatedSession.ID != sessionID {
+		t.Fatal("BGP Session mismatch after update")
+	}
+
 	sessions, _, err = c.Projects.ListBGPSessions(projectID, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -96,6 +105,10 @@ func TestAccBGPSession(t *testing.T) {
 
 	if check == nil {
 		t.Fatal("BGP Session not returned.")
+	}
+
+	if *check.DefaultRoute {
+		t.Fatal("default_route should be false after update")
 	}
 
 	_, err = c.BGPSessions.Delete(sessionID)
