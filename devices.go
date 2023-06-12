@@ -79,6 +79,7 @@ type Device struct {
 	SSHKeys             []SSHKey               `json:"ssh_keys,omitempty"`
 	ShortID             string                 `json:"short_id,omitempty"`
 	SwitchUUID          string                 `json:"switch_uuid,omitempty"`
+	SOS                 string                 `json:"sos,omitempty"`
 }
 
 type NetworkInfo struct {
