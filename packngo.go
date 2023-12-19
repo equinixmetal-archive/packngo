@@ -452,7 +452,10 @@ func checkResponse(r *http.Response) error {
 	}
 
 	ct := r.Header.Get("Content-Type")
-	if !strings.HasPrefix(ct, expectedAPIContentTypePrefix) {
+	if strings.HasPrefix(ct, "application/problem+json") {
+		errorResponse.SingleError = string(data)
+		return errorResponse
+	} else if !strings.HasPrefix(ct, expectedAPIContentTypePrefix) {
 		errorResponse.SingleError = fmt.Sprintf("Unexpected Content-Type %s with status %s", ct, r.Status)
 		return errorResponse
 	}
