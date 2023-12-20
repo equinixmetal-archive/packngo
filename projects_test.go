@@ -347,7 +347,7 @@ func TestAccProjectListSSHKeys(t *testing.T) {
 
 	for _, k := range keys {
 		if k.ID == key.ID {
-			if len(k.Owner.Href) == 0 {
+			if len(k.Owner.GetHref()) == 0 {
 				t.Error("new Key doesn't have owner URL set")
 			}
 			return

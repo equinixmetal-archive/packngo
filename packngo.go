@@ -50,7 +50,14 @@ type Response struct {
 
 // Href is an API link
 type Href struct {
-	Href string `json:"href"`
+	Href *string `json:"href,omitempty"`
+}
+
+func (h *Href) GetHref() string {
+	if h == nil {
+		return ""
+	}
+	return *h.Href
 }
 
 func (r *Response) populateRate() {
@@ -389,7 +396,7 @@ func NewClient(opts ...ClientOpt) (*Client, error) {
 	c.Connections = &ConnectionServiceOp{client: c}
 	c.DeviceIPs = &DeviceIPServiceOp{client: c}
 	c.DevicePorts = &DevicePortServiceOp{client: c}
-	c.Devices = &DeviceServiceOp{client: c}
+	c.Devices = &DeviceServiceOp{serviceOp: &serviceOp{client: c}} // TODO: NewDeviceServiceOp(c)
 	c.Emails = &EmailServiceOp{client: c}
 	c.Events = &EventServiceOp{client: c}
 	c.Facilities = &FacilityServiceOp{client: c}
@@ -399,7 +406,7 @@ func NewClient(opts ...ClientOpt) (*Client, error) {
 	c.Metros = &MetroServiceOp{client: c}
 	c.Notifications = &NotificationServiceOp{client: c}
 	c.OperatingSystems = &OSServiceOp{client: c}
-	c.Organizations = &OrganizationServiceOp{client: c}
+	c.Organizations = &OrganizationServiceOp{serviceOp: &serviceOp{client: c}}
 	c.Plans = &PlanServiceOp{client: c}
 	c.Ports = &PortServiceOp{client: c}
 	c.ProjectIPs = &ProjectIPServiceOp{client: c}

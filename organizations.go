@@ -25,6 +25,7 @@ type organizationsRoot struct {
 
 // Organization represents an Equinix Metal organization
 type Organization struct {
+	*Href        `json:",inline"`
 	ID           string    `json:"id"`
 	Name         string    `json:"name,omitempty"`
 	Description  string    `json:"description,omitempty"`
@@ -46,8 +47,17 @@ type Organization struct {
 	PrimaryOwner User      `json:"primary_owner,omitempty"`
 }
 
-func (o Organization) String() string {
+func (o *Organization) String() string {
 	return Stringify(o)
+}
+
+func (o *Organization) SetHref(href string) {
+	o.Href = &Href{Href: &href}
+}
+
+func (o *Organization) SetID(id string) {
+	o.ID = id
+	o.SetHref(path.Join(projectBasePath, id))
 }
 
 // OrganizationCreateRequest type used to create an Equinix Metal organization
@@ -80,7 +90,7 @@ func (o OrganizationUpdateRequest) String() string {
 
 // OrganizationServiceOp implements OrganizationService
 type OrganizationServiceOp struct {
-	client *Client
+	*serviceOp
 }
 
 // List returns the user's organizations
@@ -104,16 +114,19 @@ func (s *OrganizationServiceOp) List(opts *ListOptions) (orgs []Organization, re
 	}
 }
 
+func (s *OrganizationServiceOp) DefaultIncludes() []string {
+	return []string{}
+}
+
 // Get returns a organization by id
 func (s *OrganizationServiceOp) Get(organizationID string, opts *GetOptions) (*Organization, *Response, error) {
 	if validateErr := ValidateUUID(organizationID); validateErr != nil {
 		return nil, nil, validateErr
 	}
-	endpointPath := path.Join(organizationBasePath, organizationID)
-	apiPathQuery := opts.WithQuery(endpointPath)
 	organization := new(Organization)
-
-	resp, err := s.client.DoRequest("GET", apiPathQuery, nil, organization)
+	href := path.Join(organizationBasePath, organizationID)
+	organization.Href = &Href{Href: &href}
+	resp, err := s.Hydrate(organization, opts)
 	if err != nil {
 		return nil, resp, err
 	}
